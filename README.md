@@ -8,6 +8,44 @@ Die Helper sind bewusst klein, unabhängig von konkreten Geräten oder Diensten 
 
 Die Helper werden für aktuelle `IPSModuleStrict`-Module entwickelt und mit **PHP 8.5 / Symcon 9.0** getestet.
 
+## ConfigurationFormHelper
+
+`src/ConfigurationFormHelper.php` unterstützt dynamische Symcon-Konfigurationsformulare. Der Helper ermittelt per Reflection das Verzeichnis der konkreten Modulklasse und lädt von dort die zugehörige `form.json`.
+
+Dabei wird geprüft, dass die Datei lesbar ist, gültiges JSON enthält und an der Wurzel tatsächlich ein JSON-Objekt vorliegt. Die geladene Struktur kann anschließend dynamisch ergänzt und mit einheitlichen JSON-Optionen wieder serialisiert werden.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
+
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ConfigurationFormHelper;
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+
+        $form['actions'][] = [
+            'type'  => 'Label',
+            'label' => 'Dynamic content'
+        ];
+
+        return $this->EncodeConfigurationForm($form);
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `LoadConfigurationForm()` | Lädt und validiert die `form.json` des konkreten Moduls als assoziatives Array. |
+| `EncodeConfigurationForm()` | Serialisiert die dynamisch bearbeitete Formularstruktur als JSON-Objekt. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -17,7 +55,7 @@ Symcon-Attribute sind persistent und ausschließlich für die interne Verwaltung
 ### Verwendung
 
 ```php
-require_once __DIR__ . '/libs/helper/PersistentJsonCacheHelper.php';
+require_once __DIR__ . '/../libs/helper/PersistentJsonCacheHelper.php';
 
 use Burki24\SymconModuleHelper\PersistentJsonCacheHelper;
 
@@ -59,11 +97,12 @@ Die Serialisierung verwendet `JSON_THROW_ON_ERROR`, erhält Unicode und Schrägs
 
 ## Einbindung in Modul-Repositories
 
-Empfohlen ist, die benötigte Helper-Datei direkt in das jeweilige Repository zu übernehmen, zum Beispiel:
+Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Repository zu übernehmen, zum Beispiel:
 
 ```text
 libs/
 └── helper/
+    ├── ConfigurationFormHelper.php
     └── PersistentJsonCacheHelper.php
 ```
 
@@ -75,7 +114,7 @@ Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder 
 php tests/run.php
 ```
 
-GitHub Actions prüft den Helper zusätzlich mit PHP 8.5.
+GitHub Actions prüft die Helper zusätzlich mit PHP 8.5.
 
 ## Lizenz
 

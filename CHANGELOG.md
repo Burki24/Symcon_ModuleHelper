@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.1.0 - 2026-07-25
+
+### Added
+
+- `ConfigurationFormHelper` zum sicheren Laden und Serialisieren dynamischer Symcon-Konfigurationsformulare.
+- Reflection-basierte Auflösung der `form.json` relativ zur konkreten Modulklasse.
+- Validierung, dass die Konfigurationsform an der JSON-Wurzel ein Objekt enthält.
+- Tests für fehlende Dateien, ungültiges JSON, ungültige Wurzeltypen, leere Formulare und Round-Trips.
+
 ## 1.0.0 - 2026-07-25
 
 ### Added
