@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.3.0 - 2026-07-26
+
+### Added
+
+- `DataFlowHelper` Version 1.0.0 für einheitliche JSON-Transportpakete im Symcon-Datenfluss.
+- `EncodeDataFlowMessage()` erzeugt Nachrichten mit einer zentral verwalteten `DataID`, Unicode-/Slash-Erhalt und `JSON_PRESERVE_ZERO_FRACTION`.
+- `DecodeDataFlowMessage()` validiert JSON-Objekt, `DataID` und optional die erwartete `DataID` und liefert verschachtelte Objekte als assoziative Arrays.
+- Regressionstests für Encoding, Decoding, DataID-Validierung, ungültige JSON-Wurzeln und doppelte DataID-Felder.
+
 ## 2.2.0 - 2026-07-26
 
 ### Changed

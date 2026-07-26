@@ -7,6 +7,7 @@ require_once __DIR__ . '/bootstrap.php';
 $tests = [
     'persistent-json-cache.php',
     'configuration-form.php',
+    'data-flow.php',
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',

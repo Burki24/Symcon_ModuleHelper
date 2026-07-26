@@ -46,6 +46,49 @@ class ExampleModule extends IPSModuleStrict
 | `LoadConfigurationForm()` | Lädt und validiert die `form.json` des konkreten Moduls als assoziatives Array. |
 | `EncodeConfigurationForm()` | Serialisiert die dynamisch bearbeitete Formularstruktur als JSON-Objekt. |
 
+## DataFlowHelper
+
+`src/DataFlowHelper.php` vereinheitlicht das JSON-Transportformat für Symcon-Datenflüsse zwischen Child-, Splitter- und Parent-Modulen. Der Helper kümmert sich bewusst nur um die Transporthülle aus `DataID` und Payload; `SendDataToParent()`, `SendDataToChildren()`, Fehlerübersetzung und fachliche Request-/Response-Strukturen bleiben Aufgabe des jeweiligen Moduls.
+
+Beim Decodieren wird geprüft, dass die JSON-Wurzel ein Objekt ist, eine nichtleere String-`DataID` enthält und optional zur erwarteten `DataID` passt. Beim Encodieren darf die Payload keine eigene `DataID` definieren.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/DataFlowHelper.php';
+
+use Burki24\SymconModuleHelper\DataFlowHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use DataFlowHelper;
+
+    private const DATA_ID_TO_PARENT = '{00000000-0000-0000-0000-000000000001}';
+    private const DATA_ID_FROM_PARENT = '{00000000-0000-0000-0000-000000000002}';
+
+    public function ReceiveData(string $JSONString): string
+    {
+        $message = $this->DecodeDataFlowMessage($JSONString, self::DATA_ID_FROM_PARENT);
+        // $message enthält DataID und Payload-Felder.
+        return '';
+    }
+
+    private function SendRequest(): string
+    {
+        return $this->SendDataToParent(
+            $this->EncodeDataFlowMessage(self::DATA_ID_TO_PARENT, ['Operation' => 'Read'])
+        );
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `EncodeDataFlowMessage()` | Erzeugt ein JSON-Datenflussobjekt aus `DataID` und Payload und verhindert eine zweite `DataID` in der Payload. |
+| `DecodeDataFlowMessage()` | Decodiert und validiert ein JSON-Datenflussobjekt und prüft optional die erwartete `DataID`. |
+
 ## VariablePresentationHelper
 
 `src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `IPS_Wolf_WSR1` zusammen.
