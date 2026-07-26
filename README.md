@@ -203,6 +203,38 @@ class ExampleModule extends IPSModuleStrict
 | `SendPlainTextResponse()` | Sendet eine Klartext-Antwort mit HTTP-Status, UTF-8-Content-Type, Cache-Schutz und `nosniff`-Header. |
 | `SendHtmlTextResponse()` | Sendet sicher HTML-maskierten Text mit HTTP-Status und denselben Standard-Headern. |
 
+
+## VariableHelper
+
+`src/VariableHelper.php` kapselt den wiederverwendbaren Zugriff auf Variablen unterhalb einer Symcon-Modulinstanz. Der Helper löst Variablen über ihren Ident relativ zur aktuellen `InstanceID` auf und normalisiert einen fehlgeschlagenen Lookup auf die ID `0`.
+
+Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`-Aufrufe nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VariableHelper.php';
+
+use Burki24\SymconModuleHelper\VariableHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VariableHelper;
+
+    public function HasTemperatureVariable(): bool
+    {
+        return $this->VariableExists('Temperature');
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder `0`, wenn kein passendes Objekt existiert. |
+| `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz existiert. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -263,6 +295,7 @@ libs/
     ├── HttpResponseHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
+    ├── VariableHelper.php
     ├── VariablePresentationHelper.php
     └── VisualizationAssetHelper.php
 ```

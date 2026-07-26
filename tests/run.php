@@ -149,3 +149,5 @@ require_once __DIR__ . '/variable-presentation.php';
 require_once __DIR__ . '/parent-connection.php';
 
 require_once __DIR__ . '/visualization-asset.php';
+
+require_once __DIR__ . '/variable-helper.php';

@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.7.0 - 2026-07-26
+
+### Added
+
+- `VariableHelper` zum einheitlichen Auflösen von Variablen über ihren Ident relativ zur aktuellen Symcon-Modulinstanz.
+- Normalisierung fehlgeschlagener `IPS_GetObjectIDByIdent()`-Lookups auf die ID `0`.
+- Existenzprüfung für Variablen ohne wiederholte direkte Objekt-Lookups im aufrufenden Modul.
+- Tests für vorhandene, fehlende und ungültige Variablen-IDs sowie unterschiedliche Modulinstanzen.
+
 ## 1.6.0 - 2026-07-26
 
 ### Added
