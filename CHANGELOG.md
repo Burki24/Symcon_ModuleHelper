@@ -2,6 +2,13 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.1.0 - 2026-07-26
+
+- Add a machine-readable helper manifest.
+- Add centralized vendor synchronization for subscribed consumer repositories.
+- Create/update pull requests against consumer `dev` branches when helper sources change.
+- Validate helper versions and SHA-256 hashes in CI.
+
 ## 2.0.0 - 2026-07-26
 
 ### Changed

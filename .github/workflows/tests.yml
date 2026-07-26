@@ -27,5 +27,8 @@ jobs:
           set -euo pipefail
           find src tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
+      - name: Validate helper manifest
+        run: python3 .github/scripts/verify_manifest.py
+
       - name: Run tests
         run: php tests/run.php

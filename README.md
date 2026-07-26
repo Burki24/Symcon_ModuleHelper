@@ -383,3 +383,18 @@ GitHub Actions prüft zusätzlich die PHP-Syntax und den vollständigen Testlauf
 ## Lizenz
 
 MIT
+
+## Automatischer Vendor-Sync
+
+`manifest.json` ist die maschinenlesbare Quelle für Version und SHA-256 aller Helper. Die Consumer-Repositories deklarieren ihre verwendeten Helper über `.helper-sync.json`.
+
+Bei Änderungen unter `src/` erzeugt `.github/workflows/helper-sync.yml` automatisch einen Update-Branch und einen Pull Request gegen den jeweiligen `dev`-Branch eines abonnierten Repositories. Der Sync aktualisiert ausschließlich die vendorte Helper-Datei, `libs/helper/manifest.json` und `libs/helper/README.md`.
+
+Für den repositoryübergreifenden Zugriff wird eine GitHub App verwendet. Im Repository `Symcon_ModuleHelper` werden dafür benötigt:
+
+- Repository-Variable `HELPER_SYNC_APP_CLIENT_ID`
+- Repository-Secret `HELPER_SYNC_APP_PRIVATE_KEY`
+
+Die GitHub App wird auf den Consumer-Repositories installiert und benötigt dort nur `Contents: Read and write` sowie `Pull requests: Read and write`.
+
+Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.

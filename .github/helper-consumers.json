@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "consumers": [
+    {
+      "repository": "Burki24/IPS_LMNB",
+      "branch": "dev"
+    },
+    {
+      "repository": "Burki24/OpenCalendar",
+      "branch": "dev"
+    },
+    {
+      "repository": "Burki24/IPS_Wolf_WSR1",
+      "branch": "dev"
+    }
+  ]
+}
