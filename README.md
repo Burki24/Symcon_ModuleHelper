@@ -169,9 +169,9 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 ## HttpResponseHelper
 
-`src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.
+`src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks, OAuth-Callbacks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.
 
-Aktuell ist bewusst nur eine Klartext-Antwort enthalten. Weitere Antworttypen wie JSON sollten erst ergänzt werden, wenn dafür ein gemeinsamer Anwendungsfall besteht.
+Neben Klartext-Antworten unterstützt der Helper sicher maskierte HTML-Text-Antworten für Callback-Seiten. Freies HTML oder JSON bleiben bewusst außerhalb des Helpers, bis dafür ein gemeinsamer Anwendungsfall besteht.
 
 ### Verwendung
 
@@ -188,6 +188,11 @@ class ExampleModule extends IPSModuleStrict
     {
         $this->SendPlainTextResponse(200, 'OK');
     }
+
+    public function ProcessOAuthData(): void
+    {
+        $this->SendHtmlTextResponse(200, 'Connection successful.');
+    }
 }
 ```
 
@@ -196,6 +201,7 @@ class ExampleModule extends IPSModuleStrict
 | Methode | Aufgabe |
 | --- | --- |
 | `SendPlainTextResponse()` | Sendet eine Klartext-Antwort mit HTTP-Status, UTF-8-Content-Type, Cache-Schutz und `nosniff`-Header. |
+| `SendHtmlTextResponse()` | Sendet sicher HTML-maskierten Text mit HTTP-Status und denselben Standard-Headern. |
 
 ## PersistentJsonCacheHelper
 

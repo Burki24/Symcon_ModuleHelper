@@ -14,6 +14,11 @@ final class HttpResponseHelperHarness
     {
         $this->SendPlainTextResponse($statusCode, $message);
     }
+
+    public function sendHtmlText(int $statusCode, string $message): void
+    {
+        $this->SendHtmlTextResponse($statusCode, $message);
+    }
 }
 
 $helper = new HttpResponseHelperHarness();
@@ -27,7 +32,21 @@ if ($output !== 'Helper HTTP response') {
 }
 
 if (http_response_code() !== 418) {
-    throw new RuntimeException('HTTP response status was not set correctly.');
+    throw new RuntimeException('Plain-text HTTP response status was not set correctly.');
+}
+
+$htmlMessage = '<strong title="OAuth">München & 東京\'s</strong>';
+ob_start();
+$helper->sendHtmlText(400, $htmlMessage);
+$htmlOutput = ob_get_clean();
+
+$expectedHtml = htmlspecialchars($htmlMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+if ($htmlOutput !== $expectedHtml) {
+    throw new RuntimeException('HTML text response was not escaped correctly.');
+}
+
+if (http_response_code() !== 400) {
+    throw new RuntimeException('HTML HTTP response status was not set correctly.');
 }
 
 $source = file_get_contents(__DIR__ . '/../src/HttpResponseHelper.php');
@@ -36,12 +55,15 @@ if (!is_string($source)) {
 }
 
 foreach ([
-    "header('Content-Type: text/plain; charset=utf-8');",
+    "'text/plain'",
+    "'text/html'",
+    "htmlspecialchars(\$message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')",
+    "header('Content-Type: ' . \$contentType . '; charset=utf-8');",
     "header('Cache-Control: no-store, max-age=0');",
     "header('X-Content-Type-Options: nosniff');",
 ] as $marker) {
     if (!str_contains($source, $marker)) {
-        throw new RuntimeException('Missing secure HTTP response header: ' . $marker);
+        throw new RuntimeException('Missing HTTP response implementation marker: ' . $marker);
     }
 }
 

@@ -2,6 +2,14 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.6.0 - 2026-07-26
+
+### Added
+
+- `HttpResponseHelper` 1.1.0 mit sicher maskierten HTML-Text-Antworten für OAuth-Callbacks und ähnliche HTTP-Endpunkte.
+- Gemeinsame interne Response-Basis für Klartext- und HTML-Text-Antworten mit identischen Sicherheits- und Cache-Headern.
+- Tests für HTML-Escaping, Unicode, Statuscodes und beide unterstützten Content-Types.
+
 ## 1.5.0 - 2026-07-26
 
 ### Added
