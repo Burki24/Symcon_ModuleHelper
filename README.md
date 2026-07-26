@@ -351,7 +351,9 @@ Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder 
 php tests/run.php
 ```
 
-GitHub Actions prüft die Helper zusätzlich mit PHP 8.5.
+Der zentrale Runner führt alle Helper-Testgruppen aus; gemeinsame Testfunktionen liegen in `tests/bootstrap.php`, während jeder Helper eine eigene Testdatei besitzt.
+
+GitHub Actions prüft zusätzlich die PHP-Syntax und den vollständigen Testlauf mit PHP 8.5 sowie den Symcon-PHP-Stil über `symcon/action-style@v3`.
 
 ## Lizenz
 

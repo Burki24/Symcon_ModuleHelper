@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../src/ConfigurationFormHelper.php';
 
 use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+
 final class ConfigurationFormHarness
 {
     use ConfigurationFormHelper;

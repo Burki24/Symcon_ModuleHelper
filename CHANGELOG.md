@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.9.1 - 2026-07-26
+
+### Changed
+
+- Test-Runner bereinigt: `PersistentJsonCacheHelper` besitzt jetzt wie alle anderen Helper eine eigene Testdatei.
+- Gemeinsame Test-Assertions nach `tests/bootstrap.php` ausgelagert und alle acht Helper-Testgruppen explizit im zentralen Runner registriert.
+- GitHub Actions um die Symcon-PHP-Style-Prüfung mit `symcon/action-style@v3` ergänzt.
+- Checkout-Action des bestehenden PHP-Testworkflows auf `actions/checkout@v6` aktualisiert.
+
 ## 1.9.0 - 2026-07-26
 
 ### Added
