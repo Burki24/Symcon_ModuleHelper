@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.2.0 - 2026-07-26
+
+### Added
+
+- `VariablePresentationHelper` für wiederverwendbare native Symcon-Darstellungen ohne Legacy-Profile.
+- Hilfen für Boolean-Beschriftungen, Text, Webinhalt und Datum/Uhrzeit einschließlich nativer DateTime-Templates.
+- Parametrisierbare WebContent- und DateTime-Darstellungen mit Validierung der Symcon-Wertebereiche.
+- Tests für Standardwerte, optionale Parameter, Unicode und ungültige Darstellungswerte.
+
 ## 1.1.0 - 2026-07-25
 
 ### Added

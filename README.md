@@ -46,6 +46,52 @@ class ExampleModule extends IPSModuleStrict
 | `LoadConfigurationForm()` | Lädt und validiert die `form.json` des konkreten Moduls als assoziatives Array. |
 | `EncodeConfigurationForm()` | Serialisiert die dynamisch bearbeitete Formularstruktur als JSON-Objekt. |
 
+## VariablePresentationHelper
+
+`src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Statusvariablen. Der Helper kapselt die Array-Strukturen der aktuellen Darstellungen und benötigt keine Legacy-Profile.
+
+Enthalten sind Hilfen für boolesche Beschriftungen, Text, Webinhalt sowie Datum/Uhrzeit. Die Standardwerte entsprechen den Darstellungen, die ursprünglich in IPS_LMNB verwendet wurden; Webinhalt und Datum/Uhrzeit können bei Bedarf parametrisiert werden.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VariablePresentationHelper.php';
+
+use Burki24\SymconModuleHelper\VariablePresentationHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VariablePresentationHelper;
+
+    public function Create(): void
+    {
+        parent::Create();
+
+        $this->RegisterVariableBoolean(
+            'Available',
+            'Available',
+            $this->BooleanPresentation('Yes', 'No')
+        );
+
+        $this->RegisterVariableInteger(
+            'LastUpdate',
+            'Last update',
+            $this->DateTimePresentation()
+        );
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `BooleanPresentation()` | Wertanzeige für Boolean-Werte mit frei definierbaren Beschriftungen. |
+| `TextPresentation()` | Ein- oder mehrzeilige native Textdarstellung. |
+| `WebContentPresentation()` | Webinhalt als HTML oder Webseite mit steuerbarem Padding. |
+| `DateTimePresentation()` | Parametrisierbare native Datum-/Uhrzeitdarstellung. |
+| `DateTimeTemplatePresentation()` | Datum/Uhrzeit mit einer nativen Symcon-Vorlage, um bestehendes Darstellungsverhalten exakt beizubehalten. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -103,7 +149,8 @@ Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Reposi
 libs/
 └── helper/
     ├── ConfigurationFormHelper.php
-    └── PersistentJsonCacheHelper.php
+    ├── PersistentJsonCacheHelper.php
+    └── VariablePresentationHelper.php
 ```
 
 Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder Downloads zur Laufzeit sind nicht erforderlich.
