@@ -6,6 +6,8 @@ require_once __DIR__ . '/../src/PersistentJsonCacheHelper.php';
 
 use Burki24\SymconModuleHelper\PersistentJsonCacheHelper;
 
+require_once __DIR__ . '/http-response.php';
+
 final class PersistentJsonCacheHarness
 {
     use PersistentJsonCacheHelper;

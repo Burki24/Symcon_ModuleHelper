@@ -167,6 +167,36 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 | --- | --- |
 | `VisualizationAsset()` | Lädt eine Datei aus dem `visualization`-Verzeichnis des konkreten Moduls und liefert deren Inhalt. |
 
+## HttpResponseHelper
+
+`src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.
+
+Aktuell ist bewusst nur eine Klartext-Antwort enthalten. Weitere Antworttypen wie JSON sollten erst ergänzt werden, wenn dafür ein gemeinsamer Anwendungsfall besteht.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/HttpResponseHelper.php';
+
+use Burki24\SymconModuleHelper\HttpResponseHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use HttpResponseHelper;
+
+    public function ProcessHookData(): void
+    {
+        $this->SendPlainTextResponse(200, 'OK');
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `SendPlainTextResponse()` | Sendet eine Klartext-Antwort mit HTTP-Status, UTF-8-Content-Type, Cache-Schutz und `nosniff`-Header. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -224,6 +254,7 @@ Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Reposi
 libs/
 └── helper/
     ├── ConfigurationFormHelper.php
+    ├── HttpResponseHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
     ├── VariablePresentationHelper.php

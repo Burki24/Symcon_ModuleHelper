@@ -2,6 +2,14 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.5.0 - 2026-07-26
+
+### Added
+
+- `HttpResponseHelper` für kleine HTTP-/WebHook-Antworten aus Symcon-Modulen.
+- Klartext-Antworten mit explizitem HTTP-Status, UTF-8-Content-Type, Cache-Schutz und `nosniff`-Header.
+- Tests für Antworttext, Statuscode und die vorgesehenen HTTP-Header.
+
 ## 1.4.0 - 2026-07-26
 
 ### Added
