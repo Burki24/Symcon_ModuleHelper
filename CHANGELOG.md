@@ -2,6 +2,23 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.0.0 - 2026-07-26
+
+### Changed
+
+- `VariablePresentationHelper` auf Version 2.0.0 erweitert und mit den allgemein nutzbaren Darstellungsfunktionen aus `IPS_Wolf_WSR1` zusammengeführt.
+- Bestehende API für Boolean, Text, WebContent und DateTime vollständig beibehalten.
+- Geräte-, Expose-, Feature-, Preset- und Property-spezifische Logik bewusst nicht in den zentralen Helper übernommen.
+
+### Added
+
+- Generische numerische `ValuePresentation()` sowie Komfortmethoden für Temperatur, Prozent, Drehzahl, Integer und Dezimalwerte.
+- Native Slider-Darstellung einschließlich Gradient, Usage-Type, Einheiten, Stellenzahl und Intervallen.
+- Komfortdarstellungen für Helligkeit und Kelvin-Farbtemperatur mit automatisch erzeugtem Warm-/Kalt-Gradienten.
+- Native Darstellungen für Farbe, Dauer, Schalter, Rollladen und Aufzählungen.
+- `OptionsPresentation()` für read-only Boolean-/String-Zustände mit frei definierbaren Optionslisten.
+- Umfangreiche Regressionstests für die neuen Darstellungen, Standardwerte, JSON-Daten und Parameter-Validierung.
+
 ## 1.9.1 - 2026-07-26
 
 ### Changed

@@ -2,7 +2,7 @@
 
 Wiederverwendbare Helper für die Entwicklung eigener Symcon-PHP-Module.
 
-Die Helper sind bewusst klein, unabhängig von konkreten Geräten oder Diensten und können direkt in eine Modul-Library übernommen werden. Das Repository selbst ist **keine Symcon-Library** und erzeugt keine zusätzliche Laufzeitabhängigkeit.
+Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Geräten oder Diensten und können direkt in eine Modul-Library übernommen werden. Das Repository selbst ist **keine Symcon-Library** und erzeugt keine zusätzliche Laufzeitabhängigkeit.
 
 ## Zielplattform
 
@@ -48,9 +48,11 @@ class ExampleModule extends IPSModuleStrict
 
 ## VariablePresentationHelper
 
-`src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Statusvariablen. Der Helper kapselt die Array-Strukturen der aktuellen Darstellungen und benötigt keine Legacy-Profile.
+`src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `IPS_Wolf_WSR1` zusammen.
 
-Enthalten sind Hilfen für boolesche Beschriftungen, Text, Webinhalt sowie Datum/Uhrzeit. Die Standardwerte entsprechen den Darstellungen, die ursprünglich in IPS_LMNB verwendet wurden; Webinhalt und Datum/Uhrzeit können bei Bedarf parametrisiert werden.
+Der Helper bleibt vollständig unabhängig von konkreten Geräten, Protokollen, Expose-/Feature-Strukturen oder Modul-Properties. Übernommen wurden ausschließlich generische Symcon-Darstellungen; geräte- oder dienstspezifische Ableitungslogik bleibt in den jeweiligen Libraries.
+
+Unterstützt werden Wertanzeigen für Boolean, Integer, Float, Temperatur, Prozent und Drehzahl sowie Slider, Helligkeit, Farbtemperatur, Farbe, Dauer, Schalter, Rollladen, Aufzählungen, Text, Webinhalt und Datum/Uhrzeit. Alle bisherigen Methoden aus Version 1.x bleiben unverändert verfügbar.
 
 ### Verwendung
 
@@ -73,10 +75,16 @@ class ExampleModule extends IPSModuleStrict
             $this->BooleanPresentation('Yes', 'No')
         );
 
+        $this->RegisterVariableFloat(
+            'Temperature',
+            'Temperature',
+            $this->TemperaturePresentation(-40, 100)
+        );
+
         $this->RegisterVariableInteger(
-            'LastUpdate',
-            'Last update',
-            $this->DateTimePresentation()
+            'Brightness',
+            'Brightness',
+            $this->BrightnessPresentation()
         );
     }
 }
@@ -88,9 +96,26 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `BooleanPresentation()` | Wertanzeige für Boolean-Werte mit frei definierbaren Beschriftungen. |
 | `TextPresentation()` | Ein- oder mehrzeilige native Textdarstellung. |
+| `ValuePresentation()` | Generische numerische Wertanzeige mit Einheit, Stellenzahl, Wertebereich, Icon und optionalen Intervallen. |
+| `TemperaturePresentation()` | Numerische Temperaturdarstellung mit Temperatur-Usage-Type. |
+| `PercentPresentation()` | Prozentdarstellung mit konfigurierbarem Wertebereich und Stellenzahl. |
+| `RpmPresentation()` | Wertdarstellung für Drehzahlen, standardmäßig in `U/min`. |
+| `IntegerPresentation()` | Schlanke Wertdarstellung für ganzzahlige Messwerte mit optionaler Einheit. |
+| `DecimalPresentation()` | Schlanke Wertdarstellung für Dezimalwerte mit frei wählbarer Stellenzahl und Einheit. |
+| `SliderPresentation()` | Vollständig parametrisierbarer nativer Symcon-Slider einschließlich Gradient, Usage-Type und Intervallen. |
+| `BrightnessPresentation()` | Prozent-Slider für Helligkeit/Intensität mit nativem Intensity-Usage-Type. |
+| `ColorTemperaturePresentation()` | Kelvin-Slider mit automatisch erzeugtem Warm-/Kalt-Farbverlauf und Tuneable-White-Usage-Type. |
+| `ColorPresentation()` | Native Farbdarstellung mit Encoding, Farbraum und optionalen Presets/Farbkurven. |
+| `DurationPresentation()` | Native Dauerdarstellung für Sekundenwerte bzw. Zeitdifferenzen. |
+| `SwitchPresentation()` | Native Schalterdarstellung mit Icons, Leuchtfarbe und Usage-Type. |
+| `ShutterPresentation()` | Native Rollladen-/Rotationsdarstellung mit frei definierbaren Grenzwerten. |
+| `EnumerationPresentation()` | Interaktive native Aufzählung aus frei übergebenen Optionsdefinitionen. |
+| `OptionsPresentation()` | Read-only-Wertanzeige mit frei übergebener Optionsliste, z. B. für Boolean- oder String-Zustände. |
 | `WebContentPresentation()` | Webinhalt als HTML oder Webseite mit steuerbarem Padding. |
 | `DateTimePresentation()` | Parametrisierbare native Datum-/Uhrzeitdarstellung. |
 | `DateTimeTemplatePresentation()` | Datum/Uhrzeit mit einer nativen Symcon-Vorlage, um bestehendes Darstellungsverhalten exakt beizubehalten. |
+
+Die Methoden geben ausschließlich native Symcon-Presentation-Arrays zurück. Sie führen keine Geräteerkennung durch, lesen keine Modul-Properties und übersetzen keine Beschriftungen. Dadurch kann dieselbe Helper-Datei unverändert in unterschiedlichen Symcon-Libraries vendort werden.
 
 ## ParentConnectionHelper
 
