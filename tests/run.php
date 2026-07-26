@@ -143,3 +143,5 @@ fwrite(STDOUT, "PersistentJsonCacheHelper tests passed.\n");
 require_once __DIR__ . '/configuration-form.php';
 
 require_once __DIR__ . '/variable-presentation.php';
+
+require_once __DIR__ . '/parent-connection.php';

@@ -92,6 +92,37 @@ class ExampleModule extends IPSModuleStrict
 | `DateTimePresentation()` | Parametrisierbare native Datum-/Uhrzeitdarstellung. |
 | `DateTimeTemplatePresentation()` | Datum/Uhrzeit mit einer nativen Symcon-Vorlage, um bestehendes Darstellungsverhalten exakt beizubehalten. |
 
+## ParentConnectionHelper
+
+`src/ParentConnectionHelper.php` kapselt den Zugriff auf die physisch verbundene Parent-Instanz eines Symcon-Moduls. Der Helper liest die `ConnectionID` der aktuellen Instanz und kann prüfen, ob die referenzierte Parent-Instanz tatsächlich noch existiert.
+
+Er enthält bewusst keine Modul-GUIDs und baut selbst keine Verbindung auf. Dadurch kann er unabhängig von konkreten Splittern, I/O-Modulen oder Diensten verwendet werden.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ParentConnectionHelper.php';
+
+use Burki24\SymconModuleHelper\ParentConnectionHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ParentConnectionHelper;
+
+    public function HasValidParent(): bool
+    {
+        return $this->HasParent();
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `GetParentID()` | Liefert die physisch verbundene Parent-Instanz-ID oder `0`, wenn keine Verbindung besteht. |
+| `HasParent()` | Prüft, ob eine Parent-ID gesetzt ist und die referenzierte Instanz noch existiert. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -149,6 +180,7 @@ Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Reposi
 libs/
 └── helper/
     ├── ConfigurationFormHelper.php
+    ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
     └── VariablePresentationHelper.php
 ```

@@ -2,6 +2,14 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.3.0 - 2026-07-26
+
+### Added
+
+- `ParentConnectionHelper` zum Auslesen der physisch verbundenen Parent-Instanz eines Symcon-Moduls.
+- Prüfung, ob die konfigurierte Parent-Instanz tatsächlich noch existiert.
+- Tests für gültige, fehlende und nicht mehr vorhandene Parent-Verbindungen.
+
 ## 1.2.0 - 2026-07-26
 
 ### Added
