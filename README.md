@@ -123,6 +123,50 @@ class ExampleModule extends IPSModuleStrict
 | `GetParentID()` | Liefert die physisch verbundene Parent-Instanz-ID oder `0`, wenn keine Verbindung besteht. |
 | `HasParent()` | Prüft, ob eine Parent-ID gesetzt ist und die referenzierte Instanz noch existiert. |
 
+
+## VisualizationAssetHelper
+
+`src/VisualizationAssetHelper.php` lädt Visualisierungsdateien relativ zum Verzeichnis der konkreten Symcon-Modulklasse. Dadurch kann ein vendorter Helper zuverlässig auf Dateien im jeweiligen `visualization`-Verzeichnis zugreifen, ohne einen festen Modulpfad zu kennen.
+
+Kann eine Datei nicht gelesen werden, liefert der Helper einen leeren String und schreibt den betroffenen Pfad über `SendDebug()`. Er ist damit für `IPSModule`- und `IPSModuleStrict`-Module gedacht.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VisualizationAssetHelper;
+
+    public function GetVisualizationHtml(): string
+    {
+        return $this->VisualizationAsset('template.html');
+    }
+}
+```
+
+Bei folgender Modulstruktur:
+
+```text
+ExampleModule/
+├── module.php
+└── visualization/
+    ├── template.html
+    ├── script.js
+    └── style.css
+```
+
+wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modul aus `visualization/style.css` geladen.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `VisualizationAsset()` | Lädt eine Datei aus dem `visualization`-Verzeichnis des konkreten Moduls und liefert deren Inhalt. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -182,7 +226,8 @@ libs/
     ├── ConfigurationFormHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
-    └── VariablePresentationHelper.php
+    ├── VariablePresentationHelper.php
+    └── VisualizationAssetHelper.php
 ```
 
 Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder Downloads zur Laufzeit sind nicht erforderlich.

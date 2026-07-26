@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.4.0 - 2026-07-26
+
+### Added
+
+- `VisualizationAssetHelper` zum Laden modulspezifischer Dateien aus dem `visualization`-Verzeichnis.
+- Reflection-basierte Auflösung des Verzeichnisses der konkreten Symcon-Modulklasse.
+- Debug-Ausgabe und leerer Rückgabewert für nicht lesbare Assets.
+- Tests für erfolgreiches Laden, fehlende Dateien und Debug-Ausgabe.
+
 ## 1.3.0 - 2026-07-26
 
 ### Added
