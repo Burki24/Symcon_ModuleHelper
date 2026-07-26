@@ -242,6 +242,41 @@ class ExampleModule extends IPSModuleStrict
 | `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID; andernfalls `0`. |
 | `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID existiert. |
 
+## DateHelper
+
+`src/DateHelper.php` formatiert Datumswerte aus APIs oder Konfigurationsquellen einheitlich. Der Helper verwendet standardmäßig die deutsche Datumsdarstellung `d.m.Y`, erlaubt aber auch ein frei wählbares `DateTime`-Ausgabeformat.
+
+Nicht interpretierbare Datumsstrings werden unverändert zurückgegeben. Leere oder Nicht-String-Werte ergeben einen leeren String. Damit eignet sich der Helper besonders für externe Daten, bei denen ein ungültiger oder unbekannter Originalwert nicht stillschweigend verloren gehen soll.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/DateHelper.php';
+
+use Burki24\SymconModuleHelper\DateHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use DateHelper;
+
+    public function FormatApiDate(string $date): string
+    {
+        return $this->FormatDate($date);
+    }
+
+    public function FormatApiMonth(string $date): string
+    {
+        return $this->FormatDate($date, 'm/Y');
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `FormatDate()` | Formatiert einen Datumsstring mit `d.m.Y` oder einem angegebenen `DateTime`-Format; nicht interpretierbare Strings bleiben unverändert. |
+
 ## PersistentJsonCacheHelper
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
@@ -299,6 +334,7 @@ Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Reposi
 libs/
 └── helper/
     ├── ConfigurationFormHelper.php
+    ├── DateHelper.php
     ├── HttpResponseHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php

@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.9.0 - 2026-07-26
+
+### Added
+
+- `DateHelper` zum einheitlichen Formatieren von Datumswerten aus APIs und Konfigurationsquellen.
+- Standardausgabe im Format `d.m.Y` mit optional frei wählbarem `DateTime`-Ausgabeformat.
+- Unveränderte Rückgabe nicht interpretierbarer Datumsstrings sowie leerer Rückgabewert für leere oder Nicht-String-Werte.
+- Tests für Standardformat, benutzerdefiniertes Format und Fallback-Verhalten.
+
 ## 1.8.0 - 2026-07-26
 
 ### Changed
