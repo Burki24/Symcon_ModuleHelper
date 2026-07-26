@@ -271,7 +271,7 @@ def sync(repo: str, base_branch: str, helper: str, source_meta: dict[str, Any]) 
         branch,
         {
             target_path: raw,
-            "libs/helper/manifest.json": (json.dumps(target_manifest, indent=2, ensure_ascii=False) + "\n").encode("utf-8"),
+            "libs/helper/manifest.json": (json.dumps(target_manifest, indent=4, ensure_ascii=False) + "\n").encode("utf-8"),
             "libs/helper/README.md": readme(target_manifest, str(config.get("readme_language", "en"))),
         },
         commit_prefix,
