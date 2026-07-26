@@ -2,6 +2,21 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.2.0 - 2026-07-26
+
+### Changed
+
+- `VariableHelper` auf Version 1.2.0 erweitert.
+- Sichere Werteleser lösen Variablen weiterhin per Ident und optionaler Parent-ID auf und liefern bei fehlenden oder typinkompatiblen Werten definierte Standardwerte.
+
+### Added
+
+- `GetVariableValueByIdent()` für typunveränderte Rohwerte.
+- `GetBooleanVariableValueByIdent()` für native Boolean- sowie numerische 0/1-Zustände.
+- `GetFloatVariableValueByIdent()` für Integer-/Float-Werte mit Normalisierung auf Float.
+- `GetIntegerVariableValueByIdent()` und `GetStringVariableValueByIdent()` für typsichere Zugriffe ohne implizite Konvertierung.
+- Regressionstests für Defaultwerte, Typprüfung, numerische Boolean-Zustände und explizite Parent-IDs.
+
 ## 2.1.0 - 2026-07-26
 
 - Add a machine-readable helper manifest.

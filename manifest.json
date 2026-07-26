@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "2.1.0",
+  "repository_version": "2.2.0",
   "helpers": {
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
@@ -30,8 +30,8 @@
     },
     "VariableHelper": {
       "file": "src/VariableHelper.php",
-      "version": "1.1.0",
-      "sha256": "d1c1bb4d170ebe3d0b2976590c027f341cc3f11ecd5e43e02a0abe17340484f4"
+      "version": "1.2.0",
+      "sha256": "43b205a2ca87553a3a59a9e94f1c5c72fc4643cebedb080a9706139d98b30624"
     },
     "VariablePresentationHelper": {
       "file": "src/VariablePresentationHelper.php",

@@ -235,7 +235,9 @@ class ExampleModule extends IPSModuleStrict
 
 Ein Lookup liefert nur dann eine positive ID zurück, wenn der gefundene Ident tatsächlich zu einer vorhandenen Symcon-Variable gehört. Fehlende Idents, ungültige IDs und andere Objekttypen werden einheitlich auf `0` normalisiert.
 
-Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`- und `IPS_VariableExists()`-Prüfungen nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
+Ab Version 1.2.0 kann der Helper Werte zusätzlich direkt über den Ident lesen. Der rohe Zugriff bewahrt den nativen Symcon-Variablentyp. Typspezifische Leser liefern bei fehlenden oder inkompatiblen Werten einen definierbaren Standardwert; dabei werden keine Strings implizit in Zahlen konvertiert. Der Float-Leser akzeptiert bewusst Integer und Float als numerische Werte, und der Boolean-Leser unterstützt neben nativen Boolean-Werten auch numerische Zustände mit `0 = false` und `!= 0 = true`.
+
+Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`-, `IPS_VariableExists()`- und wiederkehrende `GetValue()`-/Typprüfungen nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
 
 ### Verwendung
 
@@ -255,7 +257,12 @@ class ExampleModule extends IPSModuleStrict
 
     public function GetExternalLastSynchronization(int $calendarInstanceID): int
     {
-        return $this->GetVariableIDByIdent('LastSynchronization', $calendarInstanceID);
+        return $this->GetIntegerVariableValueByIdent('LastSynchronization', $calendarInstanceID);
+    }
+
+    public function GetPumpPower(): float
+    {
+        return $this->GetFloatVariableValueByIdent('PumpPower');
     }
 }
 ```
@@ -266,6 +273,11 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID; andernfalls `0`. |
 | `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID existiert. |
+| `GetVariableValueByIdent()` | Liest den Rohwert einer Variablen typunverändert; fehlt die Variable, wird der angegebene Standardwert geliefert. |
+| `GetBooleanVariableValueByIdent()` | Liest Boolean-Werte sowie numerische 0/Nicht-0-Zustände; inkompatible Werte liefern den Standardwert. |
+| `GetFloatVariableValueByIdent()` | Liest Integer- oder Float-Werte und normalisiert sie auf Float; andere Typen liefern den Standardwert. |
+| `GetIntegerVariableValueByIdent()` | Liest ausschließlich native Integer-Werte; andere Typen liefern den Standardwert. |
+| `GetStringVariableValueByIdent()` | Liest ausschließlich native String-Werte; andere Typen liefern den Standardwert. |
 
 ## DateHelper
 
