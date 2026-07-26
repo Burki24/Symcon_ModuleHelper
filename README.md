@@ -206,9 +206,11 @@ class ExampleModule extends IPSModuleStrict
 
 ## VariableHelper
 
-`src/VariableHelper.php` kapselt den wiederverwendbaren Zugriff auf Variablen unterhalb einer Symcon-Modulinstanz. Der Helper löst Variablen über ihren Ident relativ zur aktuellen `InstanceID` auf und normalisiert einen fehlgeschlagenen Lookup auf die ID `0`.
+`src/VariableHelper.php` kapselt den wiederverwendbaren Zugriff auf Variablen unterhalb von Symcon-Objekten. Ohne explizite Parent-ID löst der Helper Variablen wie bisher relativ zur aktuellen `InstanceID` auf. Optional kann eine andere Parent-ID angegeben werden, beispielsweise um Variablen einer verbundenen oder referenzierten Instanz auszulesen.
 
-Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`-Aufrufe nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
+Ein Lookup liefert nur dann eine positive ID zurück, wenn der gefundene Ident tatsächlich zu einer vorhandenen Symcon-Variable gehört. Fehlende Idents, ungültige IDs und andere Objekttypen werden einheitlich auf `0` normalisiert.
+
+Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`- und `IPS_VariableExists()`-Prüfungen nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
 
 ### Verwendung
 
@@ -225,6 +227,11 @@ class ExampleModule extends IPSModuleStrict
     {
         return $this->VariableExists('Temperature');
     }
+
+    public function GetExternalLastSynchronization(int $calendarInstanceID): int
+    {
+        return $this->GetVariableIDByIdent('LastSynchronization', $calendarInstanceID);
+    }
 }
 ```
 
@@ -232,8 +239,8 @@ class ExampleModule extends IPSModuleStrict
 
 | Methode | Aufgabe |
 | --- | --- |
-| `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder `0`, wenn kein passendes Objekt existiert. |
-| `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz existiert. |
+| `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID; andernfalls `0`. |
+| `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID existiert. |
 
 ## PersistentJsonCacheHelper
 

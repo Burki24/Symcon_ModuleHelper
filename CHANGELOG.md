@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 1.8.0 - 2026-07-26
+
+### Changed
+
+- `VariableHelper` auf Version 1.1.0 erweitert.
+- `GetVariableIDByIdent()` und `VariableExists()` unterstützen jetzt optional eine explizite Parent-ID für Variablen unterhalb anderer Symcon-Objekte.
+- Gefundene Objekt-IDs werden zusätzlich mit `IPS_VariableExists()` validiert, sodass nur echte Variablen zurückgegeben werden.
+- Tests für explizite Parent-IDs und gleichnamige Nicht-Variablen ergänzt.
+
 ## 1.7.0 - 2026-07-26
 
 ### Added

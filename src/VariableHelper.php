@@ -5,39 +5,50 @@ declare(strict_types=1);
 namespace Burki24\SymconModuleHelper;
 
 /**
- * Provides reusable access helpers for variables below a Symcon module instance.
+ * Provides reusable access helpers for variables below Symcon objects.
  *
  * Intended for classes derived from IPSModule/IPSModuleStrict. The helper
- * resolves variables by ident below the current instance and normalizes a
- * missing lookup to ID 0.
+ * resolves variables by ident below the current instance or an explicitly
+ * supplied parent object and normalizes a missing lookup to ID 0.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 trait VariableHelper
 {
     /**
-     * Returns the variable ID for an ident below the current module instance.
+     * Returns the variable ID for an ident below a Symcon object.
      *
-     * @param string $ident Ident of the variable below the current instance.
+     * If no parent ID is supplied, the current module instance is used.
      *
-     * @return int Variable ID, or 0 if no matching object exists.
+     * @param string   $ident    Ident of the variable below the parent object.
+     * @param int|null $parentID Optional parent object ID; defaults to the current instance.
+     *
+     * @return int Variable ID, or 0 if no matching variable exists.
      */
-    protected function GetVariableIDByIdent(string $ident): int
+    protected function GetVariableIDByIdent(string $ident, ?int $parentID = null): int
     {
-        $variableID = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+        $resolvedParentID = $parentID ?? $this->InstanceID;
+        $variableID = @IPS_GetObjectIDByIdent($ident, $resolvedParentID);
 
-        return is_int($variableID) && $variableID > 0 ? $variableID : 0;
+        if (!is_int($variableID) || $variableID <= 0) {
+            return 0;
+        }
+
+        return IPS_VariableExists($variableID) ? $variableID : 0;
     }
 
     /**
-     * Checks whether a variable with the given ident exists below the current module instance.
+     * Checks whether a variable with the given ident exists below a Symcon object.
      *
-     * @param string $ident Ident of the variable below the current instance.
+     * If no parent ID is supplied, the current module instance is used.
+     *
+     * @param string   $ident    Ident of the variable below the parent object.
+     * @param int|null $parentID Optional parent object ID; defaults to the current instance.
      *
      * @return bool True if a matching variable exists.
      */
-    protected function VariableExists(string $ident): bool
+    protected function VariableExists(string $ident, ?int $parentID = null): bool
     {
-        return $this->GetVariableIDByIdent($ident) > 0;
+        return $this->GetVariableIDByIdent($ident, $parentID) > 0;
     }
 }
