@@ -114,7 +114,7 @@ foreach ([
 
 foreach ([
     ['authorization', static fn (): string => $client->getAuthorizationUrl(''), 'The Symcon license account is unavailable.'],
-    ['code', static fn (): array => $client->exchangeAuthorizationCode(''), 'The authorization code is missing.'],
+    ['code', static fn (): array    => $client->exchangeAuthorizationCode(''), 'The authorization code is missing.'],
     ['refresh', static fn (): array => $client->refreshAccessToken(''), 'Example Provider is not connected yet.']
 ] as [$case, $operation, $expectedMessage]) {
     try {
