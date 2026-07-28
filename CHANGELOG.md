@@ -2,6 +2,14 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.5.0 - 2026-07-28
+
+### Added
+
+- `VisualizationThemeHelper` Version 1.0.0 für ein gemeinsames Symcon-nahes Design von HTML-SDK-Visualisierungen.
+- Native Symcon-Farbvariablen mit Light-/Dark-Fallbacks sowie wiederverwendbare Tokens für Oberflächen, Rahmen, Statusfarben, Radien und Fokusdarstellung.
+- Regressionstests für die zentralen Theme-Tokens und die Anbindung an Symcon-Farbvariablen.
+
 ## 2.4.0 - 2026-07-28
 
 ### Added

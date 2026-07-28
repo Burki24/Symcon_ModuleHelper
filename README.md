@@ -235,6 +235,36 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 | --- | --- |
 | `VisualizationAsset()` | Lädt eine Datei aus dem `visualization`-Verzeichnis des konkreten Moduls und liefert deren Inhalt. |
 
+## VisualizationThemeHelper
+
+`src/VisualizationThemeHelper.php` stellt ein gemeinsames Design-Fundament für HTML-SDK-Visualisierungen bereit. Der Helper bevorzugt die von Symcon angebotenen Farben für Inhalt, Kachel und Akzent und ergänzt robuste Light-/Dark-Fallbacks. Dadurch folgen verschiedene Module demselben Symcon-nahen Erscheinungsbild, ohne ihre fachlichen Komponenten miteinander zu koppeln.
+
+Die CSS-Tokens umfassen Text, Hintergrund, abgestufte Oberflächen, Rahmen, Symcon-Akzent, Statusfarben, Radien, Steuerelementhöhe und Fokusdarstellung. Modulspezifische Regeln – beispielsweise Kalendertermine oder Alarmzustände – bleiben bewusst im jeweiligen Modul.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VisualizationThemeHelper.php';
+
+use Burki24\SymconModuleHelper\VisualizationThemeHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VisualizationThemeHelper;
+
+    public function GetVisualizationHtml(): string
+    {
+        return '<style>' . $this->VisualizationThemeCSS() . '</style>';
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
+
 ## HttpResponseHelper
 
 `src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks, OAuth-Callbacks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.

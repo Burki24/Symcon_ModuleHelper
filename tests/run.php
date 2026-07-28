@@ -11,6 +11,7 @@ $tests = [
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',
+    'visualization-theme.php',
     'http-response.php',
     'symcon-oauth.php',
     'variable-helper.php',
