@@ -271,6 +271,48 @@ class ExampleModule extends IPSModuleStrict
 | `SendPlainTextResponse()` | Sendet eine Klartext-Antwort mit HTTP-Status, UTF-8-Content-Type, Cache-Schutz und `nosniff`-Header. |
 | `SendHtmlTextResponse()` | Sendet sicher HTML-maskierten Text mit HTTP-Status und denselben Standard-Headern. |
 
+## SymconOAuthHelper
+
+`src/SymconOAuthHelper.php` kapselt den wiederverwendbaren OAuth-Ablauf für Anbieter, die zentral beim Symcon-OAuth-Dienst registriert sind. Der Helper erzeugt die lizenzbezogene Autorisierungs-URL, tauscht weitergeleitete Autorisierungscodes gegen Tokens und erneuert Access-Tokens über ein gespeichertes Refresh-Token.
+
+Client-ID und Client-Secret des Anbieters bleiben auf dem Symcon-OAuth-Backend und werden weder im Modul noch in Benutzerinstanzen gespeichert. Der Helper verwendet ausschließlich die feste Basis `https://oauth.ipmagic.de` und validiert Identifier, Transportantwort, HTTP-Status, JSON-Struktur, Bearer-Token und Refresh-Token.
+
+Der HTTP-Transport wird als Callable injiziert. Dadurch bleibt der Helper unabhängig von konkreten HTTP-Clients und kann den im Consumer bereits vorhandenen, für `oauth.ipmagic.de` abgesicherten Transport wiederverwenden.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/SymconOAuthHelper.php';
+
+use Burki24\SymconModuleHelper\SymconOAuthClient;
+
+$trustedHttpClient = $this->CreateTrustedOAuthHttpClient();
+$oauth = new SymconOAuthClient(
+    static function (string $method, string $url, array $headers, string $body) use ($trustedHttpClient): array {
+        $response = $trustedHttpClient->request($method, $url, $headers, $body);
+
+        return [
+            'statusCode' => $response->statusCode,
+            'body'       => $response->body
+        ];
+    },
+    'example_provider',
+    'Example Provider'
+);
+
+$authorizationUrl = $oauth->getAuthorizationUrl((string) IPS_GetLicensee());
+$tokens = $oauth->exchangeAuthorizationCode($authorizationCode);
+$renewedTokens = $oauth->refreshAccessToken($tokens['refreshToken']);
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `getAuthorizationUrl()` | Erzeugt die Autorisierungs-URL des registrierten Symcon-OAuth-Identifiers für ein Lizenzkonto. |
+| `exchangeAuthorizationCode()` | Tauscht einen weitergeleiteten Autorisierungscode gegen normalisierte Access- und Refresh-Tokens. |
+| `refreshAccessToken()` | Erneuert den Access-Token und behält den bisherigen Refresh-Token, wenn der Anbieter ihn nicht rotiert. |
+
 
 ## VariableHelper
 
@@ -418,6 +460,7 @@ libs/
     ├── HttpResponseHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
+    ├── SymconOAuthHelper.php
     ├── VariableHelper.php
     ├── VariablePresentationHelper.php
     └── VisualizationAssetHelper.php

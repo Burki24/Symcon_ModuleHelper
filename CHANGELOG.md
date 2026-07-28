@@ -2,6 +2,21 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.4.0 - 2026-07-28
+
+### Added
+
+- `SymconOAuthHelper` Version 1.0.0 für zentral registrierte OAuth-Anbieter über den Symcon-OAuth-Dienst.
+- Generierung der lizenzbezogenen Autorisierungs-URL ohne Offenlegung zentraler Client-Zugangsdaten.
+- Austausch von Autorisierungscodes und Refresh-Tokens mit Validierung von HTTP-, JSON-, Bearer- und Ablaufzeitdaten.
+- Transportinjektion für die Wiederverwendung vorhandener, modulspezifisch abgesicherter HTTP-Clients.
+- Regressionstests für Autorisierung, Tokenaustausch, Tokenrotation, Fehlerantworten und ungültige Transportdaten.
+
+### Fixed
+
+- Ungültiges JSON in der Consumer-Liste des automatischen Helper-Syncs korrigiert.
+- `OpenHomeAlarm` in die Repository-Berechtigungen des Helper-Sync-Workflows aufgenommen.
+
 ## 2.3.0 - 2026-07-26
 
 ### Added

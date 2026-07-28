@@ -21,6 +21,11 @@ jobs:
           php-version: '8.5'
           coverage: none
 
+      - name: Validate JSON configuration
+        run: |
+          python3 -m json.tool manifest.json > /dev/null
+          python3 -m json.tool .github/helper-consumers.json > /dev/null
+
       - name: PHP lint
         shell: bash
         run: |

@@ -18,6 +18,7 @@ Danach einen Private Key erzeugen und die App für genau diese Repositories inst
 
 - `IPS_LMNB`
 - `OpenCalendar`
+- `OpenHomeAlarm`
 - `IPS_Wolf_WSR1`
 
 ## 2. Symcon_ModuleHelper konfigurieren
@@ -45,7 +46,7 @@ Jedes Consumer-Repository beschreibt in `.helper-sync.json`, welche Helper es ve
 Bei einer Änderung unter `src/` oder an `manifest.json`:
 
 1. prüft der zentrale Workflow das Manifest,
-2. liest die Subscription der drei Consumer aus deren `dev`-Branch,
+2. liest die Subscription der Consumer aus deren `dev`-Branch,
 3. überspringt nicht abonnierte oder bereits aktuelle Helper,
 4. erzeugt für veraltete Helper einen Branch `helper-sync/...`,
 5. schreibt Helper-Datei, `libs/helper/manifest.json` und `libs/helper/README.md` in einem Commit,

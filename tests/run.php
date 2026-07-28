@@ -12,6 +12,7 @@ $tests = [
     'parent-connection.php',
     'visualization-asset.php',
     'http-response.php',
+    'symcon-oauth.php',
     'variable-helper.php',
     'date-helper.php',
 ];

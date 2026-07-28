@@ -53,6 +53,7 @@ jobs:
           repositories: |
             IPS_LMNB
             OpenCalendar
+            OpenHomeAlarm
             IPS_Wolf_WSR1
 
       - name: Validate helper manifest
