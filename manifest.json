@@ -31,7 +31,7 @@
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
       "version": "1.0.0",
-      "sha256": "fe305ad6cba99eae8e85783e2c38e06a3ad2f829516a6a88559384298f2844d4"
+      "sha256": "a675da17c8b6c0361ef7c5a65566ff587833e2ae8cfbdc92df4f5d977c804cc8"
     },
     "ParentConnectionHelper": {
       "file": "src/ParentConnectionHelper.php",

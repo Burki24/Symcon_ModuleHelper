@@ -569,6 +569,27 @@ trait IPSViewStyleHelper
         return implode("\n", $lines);
     }
 
+    /** Reads and decodes the selected IPSView media object. */
+    protected function ReadIPSViewStyleMediaContent(): string
+    {
+        $mediaID = $this->IPSViewStyleMediaID();
+        if ($mediaID <= 0 || !function_exists('IPS_GetMediaContent')) {
+            return '';
+        }
+        if (function_exists('IPS_MediaExists') && !IPS_MediaExists($mediaID)) {
+            return '';
+        }
+
+        $encoded = IPS_GetMediaContent($mediaID);
+        if (!is_string($encoded) || $encoded === '') {
+            return '';
+        }
+
+        $decoded = base64_decode($encoded, true);
+
+        return $decoded === false ? '' : $decoded;
+    }
+
     /** @return array<string,mixed> */
     private function IPSViewCustomStyle(): array
     {
@@ -763,27 +784,6 @@ trait IPSViewStyleHelper
         }
 
         return $resolved;
-    }
-
-    /** Reads and decodes the selected IPSView media object. */
-    protected function ReadIPSViewStyleMediaContent(): string
-    {
-        $mediaID = $this->IPSViewStyleMediaID();
-        if ($mediaID <= 0 || !function_exists('IPS_GetMediaContent')) {
-            return '';
-        }
-        if (function_exists('IPS_MediaExists') && !IPS_MediaExists($mediaID)) {
-            return '';
-        }
-
-        $encoded = IPS_GetMediaContent($mediaID);
-        if (!is_string($encoded) || $encoded === '') {
-            return '';
-        }
-
-        $decoded = base64_decode($encoded, true);
-
-        return $decoded === false ? '' : $decoded;
     }
 
     /** @param array<string,mixed> $document */
@@ -1001,9 +1001,9 @@ trait IPSViewStyleHelper
         }
         if ($readable) {
             return [
-                'red' => $foreground['red'],
+                'red'   => $foreground['red'],
                 'green' => $foreground['green'],
-                'blue' => $foreground['blue'],
+                'blue'  => $foreground['blue'],
                 'alpha' => 1.0
             ];
         }
