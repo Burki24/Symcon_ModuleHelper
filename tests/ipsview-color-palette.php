@@ -75,7 +75,8 @@ function parseTestCSSColor(string $color): array
 /** @param array{red:float,green:float,blue:float} $color */
 function testRelativeLuminance(array $color): float
 {
-    $channel = static function (float $value): float {
+    $channel = static function (float $value): float
+    {
         $normalized = $value / 255.0;
 
         return $normalized <= 0.03928
