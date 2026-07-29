@@ -2,6 +2,17 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.9.0 - 2026-07-29
+
+### Changed
+
+- `IPSViewStyleHelper` auf Version 1.1.0 erweitert.
+- Benutzerdefinierte Stile unterstützen nun getrennte Deckkraftwerte für View-, Seiten-, Label-, normale/aktive/inaktive Steuerelement-, Popup-, Rahmen-, Linien- und Popup-Rahmenfarben.
+- Schatten und Popup-Schatten besitzen eigene zentral verwaltete Deckkraftwerte; die bisherigen Standardwerte von 24 % beziehungsweise 32 % bleiben kompatibel erhalten.
+- Die resultierenden RGBA-Farben und alle aufgelösten Deckkraftwerte werden als gemeinsame `--ipsview-*`-CSS-Variablen ausgegeben.
+- Importierte IPSView-Standardstile behalten weiterhin ihre in der `.ipsView`-Datei gespeicherten Alpha-Werte und werden nicht durch benutzerdefinierte Deckkraftwerte überschrieben.
+- Regressionstests für Standardwerte, Formularfelder, RGBA-Ausgabe, vollständige Transparenz, CSS-Tokens und IPSView-Alpha-Import ergänzt.
+
 ## 2.8.0 - 2026-07-29
 
 ### Added

@@ -362,6 +362,8 @@ class ExampleModule extends IPSModuleStrict
 
 `src/IPSViewStyleHelper.php` bildet ein universelles IPSView-Stilsystem für eigenständige HTML-Seiten ab. Der Helper besitzt alle gemeinsamen Farben, Schriften, Rahmen, Linien, Schatten, Opacity- und Verlaufswerte. Consumer ordnen ihren Komponenten nur noch semantische Rollen wie Akzent, Information, positiv, Warnung oder kritisch zu; eigene Farbwerte oder Verlaufsberechnungen gehören nicht mehr in die Module.
 
+Für benutzerdefinierte Stile werden Farbe und Deckkraft getrennt gepflegt. Einstellbar sind die Transparenz von View-, Seiten-, Label-, normalen/aktiven/inaktiven Steuerelement- und Popupflächen sowie Rahmen, Linien, Popup-Rahmen, Schatten und Popup-Schatten. Text-, Icon- und semantische Statusfarben bleiben bewusst deckend; weichere Statusflächen und Verläufe entstehen weiterhin zentral über die Verlaufsstärke. Die bisherigen Standardwerte bleiben unverändert, sodass bestehende Consumer nach dem Helper-Update ihr Aussehen nicht verändern.
+
 Der Helper unterstützt vier Stilquellen:
 
 - **Benutzerdefinierter Stil** mit vollständig zentral registrierten Eigenschaften,
@@ -424,6 +426,19 @@ Der Helper erzeugt unter anderem:
 --ipsview-control-background-inactive
 --ipsview-popup-background
 
+--ipsview-view-background-opacity
+--ipsview-page-background-opacity
+--ipsview-label-background-opacity
+--ipsview-control-background-opacity
+--ipsview-control-background-active-opacity
+--ipsview-control-background-inactive-opacity
+--ipsview-popup-background-opacity
+--ipsview-border-opacity
+--ipsview-line-opacity
+--ipsview-popup-border-opacity
+--ipsview-shadow-opacity
+--ipsview-popup-shadow-opacity
+
 --ipsview-text
 --ipsview-text-active
 --ipsview-text-inactive
@@ -463,7 +478,7 @@ Für die Migration bestehender Consumer werden zusätzlich die bisherigen Alias-
 
 | Methode | Aufgabe |
 | --- | --- |
-| `RegisterIPSViewStyleProperties()` | Registriert Stilquelle, Medienobjekt, Transparenz, Skalierung, universelle Farben, Typografie, Rahmen, Schatten, Opacity und Verlaufsstärke. |
+| `RegisterIPSViewStyleProperties()` | Registriert Stilquelle, Medienobjekt, Hintergrundmodus, Skalierung, universelle Farben, getrennte Flächen-/Rahmen-/Schatten-Deckkraft, Typografie, Rahmen, Schatten, inaktive Opacity und Verlaufsstärke. |
 | `IPSViewStyleFormItems()` | Liefert die vollständige modulunabhängige Instanzkonfiguration für alle Stilquellen. |
 | `IPSViewStyleSource()` | Liefert die normalisierte aktive Stilquelle. |
 | `IPSViewStyleMediaID()` | Liefert die ausgewählte Medienobjekt-ID oder `0`. |
