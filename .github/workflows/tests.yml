@@ -30,7 +30,10 @@ jobs:
         run: python3 .github/scripts/update_helper_translations.py
 
       - name: Python syntax
-        run: python3 -m py_compile .github/scripts/*.py
+        run: python3 -m py_compile .github/scripts/*.py tests/helper_sync_bundle.py
+
+      - name: Validate helper dependency bundles
+        run: python3 tests/helper_sync_bundle.py
 
       - name: PHP lint
         shell: bash

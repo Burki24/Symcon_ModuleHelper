@@ -178,8 +178,14 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
         return sorted(helpers)
 
     import subprocess
+    sync_paths = [
+        "src",
+        "manifest.json",
+        ".github/scripts/sync_helper_consumers.py",
+        ".github/workflows/helper-sync.yml",
+    ]
     result = subprocess.run(
-        ["git", "diff", "--name-only", BEFORE_SHA, SOURCE_SHA, "--", "src", "manifest.json"],
+        ["git", "diff", "--name-only", BEFORE_SHA, SOURCE_SHA, "--", *sync_paths],
         cwd=ROOT,
         check=True,
         capture_output=True,
@@ -187,6 +193,11 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
     )
     paths = {line.strip() for line in result.stdout.splitlines() if line.strip()}
     names = {Path(path).stem for path in paths if path.startswith("src/") and path.endswith("Helper.php")}
+    if paths & {
+        ".github/scripts/sync_helper_consumers.py",
+        ".github/workflows/helper-sync.yml",
+    }:
+        names.update(helpers)
     for path in paths:
         match = re.fullmatch(r"src/translations/([A-Za-z0-9_]+)\.json", path)
         if match:
@@ -237,9 +248,20 @@ def readme(manifest: dict[str, Any], language: str) -> bytes:
         ]
         footer = "The copies are shipped with the library deliberately; there is no external runtime dependency."
 
+    documented_paths: set[str] = set()
     for name, meta in sorted(helpers.items()):
-        target = str(meta.get("path", f"libs/helper/{name}.php"))
-        lines.append(f"| `{Path(target).name}` | {meta['version']} | `{meta['sha256']}` |")
+        rows = [meta]
+        rows.extend(
+            dependency
+            for dependency in meta.get("dependencies", [])
+            if isinstance(dependency, dict)
+        )
+        for row in rows:
+            target = str(row.get("path", f"libs/helper/{name}.php"))
+            if target in documented_paths:
+                continue
+            documented_paths.add(target)
+            lines.append(f"| `{Path(target).name}` | {row['version']} | `{row['sha256']}` |")
     lines.extend(["", footer, ""])
     return "\n".join(lines).encode("utf-8")
 
@@ -284,8 +306,9 @@ def bundle_files(
     target_path: str,
 ) -> tuple[dict[str, bytes], dict[str, dict[str, Any]]]:
     files: dict[str, bytes] = {}
-    entries: dict[str, dict[str, Any]] = {}
     target_directory = PurePosixPath(target_path).parent
+    primary_entry: dict[str, Any] | None = None
+    dependency_entries: list[dict[str, Any]] = []
 
     for name in dependency_order(manifest, helper):
         meta = manifest["helpers"][name]
@@ -317,9 +340,18 @@ def bundle_files(
             })
         if assets:
             entry["assets"] = assets
-        entries[name] = entry
 
-    return files, entries
+        if name == helper:
+            primary_entry = entry
+        else:
+            dependency_entries.append({"name": name, **entry})
+
+    if primary_entry is None:
+        raise RuntimeError(f"Unable to build helper bundle for {helper}.")
+    if dependency_entries:
+        primary_entry["dependencies"] = dependency_entries
+
+    return files, {helper: primary_entry}
 
 
 def sync(
@@ -359,7 +391,12 @@ def sync(
         "source_repository": "Burki24/Symcon_ModuleHelper",
         "helpers": {},
     }
-    target_manifest.setdefault("helpers", {}).update(target_entries)
+    target_helpers = target_manifest.setdefault("helpers", {})
+    for dependency in target_entries[helper].get("dependencies", []):
+        dependency_name = str(dependency.get("name", ""))
+        if dependency_name and dependency_name not in subscriptions:
+            target_helpers.pop(dependency_name, None)
+    target_helpers.update(target_entries)
 
     files = dict(source_files)
     files["libs/helper/manifest.json"] = (

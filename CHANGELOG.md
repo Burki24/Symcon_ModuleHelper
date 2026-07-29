@@ -12,6 +12,11 @@ Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 - CI-Prüfung auf fehlende, veraltete oder nicht synchronisierte Übersetzungsschlüssel sowie abweichende Platzhalter.
 - Manifest-Unterstützung für Helper-Abhängigkeiten und zusätzliche Assets wie Übersetzungskataloge.
 
+### Fixed
+
+- Abhängige Helper werden im Consumer-Manifest nun innerhalb des abonnierten Helper-Bundles dokumentiert, statt als zusätzliche Subscription aufzutauchen. Dadurch bleiben bestehende Integritätsprüfungen mit exakter Subscription-/Manifest-Zuordnung gültig.
+- Änderungen an der Sync-Logik lösen automatisch einen erneuten Abgleich der Consumer aus, sodass fehlerhafte Bot-PRs ohne manuelle Änderungen in den Ziel-Repositories aktualisiert werden.
+
 ### Changed
 
 - `IPSViewStyleHelper` auf Version 1.2.0 erweitert und vollständig auf helper-eigene Übersetzungen umgestellt.

@@ -51,7 +51,8 @@ Bei einer Änderung unter `src/` oder an `manifest.json`:
 3. überspringt nicht abonnierte oder bereits aktuelle Helper,
 4. erzeugt für veraltete Helper einen Branch `helper-sync/...`,
 5. schreibt das vollständige Helper-Bundle einschließlich Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md` in einem Commit,
-6. eröffnet einen Pull Request gegen `dev`.
+6. dokumentiert transitive Abhängigkeiten innerhalb des abonnierten Helper-Eintrags, sodass `.helper-sync.json` ausschließlich die bewusst abonnierten Helper enthält,
+7. eröffnet einen Pull Request gegen `dev`.
 
 Die Consumer-CI prüft den PR. Der Merge bleibt bewusst manuell.
 
