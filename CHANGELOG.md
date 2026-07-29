@@ -2,6 +2,18 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.8.0 - 2026-07-29
+
+### Added
+
+- `IPSViewHTMLPageHelper` Version 1.0.0 für eine gemeinsame technische Erzeugung nativer HTML-SDK- und eigenständiger IPSView-Seiten.
+- Einheitlicher Asset-Vertrag aus `visualization/index.html`, `style.css` und `app.js` sowie validierte zentrale Template-Platzhalter.
+- Gemeinsamer Bootstrap-Vertrag mit Version, Modus, Zustand, Laufzeitkonfiguration, Übersetzungen und Optionen.
+- Sichere JSON-Einbettung mit HTML-Schutzflags, Unicode-/Slash-Erhalt und bewahrten Float-Nachkommastellen.
+- Gemeinsame Sprach-, Viewport-, Klassen- und Schriftgrößenbehandlung für native und IPSView-Darstellungen.
+- Wiederverwendbare Übersetzungserzeugung aus der `locale.json` sowie strikte Prüfung unbekannter Konfigurationswerte und nicht aufgelöster Platzhalter.
+- Regressionstests für beide Darstellungsmodi, Asset-Einbettung, Bootstrap, JSON-Sicherheit, Übersetzungen und Fehlerfälle.
+
 ## 2.7.0 - 2026-07-29
 
 ### Added

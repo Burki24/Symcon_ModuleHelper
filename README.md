@@ -235,6 +235,99 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 | --- | --- |
 | `VisualizationAsset()` | Lädt eine Datei aus dem `visualization`-Verzeichnis des konkreten Moduls und liefert deren Inhalt. |
 
+## IPSViewHTMLPageHelper
+
+`src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter.
+
+Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard und OpenCalendar eine Kalenderansicht rendern, während Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
+
+Der gemeinsame Bootstrap steht im Template als `window.SYMC_VISUALIZATION` bereit und enthält immer:
+
+```javascript
+{
+    contractVersion: 1,
+    mode: 'symcon' | 'ipsview',
+    state: {},
+    runtime: {},
+    translations: {},
+    options: {}
+}
+```
+
+### Vorgesehene Asset-Struktur
+
+```text
+ExampleModule/
+├── module.php
+├── locale.json
+└── visualization/
+    ├── index.html
+    ├── style.css
+    └── app.js
+```
+
+`index.html` verwendet den gemeinsamen Template-Vertrag:
+
+```html
+<!DOCTYPE html>
+<html lang="{{HTML_LANGUAGE}}" class="{{HTML_CLASSES}}" style="font-size: {{ROOT_FONT_SIZE}};">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="{{VIEWPORT_CONTENT}}">
+    <style>{{VISUALIZATION_THEME}}
+{{MODULE_STYLE}}
+{{IPSVIEW_STYLE}}</style>
+</head>
+<body>
+    <!-- modulspezifische HTML-Struktur -->
+    <script>window.SYMC_VISUALIZATION = {{BOOTSTRAP_JSON}};</script>
+    <script>{{MODULE_SCRIPT}}</script>
+</body>
+</html>
+```
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewHTMLPageHelper.php';
+
+use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
+use Burki24\SymconModuleHelper\VisualizationAssetHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VisualizationAssetHelper;
+    use IPSViewHTMLPageHelper;
+
+    private function RenderPage(bool $ipsView): string
+    {
+        return $this->RenderVisualizationHTMLPage($ipsView, [
+            'language'           => 'de',
+            'classes'            => $ipsView ? ['example-ipsview'] : [],
+            'rootFontSize'       => $ipsView ? '18px' : '100%',
+            'visualizationTheme' => $this->VisualizationThemeCSS(),
+            'ipsViewStyle'       => $this->IPSViewStyleCSSVariables(':root'),
+            'state'              => $this->BuildState(),
+            'runtime'            => $ipsView ? ['endpoint' => '/hook/example'] : null,
+            'translations'       => $this->IPSViewTranslationsFromLocale(),
+            'options'            => ['compact' => $ipsView]
+        ]);
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `RenderVisualizationHTMLPage()` | Lädt Template, CSS und JavaScript, erzeugt den gemeinsamen Bootstrap und rendert das vollständige HTML-Dokument. |
+| `EncodeVisualizationHTMLJSON()` | Kodiert JSON mit zentralen Schutzflags für die sichere Einbettung in ein `script`-Element. |
+| `IPSViewTranslationsFromLocale()` | Liest alle Quelltexte aus der `locale.json` des konkreten Moduls und übersetzt sie mit der aktiven Symcon-Sprache. |
+| `IPSViewTranslationsFor()` | Übersetzt einen explizit übergebenen Satz von Quelltexten. |
+
+Der Helper setzt den `VisualizationAssetHelper` voraus. `VisualizationThemeHelper` und `IPSViewStyleHelper` bleiben eigenständige Bausteine; deren CSS wird dem Seiten-Helper lediglich übergeben.
+
 ## VisualizationThemeHelper
 
 `src/VisualizationThemeHelper.php` stellt ein gemeinsames Design-Fundament für HTML-SDK-Visualisierungen bereit. Der Helper bevorzugt die von Symcon angebotenen Farben für Inhalt, Kachel und Akzent und ergänzt robuste Light-/Dark-Fallbacks. Dadurch folgen verschiedene Module demselben Symcon-nahen Erscheinungsbild, ohne ihre fachlichen Komponenten miteinander zu koppeln.
