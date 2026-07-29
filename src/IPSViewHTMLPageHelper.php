@@ -112,16 +112,16 @@ trait IPSViewHTMLPageHelper
         $bootstrap = $this->BuildVisualizationHTMLBootstrap($ipsView, $configuration);
 
         $replacements = [
-            '{{HTML_LANGUAGE}}'      => htmlspecialchars($language, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-            '{{HTML_CLASSES}}'       => htmlspecialchars($classes, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-            '{{VIEWPORT_CONTENT}}'   => htmlspecialchars($viewport, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
-            '{{ROOT_FONT_SIZE}}'     => $rootFontSize,
-            '{{DOCUMENT_TITLE}}'     => htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            '{{HTML_LANGUAGE}}'       => htmlspecialchars($language, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            '{{HTML_CLASSES}}'        => htmlspecialchars($classes, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            '{{VIEWPORT_CONTENT}}'    => htmlspecialchars($viewport, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            '{{ROOT_FONT_SIZE}}'      => $rootFontSize,
+            '{{DOCUMENT_TITLE}}'      => htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
             '{{VISUALIZATION_THEME}}' => $ipsView ? '' : $visualizationTheme,
-            '{{MODULE_STYLE}}'       => $moduleStyle,
-            '{{IPSVIEW_STYLE}}'      => $ipsView ? $ipsViewStyle : '',
-            '{{BOOTSTRAP_JSON}}'     => $this->EncodeVisualizationHTMLJSON($bootstrap),
-            '{{MODULE_SCRIPT}}'      => $moduleScript
+            '{{MODULE_STYLE}}'        => $moduleStyle,
+            '{{IPSVIEW_STYLE}}'       => $ipsView ? $ipsViewStyle : '',
+            '{{BOOTSTRAP_JSON}}'      => $this->EncodeVisualizationHTMLJSON($bootstrap),
+            '{{MODULE_SCRIPT}}'       => $moduleScript
         ];
 
         foreach ($this->NormalizeIPSViewHTMLReplacements($configuration['replacements'] ?? []) as $placeholder => $value) {

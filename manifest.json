@@ -31,7 +31,7 @@
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
       "version": "1.0.0",
-      "sha256": "2a09e307fdc6218f995ab6fe7fdcf3cabea9546b9e69cf89b20d77bcc32f3c62"
+      "sha256": "5cbe377be2277d40f20599d6b52dc4e0d631c03b54d3b8e14da5c9c6f48d9325"
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
