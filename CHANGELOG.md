@@ -2,6 +2,16 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.6.0 - 2026-07-29
+
+### Added
+
+- `IPSViewColorPaletteHelper` Version 1.0.0 für wiederverwendbare IPSView-Farbkonfigurationen in eigenständigen HTML-Seiten.
+- Neun `SelectColor`-kompatible Integer-Properties und dynamisch einbindbare Formularelemente für Seiten-, Flächen-, Text-, Akzent- und Statusfarben.
+- Gemeinsame Kontrastberechnung für abgestufte Flächen sowie primäre, sekundäre und dezente Schriftfarben.
+- Wiederverwendbare `--ipsview-*`-CSS-Variablen mit transparentem Hintergrundmodus, Rahmen- und Softfarben.
+- Regressionstests für Registrierung, Formularstruktur, Farbnormalisierung, Kontrast, CSS-Ausgabe und ungültige Eingaben.
+
 ## 2.5.0 - 2026-07-28
 
 ### Added

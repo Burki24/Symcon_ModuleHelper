@@ -265,6 +265,93 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
 
+## IPSViewColorPaletteHelper
+
+`src/IPSViewColorPaletteHelper.php` bündelt die wiederverwendbare Farbkonfiguration für eigenständige IPSView-HTML-Seiten. Der Helper registriert neun `SelectColor`-kompatible Integer-Properties, liefert die zugehörigen Formularelemente und erzeugt daraus kontrastsichere CSS-Variablen.
+
+Die Farbpalette umfasst Seitenhintergrund, normale und hervorgehobene Flächen, primäre und sekundäre Schrift, Akzent sowie Erfolgs-, Warn- und Fehlerfarben. Die drei Flächenfarben werden bei Bedarf gemeinsam angepasst, damit ihre Abstufung erhalten bleibt. Schriftfarben werden erst korrigiert, wenn die Flächenanpassung allein den erforderlichen Kontrast nicht erreicht. Modulspezifische Verläufe, Opacity für deaktivierte Bedienelemente, Layout und Komponenten bleiben bewusst im jeweiligen Consumer.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/IPSViewColorPaletteHelper.php';
+
+use Burki24\SymconModuleHelper\IPSViewColorPaletteHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use IPSViewColorPaletteHelper;
+
+    public function Create(): void
+    {
+        parent::Create();
+
+        $this->RegisterIPSViewColorProperties([
+            'Page'          => 0xD8C59B,
+            'Surface'       => 0x9B795A,
+            'SurfaceStrong' => 0xAD8A69,
+            'Text'          => 0xFFFFFF,
+            'MutedText'     => 0xF1E6D5,
+            'Accent'        => 0xE0BE63,
+            'Success'       => 0x78D79C,
+            'Warning'       => 0xFFD166,
+            'Danger'        => 0xFF8174
+        ]);
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        array_push($form['elements'], ...$this->IPSViewColorFormItems());
+
+        return $this->EncodeConfigurationForm($form);
+    }
+
+    private function RenderIPSViewPage(): string
+    {
+        $theme = $this->IPSViewColorCSSVariables(
+            $this->ReadPropertyBoolean('IPSViewTransparent')
+        );
+
+        return '<style>' . $theme . '</style>';
+    }
+}
+```
+
+Die Beschriftungen der dynamisch erzeugten Formularelemente werden als normale Strings geliefert und können deshalb wie gewohnt über die `locale.json` des jeweiligen Moduls übersetzt werden. Die CSS-Ausgabe verwendet gemeinsame `--ipsview-*`-Tokens, die anschließend auf die modulspezifischen Variablen abgebildet werden können.
+
+### CSS-Tokens
+
+Unter anderem werden folgende Variablen erzeugt:
+
+```css
+--ipsview-page
+--ipsview-background
+--ipsview-surface
+--ipsview-surface-strong
+--ipsview-surface-soft
+--ipsview-text
+--ipsview-muted
+--ipsview-faint
+--ipsview-border
+--ipsview-accent
+--ipsview-success
+--ipsview-warning
+--ipsview-danger
+```
+
+Für Akzent- und Statusfarben werden zusätzlich weichere Varianten sowie ein Erfolgsrahmen abgeleitet.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `RegisterIPSViewColorProperties()` | Registriert die neun gemeinsamen Integer-Properties mit neutralen oder modulspezifisch übergebenen Vorgabefarben. |
+| `IPSViewColorFormItems()` | Liefert die drei Reihen mit `SelectColor`-Feldern einschließlich allgemeiner Hinweistexte. |
+| `IPSViewColorPalette()` | Liest die konfigurierten Farben als normalisierte sechsstellige CSS-Hexwerte. |
+| `IPSViewResolvedColorPalette()` | Erzeugt daraus kontrastsichere Flächen-, Text-, Rahmen- und Softfarben. |
+| `IPSViewColorCSSVariables()` | Liefert die aufgelöste Palette als gemeinsame `--ipsview-*`-CSS-Variablen für einen frei wählbaren Selektor. |
+
 ## HttpResponseHelper
 
 `src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks, OAuth-Callbacks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.
