@@ -13,6 +13,7 @@ $tests = [
     'visualization-asset.php',
     'visualization-theme.php',
     'ipsview-color-palette.php',
+    'ipsview-style.php',
     'http-response.php',
     'symcon-oauth.php',
     'variable-helper.php',

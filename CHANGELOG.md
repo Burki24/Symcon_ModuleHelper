@@ -2,6 +2,22 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 2.7.0 - 2026-07-29
+
+### Added
+
+- `IPSViewStyleHelper` Version 1.0.0 als universelles Stilsystem für eigenständige IPSView-HTML-Seiten.
+- Zentrale Stilquellen für benutzerdefinierte Werte, helles und dunkles Preset sowie den globalen Standardstil aus einem ausgewählten `.ipsView`-Medienobjekt.
+- Whitelist-basierter Import von IPSView-Seiten-, Label-, Steuerelement-, Text-, Icon-, Rahmen-, Linien-, Popup-, Schrift- und Schattenwerten ohne Übernahme sonstiger View-Daten.
+- Universelle semantische Rollen für Akzent, Information, positiv, Warnung und kritisch einschließlich Kontrastfarben, Softfarben und zentral erzeugter Verläufe.
+- Gemeinsame Typografie-, Rahmen-, Linien-, Schatten-, Opacity- und Verlaufseinstellungen, sodass Consumer keine eigenen Stilwerte mehr vorgeben müssen.
+- Aktualisierungsüberwachung für ausgewählte IPSView-Medienobjekte und kompatible Alias-Tokens für bestehende Consumer.
+- Regressionstests für Registrierung, Formularstruktur, Presets, Medienimport, Favoritenfarben, Typografie, Schatten, Base64-Dokumente, CSS-Ausgabe und Medienupdates.
+
+### Changed
+
+- `IPSViewColorPaletteHelper` bleibt als kompatibler Vorgänger erhalten; neue Consumer sollen auf `IPSViewStyleHelper` migriert werden.
+
 ## 2.6.0 - 2026-07-29
 
 ### Added

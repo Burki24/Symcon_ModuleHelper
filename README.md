@@ -265,92 +265,123 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
 
-## IPSViewColorPaletteHelper
+## IPSViewStyleHelper
 
-`src/IPSViewColorPaletteHelper.php` bündelt die wiederverwendbare Farbkonfiguration für eigenständige IPSView-HTML-Seiten. Der Helper registriert neun `SelectColor`-kompatible Integer-Properties, liefert die zugehörigen Formularelemente und erzeugt daraus kontrastsichere CSS-Variablen.
+`src/IPSViewStyleHelper.php` bildet ein universelles IPSView-Stilsystem für eigenständige HTML-Seiten ab. Der Helper besitzt alle gemeinsamen Farben, Schriften, Rahmen, Linien, Schatten, Opacity- und Verlaufswerte. Consumer ordnen ihren Komponenten nur noch semantische Rollen wie Akzent, Information, positiv, Warnung oder kritisch zu; eigene Farbwerte oder Verlaufsberechnungen gehören nicht mehr in die Module.
 
-Die Farbpalette umfasst Seitenhintergrund, normale und hervorgehobene Flächen, primäre und sekundäre Schrift, Akzent sowie Erfolgs-, Warn- und Fehlerfarben. Die drei Flächenfarben werden bei Bedarf gemeinsam angepasst, damit ihre Abstufung erhalten bleibt. Schriftfarben werden erst korrigiert, wenn die Flächenanpassung allein den erforderlichen Kontrast nicht erreicht. Modulspezifische Verläufe, Opacity für deaktivierte Bedienelemente, Layout und Komponenten bleiben bewusst im jeweiligen Consumer.
+Der Helper unterstützt vier Stilquellen:
+
+- **Benutzerdefinierter Stil** mit vollständig zentral registrierten Eigenschaften,
+- **IPSView-Standardstil** aus einem ausgewählten `.ipsView`-Medienobjekt,
+- **heller Standardstil**,
+- **dunkler Standardstil**.
+
+Beim IPSView-Standardstil wird ausschließlich eine feste Whitelist der globalen Style-Einstellungen gelesen. Dazu gehören unter anderem Seiten-, Label-, Steuerelement-, Text-, Icon-, Rahmen-, Linien- und Popupfarben sowie Standardschrift, Radien, Rahmenstärken und Schatten. Frei benannte View-Farben werden für die universellen Rollen positiv, Warnung und kritisch verwendet, wenn passende Namen wie `Grün`, `Gelb` und `Rot` vorhanden sind. Lizenz-, Verbindungs- oder sonstige View-Daten werden nicht übernommen.
 
 ### Verwendung
 
 ```php
-require_once __DIR__ . '/../libs/helper/IPSViewColorPaletteHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewStyleHelper.php';
 
-use Burki24\SymconModuleHelper\IPSViewColorPaletteHelper;
+use Burki24\SymconModuleHelper\IPSViewStyleHelper;
 
 class ExampleModule extends IPSModuleStrict
 {
-    use IPSViewColorPaletteHelper;
+    use IPSViewStyleHelper;
 
     public function Create(): void
     {
         parent::Create();
 
-        $this->RegisterIPSViewColorProperties([
-            'Page'          => 0xD8C59B,
-            'Surface'       => 0x9B795A,
-            'SurfaceStrong' => 0xAD8A69,
-            'Text'          => 0xFFFFFF,
-            'MutedText'     => 0xF1E6D5,
-            'Accent'        => 0xE0BE63,
-            'Success'       => 0x78D79C,
-            'Warning'       => 0xFFD166,
-            'Danger'        => 0xFF8174
-        ]);
+        $this->RegisterIPSViewStyleProperties();
+    }
+
+    public function ApplyChanges(): void
+    {
+        parent::ApplyChanges();
+
+        $this->RegisterIPSViewStyleMediaMessages();
     }
 
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
-        array_push($form['elements'], ...$this->IPSViewColorFormItems());
+        array_push($form['elements'], ...$this->IPSViewStyleFormItems());
 
         return $this->EncodeConfigurationForm($form);
     }
 
     private function RenderIPSViewPage(): string
     {
-        $theme = $this->IPSViewColorCSSVariables(
-            $this->ReadPropertyBoolean('IPSViewTransparent')
-        );
-
-        return '<style>' . $theme . '</style>';
+        return '<style>' . $this->IPSViewStyleCSSVariables() . '</style>';
     }
 }
 ```
 
-Die Beschriftungen der dynamisch erzeugten Formularelemente werden als normale Strings geliefert und können deshalb wie gewohnt über die `locale.json` des jeweiligen Moduls übersetzt werden. Die CSS-Ausgabe verwendet gemeinsame `--ipsview-*`-Tokens, die anschließend auf die modulspezifischen Variablen abgebildet werden können.
+### Universelle CSS-Rollen
 
-### CSS-Tokens
-
-Unter anderem werden folgende Variablen erzeugt:
+Der Helper erzeugt unter anderem:
 
 ```css
---ipsview-page
---ipsview-background
---ipsview-surface
---ipsview-surface-strong
---ipsview-surface-soft
+--ipsview-view-background
+--ipsview-page-background
+--ipsview-label-background
+--ipsview-control-background
+--ipsview-control-background-active
+--ipsview-control-background-inactive
+--ipsview-popup-background
+
 --ipsview-text
---ipsview-muted
---ipsview-faint
+--ipsview-text-active
+--ipsview-text-inactive
+--ipsview-text-label
+--ipsview-text-secondary
+--ipsview-text-faint
+--ipsview-icon
 --ipsview-border
+--ipsview-line
+
 --ipsview-accent
---ipsview-success
+--ipsview-information
+--ipsview-positive
 --ipsview-warning
---ipsview-danger
+--ipsview-critical
+
+--ipsview-gradient-accent
+--ipsview-gradient-information
+--ipsview-gradient-positive
+--ipsview-gradient-warning
+--ipsview-gradient-critical
+
+--ipsview-font-family
+--ipsview-font-size
+--ipsview-font-scale
+--ipsview-radius
+--ipsview-border-width
+--ipsview-line-width
+--ipsview-disabled-opacity
+--ipsview-shadow
+--ipsview-popup-shadow
 ```
 
-Für Akzent- und Statusfarben werden zusätzlich weichere Varianten sowie ein Erfolgsrahmen abgeleitet.
+Für die Migration bestehender Consumer werden zusätzlich die bisherigen Alias-Tokens wie `--ipsview-surface`, `--ipsview-success` und `--ipsview-danger` ausgegeben.
 
 ### Methoden
 
 | Methode | Aufgabe |
 | --- | --- |
-| `RegisterIPSViewColorProperties()` | Registriert die neun gemeinsamen Integer-Properties mit neutralen oder modulspezifisch übergebenen Vorgabefarben. |
-| `IPSViewColorFormItems()` | Liefert die drei Reihen mit `SelectColor`-Feldern einschließlich allgemeiner Hinweistexte. |
-| `IPSViewColorPalette()` | Liest die konfigurierten Farben als normalisierte sechsstellige CSS-Hexwerte. |
-| `IPSViewResolvedColorPalette()` | Erzeugt daraus kontrastsichere Flächen-, Text-, Rahmen- und Softfarben. |
-| `IPSViewColorCSSVariables()` | Liefert die aufgelöste Palette als gemeinsame `--ipsview-*`-CSS-Variablen für einen frei wählbaren Selektor. |
+| `RegisterIPSViewStyleProperties()` | Registriert Stilquelle, Medienobjekt, Transparenz, Skalierung, universelle Farben, Typografie, Rahmen, Schatten, Opacity und Verlaufsstärke. |
+| `IPSViewStyleFormItems()` | Liefert die vollständige modulunabhängige Instanzkonfiguration für alle Stilquellen. |
+| `IPSViewStyleSource()` | Liefert die normalisierte aktive Stilquelle. |
+| `IPSViewStyleMediaID()` | Liefert die ausgewählte Medienobjekt-ID oder `0`. |
+| `RegisterIPSViewStyleMediaMessages()` | Registriert Aktualisierungen des ausgewählten IPSView-Medienobjekts. |
+| `IsIPSViewStyleMediaUpdate()` | Erkennt eine Aktualisierung der aktiven IPSView-Stilquelle. |
+| `IPSViewResolvedStyle()` | Liefert die vollständig aufgelösten universellen Stilwerte. |
+| `IPSViewStyleCSSVariables()` | Rendert die aufgelösten Werte als gemeinsame `--ipsview-*`-CSS-Variablen. |
+
+## IPSViewColorPaletteHelper
+
+`src/IPSViewColorPaletteHelper.php` bleibt vorerst als kompatibler Vorgänger für bereits migrierte Consumer erhalten. Neue Integrationen sollen `IPSViewStyleHelper` verwenden. Der ältere Helper verwaltet nur neun Farben und besitzt weder den IPSView-Standardstil noch die gemeinsamen Typografie-, Rahmen-, Schatten-, Opacity- und Verlaufswerte.
 
 ## HttpResponseHelper
 
@@ -575,6 +606,8 @@ libs/
     ├── ConfigurationFormHelper.php
     ├── DateHelper.php
     ├── HttpResponseHelper.php
+    ├── IPSViewColorPaletteHelper.php
+    ├── IPSViewStyleHelper.php
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
     ├── SymconOAuthHelper.php
