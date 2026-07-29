@@ -12,7 +12,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -127,6 +127,44 @@ def load_json_content(repo: str, path: str, ref: str) -> dict[str, Any] | None:
     return decoded
 
 
+def dependency_order(manifest: dict[str, Any], helper: str) -> list[str]:
+    helpers = manifest["helpers"]
+    ordered: list[str] = []
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(name: str) -> None:
+        if name in visited:
+            return
+        if name in visiting:
+            raise RuntimeError(f"Circular helper dependency involving {name}.")
+        if name not in helpers:
+            raise RuntimeError(f"Unknown helper dependency: {name}")
+        visiting.add(name)
+        for dependency in helpers[name].get("dependencies", []):
+            visit(str(dependency))
+        visiting.remove(name)
+        visited.add(name)
+        ordered.append(name)
+
+    visit(helper)
+    return ordered
+
+
+def expand_dependents(manifest: dict[str, Any], names: set[str]) -> set[str]:
+    helpers = manifest["helpers"]
+    expanded = set(names)
+    changed = True
+    while changed:
+        changed = False
+        for helper, meta in helpers.items():
+            dependencies = {str(item) for item in meta.get("dependencies", [])}
+            if dependencies & expanded and helper not in expanded:
+                expanded.add(helper)
+                changed = True
+    return expanded
+
+
 def changed_helpers(manifest: dict[str, Any]) -> list[str]:
     helpers = manifest["helpers"]
     if EVENT_NAME == "workflow_dispatch":
@@ -134,7 +172,7 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
             return sorted(helpers)
         if REQUESTED_HELPER not in helpers:
             raise SystemExit(f"Unknown helper requested: {REQUESTED_HELPER}")
-        return [REQUESTED_HELPER]
+        return sorted(expand_dependents(manifest, {REQUESTED_HELPER}))
 
     if not BEFORE_SHA or set(BEFORE_SHA) == {"0"}:
         return sorted(helpers)
@@ -149,6 +187,10 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
     )
     paths = {line.strip() for line in result.stdout.splitlines() if line.strip()}
     names = {Path(path).stem for path in paths if path.startswith("src/") and path.endswith("Helper.php")}
+    for path in paths:
+        match = re.fullmatch(r"src/translations/([A-Za-z0-9_]+)\.json", path)
+        if match:
+            names.add(match.group(1))
 
     if "manifest.json" in paths:
         try:
@@ -166,6 +208,7 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
         except Exception:
             names.update(helpers)
 
+    names = expand_dependents(manifest, names)
     return sorted(name for name in names if name in helpers)
 
 
@@ -223,7 +266,69 @@ def open_pull_request(repo: str, base_branch: str, branch: str, helper: str, ver
     print(f"Created PR #{result['number']} in {repo} for {helper}.")
 
 
-def sync(repo: str, base_branch: str, helper: str, source_meta: dict[str, Any]) -> None:
+def validate_source_helper(name: str, meta: dict[str, Any]) -> tuple[bytes, str]:
+    source_path = ROOT / str(meta["file"])
+    raw = source_path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    if digest != meta["sha256"]:
+        raise RuntimeError(f"Local source hash for {name} does not match manifest.")
+    version_match = VERSION_PATTERN.search(raw.decode("utf-8"))
+    if version_match is None or version_match.group(1) != meta["version"]:
+        raise RuntimeError(f"Local source version for {name} does not match manifest.")
+    return raw, digest
+
+
+def bundle_files(
+    manifest: dict[str, Any],
+    helper: str,
+    target_path: str,
+) -> tuple[dict[str, bytes], dict[str, dict[str, Any]]]:
+    files: dict[str, bytes] = {}
+    entries: dict[str, dict[str, Any]] = {}
+    target_directory = PurePosixPath(target_path).parent
+
+    for name in dependency_order(manifest, helper):
+        meta = manifest["helpers"][name]
+        raw, digest = validate_source_helper(name, meta)
+        helper_target = (
+            PurePosixPath(target_path)
+            if name == helper
+            else target_directory / PurePosixPath(str(meta["file"])).name
+        )
+        files[str(helper_target)] = raw
+        entry: dict[str, Any] = {
+            "version": meta["version"],
+            "sha256": digest,
+            "path": str(helper_target),
+            "source_sha": SOURCE_SHA,
+        }
+        assets = []
+        for asset in meta.get("assets", []):
+            source_asset = ROOT / str(asset["file"])
+            asset_raw = source_asset.read_bytes()
+            asset_digest = hashlib.sha256(asset_raw).hexdigest()
+            if asset_digest != asset["sha256"]:
+                raise RuntimeError(f"Local asset hash for {name}:{asset['file']} does not match manifest.")
+            asset_target = target_directory / PurePosixPath(str(asset["target"]))
+            files[str(asset_target)] = asset_raw
+            assets.append({
+                "path": str(asset_target),
+                "sha256": asset_digest,
+            })
+        if assets:
+            entry["assets"] = assets
+        entries[name] = entry
+
+    return files, entries
+
+
+def sync(
+    repo: str,
+    base_branch: str,
+    helper: str,
+    source_meta: dict[str, Any],
+    manifest: dict[str, Any],
+) -> None:
     config = load_json_content(repo, ".helper-sync.json", base_branch)
     if config is None:
         print(f"Skipping {repo}: no .helper-sync.json on {base_branch}.")
@@ -237,18 +342,15 @@ def sync(repo: str, base_branch: str, helper: str, source_meta: dict[str, Any]) 
         return
 
     target_path = str(subscriptions[helper]["target"])
-    source_path = ROOT / str(source_meta["file"])
-    raw = source_path.read_bytes()
-    digest = hashlib.sha256(raw).hexdigest()
-    if digest != source_meta["sha256"]:
-        raise RuntimeError(f"Local source hash for {helper} does not match manifest.")
-    version_match = VERSION_PATTERN.search(raw.decode("utf-8"))
-    if version_match is None or version_match.group(1) != source_meta["version"]:
-        raise RuntimeError(f"Local source version for {helper} does not match manifest.")
-
-    current = content(repo, target_path, base_branch)
-    if current is not None and hashlib.sha256(current[0]).hexdigest() == digest:
-        print(f"{repo}: {helper} already matches v{source_meta['version']}.")
+    source_files, target_entries = bundle_files(manifest, helper, target_path)
+    up_to_date = True
+    for path, raw in source_files.items():
+        current = content(repo, path, base_branch)
+        if current is None or hashlib.sha256(current[0]).hexdigest() != hashlib.sha256(raw).hexdigest():
+            up_to_date = False
+            break
+    if up_to_date:
+        print(f"{repo}: {helper} bundle already matches v{source_meta['version']}.")
         return
 
     branch = f"helper-sync/{re.sub(r'(?<!^)(?=[A-Z])', '-', helper).lower()}-v{source_meta['version']}"
@@ -257,26 +359,17 @@ def sync(repo: str, base_branch: str, helper: str, source_meta: dict[str, Any]) 
         "source_repository": "Burki24/Symcon_ModuleHelper",
         "helpers": {},
     }
-    target_manifest.setdefault("helpers", {})[helper] = {
-        "version": source_meta["version"],
-        "sha256": digest,
-        "path": target_path,
-        "source_sha": SOURCE_SHA,
-    }
+    target_manifest.setdefault("helpers", {}).update(target_entries)
+
+    files = dict(source_files)
+    files["libs/helper/manifest.json"] = (
+        json.dumps(target_manifest, indent=4, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    files["libs/helper/README.md"] = readme(target_manifest, str(config.get("readme_language", "en")))
 
     commit_prefix = f"CHORE: Update {helper} to v{source_meta['version']}"
-    create_sync_commit(
-        repo,
-        base_branch,
-        branch,
-        {
-            target_path: raw,
-            "libs/helper/manifest.json": (json.dumps(target_manifest, indent=4, ensure_ascii=False) + "\n").encode("utf-8"),
-            "libs/helper/README.md": readme(target_manifest, str(config.get("readme_language", "en"))),
-        },
-        commit_prefix,
-    )
-    open_pull_request(repo, base_branch, branch, helper, source_meta["version"], digest)
+    create_sync_commit(repo, base_branch, branch, files, commit_prefix)
+    open_pull_request(repo, base_branch, branch, helper, source_meta["version"], source_meta["sha256"])
 
 
 def main() -> None:
@@ -290,7 +383,7 @@ def main() -> None:
     for helper in helpers:
         source_meta = manifest["helpers"][helper]
         for consumer in consumers:
-            sync(str(consumer["repository"]), str(consumer["branch"]), helper, source_meta)
+            sync(str(consumer["repository"]), str(consumer["branch"]), helper, source_meta, manifest)
 
 
 if __name__ == "__main__":

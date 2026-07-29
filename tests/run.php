@@ -11,6 +11,7 @@ $tests = [
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',
+    'helper-translation.php',
     'ipsview-html-page.php',
     'visualization-theme.php',
     'ipsview-color-palette.php',

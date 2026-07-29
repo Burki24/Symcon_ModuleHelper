@@ -1,0 +1,99 @@
+name: Update Helper Translations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/*Helper.php'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+concurrency:
+  group: helper-translations
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    env:
+      APP_CLIENT_ID: ${{ vars.HELPER_SYNC_APP_CLIENT_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.HELPER_SYNC_APP_PRIVATE_KEY }}
+      TRANSLATION_MODEL: openai/gpt-4.1
+
+    steps:
+      - name: Create optional GitHub App token
+        id: app-token
+        if: env.APP_CLIENT_ID != '' && env.APP_PRIVATE_KEY != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ env.APP_CLIENT_ID }}
+          private-key: ${{ env.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            Symcon_ModuleHelper
+
+      - name: Select repository token
+        id: repository-token
+        shell: bash
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          FALLBACK_TOKEN: ${{ github.token }}
+        run: |
+          if [[ -n "$APP_TOKEN" ]]; then
+            echo "value=$APP_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "Using the existing Helper Sync GitHub App for the translation PR."
+          else
+            echo "value=$FALLBACK_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "Using the repository GITHUB_TOKEN for the translation PR."
+          fi
+
+      - name: Checkout helper repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.repository-token.outputs.value }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Generate missing German translations
+        env:
+          GITHUB_MODELS_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/update_helper_translations.py --update --target-language de
+
+      - name: Create or update translation pull request
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.repository-token.outputs.value }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- src/translations; then
+            echo "All helper translations are already current."
+            exit 0
+          fi
+
+          branch="automation/helper-translations"
+          git config user.name "Burki24 Helper Translation Bot"
+          git config user.email "helper-translation-bot@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add src/translations
+          git commit -m "CHORE: Update helper translations"
+          git push --force origin "$branch"
+
+          number="$(gh pr list --head "$branch" --base main --state open --json number --jq '.[0].number // empty')"
+          body=$'Automated helper translation update generated with GitHub Models.\n\n- Source language: English\n- Target language: German\n- Existing reviewed translations remain unchanged\n- New or changed source texts require review before merge'
+          if [[ -n "$number" ]]; then
+            gh pr edit "$number" --title "CHORE: Update helper translations" --body "$body"
+            echo "Updated translation PR #$number."
+          else
+            gh pr create --base main --head "$branch" --title "CHORE: Update helper translations" --body "$body"
+          fi

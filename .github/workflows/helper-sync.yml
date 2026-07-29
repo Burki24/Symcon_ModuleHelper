@@ -59,6 +59,9 @@ jobs:
       - name: Validate helper manifest
         run: python3 .github/scripts/verify_manifest.py
 
+      - name: Validate helper translations
+        run: python3 .github/scripts/update_helper_translations.py
+
       - name: Synchronize subscribed helpers
         if: steps.config.outputs.enabled == 'true'
         env:

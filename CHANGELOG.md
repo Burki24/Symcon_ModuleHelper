@@ -2,6 +2,22 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.0.0 - 2026-07-29
+
+### Added
+
+- `HelperTranslationHelper` Version 1.0.0 für helper-eigene Übersetzungen ohne Nachträge in den `locale.json`-Dateien der Consumer-Module.
+- Zentraler JSON-Übersetzungskatalog für `IPSViewStyleHelper` mit vollständigen englischen und deutschen Formulartexten.
+- Automatischer Übersetzungsworkflow über GitHub Models: Neue oder geänderte englische Helper-Texte werden als deutscher Übersetzungs-PR vorgeschlagen.
+- CI-Prüfung auf fehlende, veraltete oder nicht synchronisierte Übersetzungsschlüssel sowie abweichende Platzhalter.
+- Manifest-Unterstützung für Helper-Abhängigkeiten und zusätzliche Assets wie Übersetzungskataloge.
+
+### Changed
+
+- `IPSViewStyleHelper` auf Version 1.2.0 erweitert und vollständig auf helper-eigene Übersetzungen umgestellt.
+- Der automatische Vendor-Sync verteilt nun benötigte Helper-Abhängigkeiten und Übersetzungsdateien gemeinsam mit dem abonnierten Helper.
+- Änderungen am zentralen Übersetzungskatalog lösen automatisch eine Aktualisierung der betroffenen Consumer aus.
+
 ## 2.9.0 - 2026-07-29
 
 ### Changed

@@ -19,6 +19,8 @@ final class IPSViewStyleHelperHarness
     /** @var array<string,int> */
     private array $attributes = [];
 
+    private ?string $translationLanguage = null;
+
     public function register(): void
     {
         $this->RegisterIPSViewStyleProperties();
@@ -61,6 +63,11 @@ final class IPSViewStyleHelperHarness
         return $this->IsIPSViewStyleMediaUpdate($senderID, $message);
     }
 
+    public function setTranslationLanguage(?string $language): void
+    {
+        $this->translationLanguage = $language;
+    }
+
     public function setProperty(string $name, mixed $value): void
     {
         $this->properties[$name] = $value;
@@ -76,6 +83,11 @@ final class IPSViewStyleHelperHarness
     public function messages(): array
     {
         return $this->messages;
+    }
+
+    protected function HelperTranslationLanguageOverride(): ?string
+    {
+        return $this->translationLanguage;
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): void
@@ -198,6 +210,13 @@ assertTrueValue(str_contains($formJSON, 'Surface transparency'), 'Custom surface
 assertTrueValue(str_contains($formJSON, 'Control background opacity'), 'Control opacity must be configurable centrally.');
 assertTrueValue(str_contains($formJSON, 'Popup shadow opacity'), 'Popup shadow opacity must be configurable centrally.');
 assertTrueValue(str_contains($formJSON, '230px'), 'The requested color-control width must be applied.');
+
+$harness->setTranslationLanguage('de_DE.UTF-8');
+$germanFormJSON = json_encode($harness->formItems(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+assertTrueValue(str_contains($germanFormJSON, 'Flächentransparenz'), 'The style helper must translate its own form captions.');
+assertTrueValue(str_contains($germanFormJSON, 'Deckkraft des Bedienelement-Hintergrunds'), 'New helper fields must not require consumer locale entries.');
+assertTrueValue(str_contains($germanFormJSON, 'Benutzerdefinierter Stil'), 'Style options must be translated centrally.');
+$harness->setTranslationLanguage(null);
 
 $custom = $harness->style();
 assertSameValue('#F4F5F7', $custom['ViewBackground'], 'Custom mode must use the shared neutral view background.');

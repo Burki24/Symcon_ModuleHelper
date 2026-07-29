@@ -26,6 +26,12 @@ jobs:
           python3 -m json.tool manifest.json > /dev/null
           python3 -m json.tool .github/helper-consumers.json > /dev/null
 
+      - name: Validate helper translations
+        run: python3 .github/scripts/update_helper_translations.py
+
+      - name: Python syntax
+        run: python3 -m py_compile .github/scripts/*.py
+
       - name: PHP lint
         shell: bash
         run: |

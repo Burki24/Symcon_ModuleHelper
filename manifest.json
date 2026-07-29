@@ -1,7 +1,7 @@
 {
-  "schema": 1,
+  "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "2.9.0",
+  "repository_version": "3.0.0",
   "helpers": {
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
@@ -17,6 +17,11 @@
       "file": "src/DateHelper.php",
       "version": "1.0.0",
       "sha256": "feee6f0260ac33bb87027ecb461e23007edfdc22aeff9c44369ca03e76f80fae"
+    },
+    "HelperTranslationHelper": {
+      "file": "src/HelperTranslationHelper.php",
+      "version": "1.0.0",
+      "sha256": "d3deee581eca9f8eb11e9adce060170227a2dc836ee898bd134f93d27604f639"
     },
     "HttpResponseHelper": {
       "file": "src/HttpResponseHelper.php",
@@ -35,8 +40,18 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.1.0",
-      "sha256": "802d055e91ae0cd9c6c2351b6cc2231e3e21a3a7150b7a52efdeb220f922334e"
+      "version": "1.2.0",
+      "sha256": "290b564748719297cc3686463c03622e820c8c28afbcbc832198014811fcb601",
+      "dependencies": [
+        "HelperTranslationHelper"
+      ],
+      "assets": [
+        {
+          "file": "src/translations/IPSViewStyleHelper.json",
+          "target": "translations/IPSViewStyleHelper.json",
+          "sha256": "75eef3aaf784e001de3f6e9c206169d8c73d8ed5291b65aa9b920e93999e5880"
+        }
+      ]
     },
     "ParentConnectionHelper": {
       "file": "src/ParentConnectionHelper.php",

@@ -358,9 +358,44 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
 
+## HelperTranslationHelper
+
+`src/HelperTranslationHelper.php` stellt helper-eigene Übersetzungen bereit. Sichtbare Beschriftungen und Hinweise eines zentralen Helpers werden damit bereits im Helper übersetzt; Consumer-Module benötigen dafür keine Einträge in ihrer eigenen `locale.json`.
+
+Die Übersetzungen liegen als versionierte JSON-Kataloge unter `src/translations/`. Der deutsche Katalog des `IPSViewStyleHelper` wird beim Vendor-Sync zusammen mit dem Helper und seiner Abhängigkeit verteilt:
+
+```text
+libs/helper/
+├── HelperTranslationHelper.php
+├── IPSViewStyleHelper.php
+└── translations/
+    └── IPSViewStyleHelper.json
+```
+
+Die Systemsprache wird über `IPS_GetSystemLanguage()` ermittelt und auf den Sprachcode normalisiert. Nicht unterstützte Sprachen oder fehlende Einträge fallen zuverlässig auf Englisch beziehungsweise den im Helper definierten Ausgangstext zurück.
+
+### Automatische Übersetzung
+
+Helper mit sichtbaren Texten definieren ihre englischen Quellen in einer Konstanten, deren Name auf `_TRANSLATION_SOURCES` endet. Der Workflow `.github/workflows/helper-translations.yml` vergleicht diese Quellen mit den Katalogen und nutzt GitHub Models mit dem repository-eigenen `GITHUB_TOKEN`, um neue oder geänderte Texte nach Deutsch zu übersetzen. Bestehende geprüfte Übersetzungen werden nicht überschrieben. Der Bot erstellt einen Pull Request zur Kontrolle; erst nach dessen Merge verteilt der normale Helper-Sync den aktualisierten Helper-Bundle an die Consumer.
+
+Die CI prüft zusätzlich:
+
+- fehlende deutsche oder englische Einträge,
+- veraltete Katalogschlüssel,
+- geänderte englische Ausgangstexte,
+- abweichende Platzhalter zwischen Quelle und Übersetzung.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `TranslateHelperText()` | Übersetzt einen stabilen Helper-Schlüssel aus dem passenden Katalog mit sicherem Fallback. |
+| `ResolveHelperTranslationLanguage()` | Ermittelt die aktive Systemsprache. |
+| `NormalizeHelperTranslationLanguage()` | Normalisiert Locale-Werte wie `de_DE.UTF-8` zu `de`. |
+
 ## IPSViewStyleHelper
 
-`src/IPSViewStyleHelper.php` bildet ein universelles IPSView-Stilsystem für eigenständige HTML-Seiten ab. Der Helper besitzt alle gemeinsamen Farben, Schriften, Rahmen, Linien, Schatten, Opacity- und Verlaufswerte. Consumer ordnen ihren Komponenten nur noch semantische Rollen wie Akzent, Information, positiv, Warnung oder kritisch zu; eigene Farbwerte oder Verlaufsberechnungen gehören nicht mehr in die Module.
+`src/IPSViewStyleHelper.php` bildet ein universelles IPSView-Stilsystem für eigenständige HTML-Seiten ab. Alle vom Helper erzeugten Formulartexte werden zentral aus seinem Übersetzungskatalog geladen und benötigen keine Consumer-Lokalisierung. Der Helper besitzt alle gemeinsamen Farben, Schriften, Rahmen, Linien, Schatten, Opacity- und Verlaufswerte. Consumer ordnen ihren Komponenten nur noch semantische Rollen wie Akzent, Information, positiv, Warnung oder kritisch zu; eigene Farbwerte oder Verlaufsberechnungen gehören nicht mehr in die Module.
 
 Für benutzerdefinierte Stile werden Farbe und Deckkraft getrennt gepflegt. Einstellbar sind die Transparenz von View-, Seiten-, Label-, normalen/aktiven/inaktiven Steuerelement- und Popupflächen sowie Rahmen, Linien, Popup-Rahmen, Schatten und Popup-Schatten. Text-, Icon- und semantische Statusfarben bleiben bewusst deckend; weichere Statusflächen und Verläufe entstehen weiterhin zentral über die Verlaufsstärke. Die bisherigen Standardwerte bleiben unverändert, sodass bestehende Consumer nach dem Helper-Update ihr Aussehen nicht verändern.
 
@@ -713,9 +748,12 @@ libs/
 └── helper/
     ├── ConfigurationFormHelper.php
     ├── DateHelper.php
+    ├── HelperTranslationHelper.php
     ├── HttpResponseHelper.php
     ├── IPSViewColorPaletteHelper.php
     ├── IPSViewStyleHelper.php
+    ├── translations/
+    │   └── IPSViewStyleHelper.json
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
     ├── SymconOAuthHelper.php
@@ -744,7 +782,7 @@ MIT
 
 `manifest.json` ist die maschinenlesbare Quelle für Version und SHA-256 aller Helper. Die Consumer-Repositories deklarieren ihre verwendeten Helper über `.helper-sync.json`.
 
-Bei Änderungen unter `src/` erzeugt `.github/workflows/helper-sync.yml` automatisch einen Update-Branch und einen Pull Request gegen den jeweiligen `dev`-Branch eines abonnierten Repositories. Der Sync aktualisiert ausschließlich die vendorte Helper-Datei, `libs/helper/manifest.json` und `libs/helper/README.md`.
+Bei Änderungen unter `src/` erzeugt `.github/workflows/helper-sync.yml` automatisch einen Update-Branch und einen Pull Request gegen den jeweiligen `dev`-Branch eines abonnierten Repositories. Der Sync aktualisiert das abonnierte Helper-Bundle einschließlich deklarierter Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md`. Übersetzungskataloge werden dadurch gemeinsam mit dem zugehörigen Helper verteilt.
 
 Für den repositoryübergreifenden Zugriff wird eine GitHub App verwendet. Im Repository `Symcon_ModuleHelper` werden dafür benötigt:
 
