@@ -181,6 +181,7 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
     sync_paths = [
         "src",
         "manifest.json",
+        ".github/helper-consumers.json",
         ".github/scripts/sync_helper_consumers.py",
         ".github/workflows/helper-sync.yml",
     ]
@@ -194,6 +195,7 @@ def changed_helpers(manifest: dict[str, Any]) -> list[str]:
     paths = {line.strip() for line in result.stdout.splitlines() if line.strip()}
     names = {Path(path).stem for path in paths if path.startswith("src/") and path.endswith("Helper.php")}
     if paths & {
+        ".github/helper-consumers.json",
         ".github/scripts/sync_helper_consumers.py",
         ".github/workflows/helper-sync.yml",
     }:

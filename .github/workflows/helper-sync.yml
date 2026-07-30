@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'manifest.json'
+      - '.github/helper-consumers.json'
       - '.github/scripts/sync_helper_consumers.py'
       - '.github/workflows/helper-sync.yml'
   workflow_dispatch:
@@ -44,6 +45,34 @@ jobs:
             echo "Helper sync is not configured yet; skipping cross-repository updates."
           fi
 
+      - name: Resolve consumer repositories
+        if: steps.config.outputs.enabled == 'true'
+        id: consumers
+        shell: bash
+        env:
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          from pathlib import Path
+
+          owner = os.environ["REPOSITORY_OWNER"]
+          prefix = f"{owner}/"
+          data = json.loads(Path(".github/helper-consumers.json").read_text(encoding="utf-8"))
+          repositories = []
+          for consumer in data.get("consumers", []):
+              repository = str(consumer.get("repository", ""))
+              if not repository.startswith(prefix):
+                  raise SystemExit(f"Consumer repository must belong to {owner}: {repository}")
+              repositories.append(repository[len(prefix):])
+          if not repositories:
+              raise SystemExit("No consumer repositories configured.")
+          print("repositories<<EOF")
+          print("\n".join(repositories))
+          print("EOF")
+          PY
+
       - name: Create GitHub App token
         if: steps.config.outputs.enabled == 'true'
         id: app-token
@@ -52,11 +81,7 @@ jobs:
           client-id: ${{ env.APP_CLIENT_ID }}
           private-key: ${{ env.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: |
-            IPS_LMNB
-            OpenCalendar
-            OpenHomeAlarm
-            IPS_Wolf_WSR1
+          repositories: ${{ steps.consumers.outputs.repositories }}
 
       - name: Validate helper manifest
         run: python3 .github/scripts/verify_manifest.py

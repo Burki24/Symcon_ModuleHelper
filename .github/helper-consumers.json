@@ -2,7 +2,7 @@
   "schema": 1,
   "consumers": [
     {
-      "repository": "Burki24/IPS_LMNB",
+      "repository": "Burki24/OpenLMNB",
       "branch": "dev"
     },
     {
