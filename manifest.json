@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.3.1",
+  "repository_version": "3.4.0",
   "helpers": {
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
@@ -51,8 +51,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.3.0",
-      "sha256": "9a2af54930f23341491f4cd6ef4c9012b5e98011056a99472f677def5c846e7f",
+      "version": "1.4.0",
+      "sha256": "b5b5f5052e15511a04705f0f7be8960b200429e4bad1da909be92bd6e0ee4310",
       "dependencies": [
         "HelperTranslationHelper"
       ],

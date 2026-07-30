@@ -2,6 +2,16 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.4.0 - 2026-07-30
+
+### Changed
+
+- `IPSViewStyleHelper` auf Version 1.4.0 erweitert.
+- Verbindliche `--ipsview-role-*`-Tokens definieren nun dieselbe semantische Farb- und Flächenzuordnung für alle Consumer.
+- Primär-, Aktiv-, Inaktiv-, Label-, Sekundär- und Faint-Text sowie neutrale Icons, View-/Seitenflächen, Steuerelemente, Popups, Rahmen, Linien und Statusrollen sind zentral dokumentiert.
+- Bestehende `--ipsview-*`-Tokens und Kompatibilitätsaliasse bleiben unverändert erhalten; Consumer können schrittweise auf den neuen Rollenvertrag wechseln.
+- Regressionstests sichern den vollständigen Rollenvertrag einschließlich der positiven Statusrahmenfarbe.
+
 ## 3.3.1 - 2026-07-30
 
 ### Fixed

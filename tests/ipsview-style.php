@@ -287,6 +287,16 @@ assertTrueValue(str_contains($customCSS, '--ipsview-control-background-opacity: 
 assertTrueValue(str_contains($customCSS, '--ipsview-shadow-opacity: 0.24;'), 'CSS must expose custom shadow opacity.');
 assertTrueValue(str_contains($customCSS, '--ipsview-popup-shadow-opacity: 0.32;'), 'CSS must expose custom popup shadow opacity.');
 assertTrueValue(str_contains($customCSS, '--ipsview-shadow:'), 'CSS must expose the shared box shadow.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-view-background: var(--ipsview-background);'), 'CSS must expose one canonical outer-view background role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-page-background: var(--ipsview-page-background);'), 'CSS must expose one canonical page background role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-primary: var(--ipsview-text);'), 'CSS must expose the canonical primary-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-active: var(--ipsview-text-active);'), 'CSS must expose the canonical active-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-inactive: var(--ipsview-text-inactive);'), 'CSS must expose the canonical inactive-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-label: var(--ipsview-text-label);'), 'CSS must expose the canonical label-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-secondary: var(--ipsview-text-secondary);'), 'CSS must expose the canonical secondary-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-text-faint: var(--ipsview-text-faint);'), 'CSS must expose the canonical faint-text role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-icon: var(--ipsview-icon);'), 'CSS must expose the canonical neutral-icon role.');
+assertTrueValue(str_contains($customCSS, '--ipsview-role-positive-border: var(--ipsview-success-border);'), 'CSS must expose the shared positive-status border role.');
 assertTrueValue(str_contains($customCSS, '--ipsview-surface:'), 'CSS must retain compatibility aliases for current consumers.');
 assertTrueValue(str_contains($customCSS, '--ipsview-danger:'), 'CSS must retain the legacy critical-color alias.');
 

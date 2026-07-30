@@ -563,6 +563,34 @@ Der Helper erzeugt unter anderem:
 --ipsview-popup-shadow
 ```
 
+Zusätzlich erzeugt der Helper einen verbindlichen Satz kanonischer `--ipsview-role-*`-Tokens. Neue und bereinigte Consumer verwenden ausschließlich diese Rollen; die bisherigen `--ipsview-*`-Tokens bleiben als kompatible technische Basis erhalten.
+
+| Rolle | Verbindliche Bedeutung |
+| --- | --- |
+| `--ipsview-role-view-background` | Äußerer HTML-/View-Hintergrund. Nur diese Rolle wird durch „Transparenter Hintergrund“ transparent. |
+| `--ipsview-role-page-background` | Zusammenhängende Seitenfläche innerhalb der View. |
+| `--ipsview-role-label-background` | Hintergrund eigenständiger Beschriftungs- und Abschnittslabel. |
+| `--ipsview-role-control-background` | Normale Buttons, Karten, Eingaben und andere bedienbare Flächen. |
+| `--ipsview-role-control-active-background` | Ausgewählte, aktive oder hervorgehobene Bedienelemente. |
+| `--ipsview-role-control-inactive-background` | Deaktivierte oder nicht verfügbare Bedienelemente. |
+| `--ipsview-role-popup-background` | Dialoge, Popups und modale Eingaben. |
+| `--ipsview-role-text-primary` | Normaler Inhalt, Überschriften und Werte. |
+| `--ipsview-role-text-active` | Text ausgewählter oder aktiver Bedienelemente. |
+| `--ipsview-role-text-inactive` | Text deaktivierter oder nicht verfügbarer Bedienelemente. |
+| `--ipsview-role-text-label` | Feldnamen, Abschnittslabel, Tabellen-/Diagrammbeschriftungen und Eyebrows. |
+| `--ipsview-role-text-secondary` | Beschreibungen, Metadaten und ergänzende Informationen. |
+| `--ipsview-role-text-faint` | Tertiäre Hinweise, Zeitstempel, Achsentexte und sehr zurückhaltende Informationen. |
+| `--ipsview-role-icon` | Neutrale, nicht statusgebundene Icons. Status-Icons verwenden die jeweilige Statusrolle. |
+| `--ipsview-role-accent` | Auswahl, Fokus und allgemeine Hervorhebung. |
+| `--ipsview-role-information` | Neutraler Informationszustand. |
+| `--ipsview-role-positive` | Sicherer, erfolgreicher oder ordnungsgemäßer Zustand. |
+| `--ipsview-role-warning` | Warnung oder verzögerter Zustand. |
+| `--ipsview-role-critical` | Alarm, Fehler oder kritischer Zustand. |
+| `--ipsview-role-border` | Außenrahmen von Flächen und Steuerelementen. |
+| `--ipsview-role-line` | Trennlinien, Tabellenlinien und Diagrammraster. |
+
+Aus Primärtext dürfen keine eigenen Sekundär- oder Faint-Farben per `currentColor`, Alpha-Mischung oder hart codiertem Farbwert abgeleitet werden. Dadurch wirkt jede Farbeinstellung in allen Modulen auf dieselbe semantische Elementgruppe.
+
 Für die Migration bestehender Consumer werden zusätzlich die bisherigen Alias-Tokens wie `--ipsview-surface`, `--ipsview-success` und `--ipsview-danger` ausgegeben.
 
 ### Methoden
