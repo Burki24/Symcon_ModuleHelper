@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.4.1 - 2026-07-30
+
+### Fixed
+
+- `IPSViewStyleHelper` auf Version 1.4.1 angehoben.
+- Benutzerdefinierte Primär-, Aktiv-, Inaktiv- und Label-Schriftfarben werden nun unverändert ausgegeben und nicht mehr durch eine automatische Kontrastkorrektur ersetzt.
+- Sekundäre und dezente Schrift behalten die RGB-Werte der Primärschrift und werden ausschließlich über 72 beziehungsweise 52 Prozent Deckkraft abgestuft.
+- Zwischenwerte der Flächendeckkraft werden in den CSS-Variablen als prozentuale Alphaangaben ausgegeben; 90 Prozent entsprechen dadurch zuverlässig 90 Prozent Deckkraft statt einer clientabhängigen Dezimalinterpretation.
+- Kompatibilitätsaliasse verweisen nun auf die kanonischen CSS-Variablen, sodass Rollen- und Alt-Tokens identische Farben und Deckkraftwerte verwenden.
+- Regressionstests sichern frei gewählte Schriftfarben und Zwischenwerte der Flächendeckkraft.
+
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
 ## 3.4.0 - 2026-07-30
