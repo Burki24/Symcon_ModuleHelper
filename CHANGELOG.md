@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.1.0 - 2026-07-30
+
+### Changed
+
+- `IPSViewStyleHelper` auf Version 1.3.0 erweitert.
+- Verschachtelte Formular-Marker können nun zentral durch die vollständigen, helper-eigenen, übersetzten IPSView-Stileinstellungen ersetzt werden.
+- Die aus Basisschriftgröße und Skalierung berechnete Root-Schriftgröße für eigenständige IPSView-HTML-Seiten wird nun direkt vom Helper bereitgestellt.
+- Consumer benötigen dadurch keine lokalen Wrapper mehr für Formulareinbindung, Root-Schriftgröße oder den bereits zentral vorhandenen CSS-Variablenblock.
+
 ## 3.0.0 - 2026-07-29
 
 ### Added

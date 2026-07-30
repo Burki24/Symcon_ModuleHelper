@@ -408,6 +408,8 @@ Der Helper unterstützt vier Stilquellen:
 
 Beim IPSView-Standardstil wird ausschließlich eine feste Whitelist der globalen Style-Einstellungen gelesen. Dazu gehören unter anderem Seiten-, Label-, Steuerelement-, Text-, Icon-, Rahmen-, Linien- und Popupfarben sowie Standardschrift, Radien, Rahmenstärken und Schatten. Frei benannte View-Farben werden für die universellen Rollen positiv, Warnung und kritisch verwendet, wenn passende Namen wie `Grün`, `Gelb` und `Rot` vorhanden sind. Lizenz-, Verbindungs- oder sonstige View-Daten werden nicht übernommen.
 
+Für statische `form.json`-Dateien kann ein Label mit der Caption `Configure the shared IPSView style used by the standalone HTML page.` als Einfügemarker verwendet werden. `InsertIPSViewStyleFormItems()` sucht diesen Marker rekursiv, ersetzt ihn durch die zentral übersetzten Bedienelemente und entfernt dadurch den englischen Platzhalter vor der Ausgabe. Die aus Basisschriftgröße und Skalierung resultierende Dokument-Schriftgröße liefert `IPSViewStyleRootFontSize()` direkt als CSS-Wert.
+
 ### Verwendung
 
 ```php
@@ -436,14 +438,21 @@ class ExampleModule extends IPSModuleStrict
     public function GetConfigurationForm(): string
     {
         $form = $this->LoadConfigurationForm();
-        array_push($form['elements'], ...$this->IPSViewStyleFormItems());
+        $this->InsertIPSViewStyleFormItems($form['elements'], colorWidth: '220px');
 
         return $this->EncodeConfigurationForm($form);
     }
 
     private function RenderIPSViewPage(): string
     {
-        return '<style>' . $this->IPSViewStyleCSSVariables() . '</style>';
+        $rootFontSize = $this->IPSViewStyleRootFontSize();
+        $style = $this->IPSViewStyleCSSVariables();
+
+        return sprintf(
+            '<html style="font-size: %s;"><head><style>%s</style></head></html>',
+            $rootFontSize,
+            $style
+        );
     }
 }
 ```
@@ -515,6 +524,8 @@ Für die Migration bestehender Consumer werden zusätzlich die bisherigen Alias-
 | --- | --- |
 | `RegisterIPSViewStyleProperties()` | Registriert Stilquelle, Medienobjekt, Hintergrundmodus, Skalierung, universelle Farben, getrennte Flächen-/Rahmen-/Schatten-Deckkraft, Typografie, Rahmen, Schatten, inaktive Opacity und Verlaufsstärke. |
 | `IPSViewStyleFormItems()` | Liefert die vollständige modulunabhängige Instanzkonfiguration für alle Stilquellen. |
+| `InsertIPSViewStyleFormItems()` | Ersetzt einen auch verschachtelt abgelegten Formular-Marker durch die vollständigen Stilbedienelemente. |
+| `IPSViewStyleRootFontSize()` | Liefert die aus Basisschriftgröße und Skalierung berechnete Root-Schriftgröße für eigenständige HTML-Seiten. |
 | `IPSViewStyleSource()` | Liefert die normalisierte aktive Stilquelle. |
 | `IPSViewStyleMediaID()` | Liefert die ausgewählte Medienobjekt-ID oder `0`. |
 | `RegisterIPSViewStyleMediaMessages()` | Registriert Aktualisierungen des ausgewählten IPSView-Medienobjekts. |

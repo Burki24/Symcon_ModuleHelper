@@ -43,6 +43,20 @@ final class IPSViewStyleHelperHarness
         return $this->IPSViewStyleCSSVariables($selector, $document);
     }
 
+    /** @param array<int,array<string,mixed>> $elements */
+    public function insertFormItems(
+        array &$elements,
+        string $markerCaption = 'Configure the shared IPSView style used by the standalone HTML page.',
+        string $colorWidth = '240px'
+    ): bool {
+        return $this->InsertIPSViewStyleFormItems($elements, $markerCaption, $colorWidth);
+    }
+
+    public function rootFontSize(?string $document = null): string
+    {
+        return $this->IPSViewStyleRootFontSize($document);
+    }
+
     public function source(): int
     {
         return $this->IPSViewStyleSource();
@@ -211,6 +225,36 @@ assertTrueValue(str_contains($formJSON, 'Control background opacity'), 'Control 
 assertTrueValue(str_contains($formJSON, 'Popup shadow opacity'), 'Popup shadow opacity must be configurable centrally.');
 assertTrueValue(str_contains($formJSON, '230px'), 'The requested color-control width must be applied.');
 
+$nestedForm = [
+    [
+        'type'  => 'ExpansionPanel',
+        'items' => [
+            ['type' => 'Label', 'caption' => 'Before marker'],
+            ['type' => 'Label', 'caption' => 'Configure the shared IPSView style used by the standalone HTML page.'],
+            ['type' => 'Label', 'caption' => 'After marker']
+        ]
+    ]
+];
+assertTrueValue(
+    $harness->insertFormItems($nestedForm, colorWidth: '220px'),
+    'The helper must replace a nested shared-style marker.'
+);
+$nestedFormJSON = json_encode($nestedForm, JSON_THROW_ON_ERROR);
+assertFalseValue(
+    str_contains($nestedFormJSON, 'Configure the shared IPSView style used by the standalone HTML page.'),
+    'The insertion marker must be removed from the returned form.'
+);
+assertTrueValue(str_contains($nestedFormJSON, 'IPSViewStyleSource'), 'The complete style form must replace the marker.');
+assertTrueValue(str_contains($nestedFormJSON, '220px'), 'Marker replacement must forward the requested color width.');
+assertTrueValue(str_contains($nestedFormJSON, 'Before marker'), 'Elements before the marker must be preserved.');
+assertTrueValue(str_contains($nestedFormJSON, 'After marker'), 'Elements after the marker must be preserved.');
+
+$missingMarkerForm = [['type' => 'Label', 'caption' => 'No shared style here']];
+assertFalseValue(
+    $harness->insertFormItems($missingMarkerForm),
+    'The helper must report when no insertion marker was found.'
+);
+
 $harness->setTranslationLanguage('de_DE.UTF-8');
 $germanFormJSON = json_encode($harness->formItems(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 assertTrueValue(str_contains($germanFormJSON, 'Flächentransparenz'), 'The style helper must translate its own form captions.');
@@ -333,6 +377,10 @@ $mediaCSS = $harness->css(':root', $documentJSON);
 assertTrueValue(str_contains($mediaCSS, '--ipsview-background: transparent;'), 'Transparent mode must override only the outer background token.');
 assertTrueValue(str_contains($mediaCSS, '--ipsview-font-scale: 1.15;'), 'The shared font scale must be rendered as a CSS factor.');
 assertTrueValue(str_contains($mediaCSS, '--ipsview-gradient-critical: linear-gradient('), 'Imported IPSView styles must receive the same centralized gradients.');
+assertSameValue('13px', $harness->rootFontSize($documentJSON), 'The root font size must combine the media font with the shared scale.');
+$harness->setProperty('IPSViewStyleFontScale', 200);
+assertSameValue('22px', $harness->rootFontSize($documentJSON), 'The root font size must support the maximum shared scale.');
+$harness->setProperty('IPSViewStyleFontScale', 115);
 
 $harness->registerMediaMessages();
 assertSameValue(
@@ -373,6 +421,14 @@ try {
     throw new RuntimeException('An empty color-control width must throw InvalidArgumentException.');
 } catch (InvalidArgumentException $exception) {
     assertTrueValue(str_contains($exception->getMessage(), 'width'), 'Empty width errors must explain the invalid argument.');
+}
+
+try {
+    $invalidMarkerForm = [];
+    $harness->insertFormItems($invalidMarkerForm, '  ');
+    throw new RuntimeException('An empty marker caption must throw InvalidArgumentException.');
+} catch (InvalidArgumentException $exception) {
+    assertTrueValue(str_contains($exception->getMessage(), 'marker'), 'Empty marker errors must explain the invalid argument.');
 }
 
 try {
