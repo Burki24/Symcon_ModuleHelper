@@ -2,6 +2,16 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.3.0 - 2026-07-30
+
+### Changed
+
+- `IPSViewHTMLPageHelper` auf Version 1.2.0 erweitert.
+- Das Deaktivieren der IPSView-Ausgabe löscht vorhandene IPSView-Variablen nicht mehr automatisch; die Variablen bleiben mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten und werden lediglich nicht mehr aktualisiert.
+- Bei deaktivierter IPSView-Ausgabe bietet das Konfigurationsformular für vorhandene Variablen eine explizite Löschaktion mit Bestätigungsdialog und Auflistung der betroffenen Variablen an.
+- Eine bestätigte Löschung wird als einmaliger Auftrag verarbeitet, sodass später neu angelegte IPSView-Variablen ohne erneute Bestätigung nicht versehentlich entfernt werden.
+- Die neuen Formulartexte und Bestätigungen werden weiterhin vollständig über den zentralen Helper-Übersetzungskatalog verteilt.
+
 ## 3.2.0 - 2026-07-30
 
 ### Added

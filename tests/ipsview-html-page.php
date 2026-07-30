@@ -22,8 +22,11 @@ final class IPSViewHTMLPageHelperHarness
     /** @var list<array{message:string,data:mixed,format:int}> */
     private array $debugMessages = [];
 
-    /** @var array<string,bool> */
+    /** @var array<string,bool|string> */
     private array $properties = [];
+
+    /** @var array<string,string> */
+    private array $attributes = [];
 
     /** @var array<string,array{caption:string,type:int,presentation:array<string,mixed>,position:int}> */
     private array $variables = [];
@@ -76,7 +79,7 @@ final class IPSViewHTMLPageHelperHarness
         return $this->UpdateIPSViewHTMLVariable($ident, $html);
     }
 
-    public function setProperty(string $name, bool $value): void
+    public function setProperty(string $name, bool|string $value): void
     {
         $this->properties[$name] = $value;
     }
@@ -86,10 +89,16 @@ final class IPSViewHTMLPageHelperHarness
         $this->helperLanguage = $language;
     }
 
-    /** @return array<string,bool> */
+    /** @return array<string,bool|string> */
     public function properties(): array
     {
         return $this->properties;
+    }
+
+    /** @return array<string,string> */
+    public function attributes(): array
+    {
+        return $this->attributes;
     }
 
     /** @return array<string,array{caption:string,type:int,presentation:array<string,mixed>,position:int}> */
@@ -144,9 +153,34 @@ final class IPSViewHTMLPageHelperHarness
         $this->properties[$name] = $default;
     }
 
+    protected function RegisterPropertyString(string $name, string $default): void
+    {
+        $this->properties[$name] = $default;
+    }
+
     protected function ReadPropertyBoolean(string $name): bool
     {
-        return $this->properties[$name] ?? false;
+        return (bool) ($this->properties[$name] ?? false);
+    }
+
+    protected function ReadPropertyString(string $name): string
+    {
+        return (string) ($this->properties[$name] ?? '');
+    }
+
+    protected function RegisterAttributeString(string $name, string $default): void
+    {
+        $this->attributes[$name] = $default;
+    }
+
+    protected function ReadAttributeString(string $name): string
+    {
+        return $this->attributes[$name] ?? '';
+    }
+
+    protected function WriteAttributeString(string $name, string $value): void
+    {
+        $this->attributes[$name] = $value;
     }
 
     /** @param array<string,mixed> $presentation */
@@ -187,6 +221,11 @@ final class IPSViewHTMLPageHelperHarness
     protected function VariableExists(string $ident): bool
     {
         return array_key_exists($ident, $this->variables);
+    }
+
+    protected function UnregisterVariable(string $ident): void
+    {
+        unset($this->variables[$ident], $this->values[$ident]);
     }
 
     protected function SetValue(string $ident, mixed $value): void
@@ -288,9 +327,20 @@ try {
 
     $helper->registerPageProperties();
     assertSameValue(
-        ['EnableIPSView' => false],
+        [
+            'EnableIPSView'            => false,
+            'IPSViewHTMLDeleteRequest' => ''
+        ],
         $helper->properties(),
-        'The optional IPSView output property must default to false.'
+        'The optional IPSView output properties must use safe defaults.'
+    );
+    assertSameValue(
+        [
+            'IPSViewHTMLVariableRegistry' => '[]',
+            'IPSViewHTMLDeleteState'      => '{}'
+        ],
+        $helper->attributes(),
+        'The optional IPSView output attributes must use empty defaults.'
     );
     assertFalseValue($helper->enabled(), 'IPSView output must be disabled by default.');
 
@@ -306,6 +356,11 @@ try {
         str_contains((string) $englishFormItems[1]['caption'], 'additional String variables'),
         'The generic hint must explain that additional String variables are created.'
     );
+    assertTrueValue(
+        str_contains((string) $englishFormItems[1]['caption'], 'explicitly deletes them'),
+        'The generic hint must explain that disabling does not delete variables automatically.'
+    );
+    assertSameValue(2, count($englishFormItems), 'No deletion controls may be shown without retained variables.');
 
     $helper->setHelperLanguage('de_DE.UTF-8');
     $germanFormItems = $helper->pageFormItems();
@@ -317,6 +372,10 @@ try {
     assertTrueValue(
         str_contains((string) $germanFormItems[1]['caption'], 'String-Variablen'),
         'The German helper hint must describe the optional variables.'
+    );
+    assertTrueValue(
+        str_contains((string) $germanFormItems[1]['caption'], 'ausdrücklich löscht'),
+        'The German helper hint must describe explicit deletion.'
     );
     assertSameValue(
         'Modulspezifischer Hinweis',
@@ -350,6 +409,11 @@ try {
         'Disabled output must not create the optional variable.'
     );
     assertSameValue([], $helper->variables(), 'No IPSView variable may exist while the switch is disabled.');
+    assertSameValue(
+        '{"IPSViewExample":"IPSView example"}',
+        $helper->attributes()['IPSViewHTMLVariableRegistry'],
+        'Known optional variables must be registered for later deletion controls.'
+    );
 
     $helper->setProperty('EnableIPSView', true);
     assertTrueValue($helper->enabled(), 'The common switch must be readable through the helper.');
@@ -411,7 +475,77 @@ try {
     );
     $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
     $helper->maintainPageVariable('IPSViewPadded', 'IPSView padded', 110);
-    assertSameValue([], $helper->variables(), 'Disabling output must remove only the optional variables.');
+    assertSameValue(
+        ['IPSViewExample', 'IPSViewPadded'],
+        array_keys($helper->variables()),
+        'Disabling output must retain existing optional variables.'
+    );
+    assertSameValue(
+        '<p>Updated</p>',
+        $helper->values()['IPSViewExample'],
+        'Retained variables must keep their last HTML value.'
+    );
+    foreach ($helper->maintainCalls() as $maintainCall) {
+        assertTrueValue(
+            $maintainCall['maintain'],
+            'The helper must never pass false to MaintainVariable() when IPSView is disabled.'
+        );
+    }
+
+    $retainedFormItems = $helper->pageFormItems();
+    assertSameValue(4, count($retainedFormItems), 'Disabled retained variables must add a warning and delete action.');
+    assertSameValue('PopupButton', $retainedFormItems[3]['type'], 'Deletion must use a confirmation popup.');
+    assertSameValue(
+        'IPSView-Variablen löschen...',
+        $retainedFormItems[3]['caption'],
+        'The German delete action must be helper-owned.'
+    );
+    assertSameValue(
+        'Variablen behalten',
+        $retainedFormItems[3]['popup']['closeCaption'],
+        'Closing the confirmation must explicitly keep the variables.'
+    );
+    assertSameValue(
+        3,
+        count($retainedFormItems[3]['popup']['items']),
+        'The confirmation popup must list every retained variable.'
+    );
+    $deleteScript = implode("\n", $retainedFormItems[3]['popup']['buttons'][0]['onClick']);
+    assertTrueValue(
+        str_contains($deleteScript, "IPS_SetProperty(\$id, 'IPSViewHTMLDeleteRequest'"),
+        'The confirmation action must create a new one-shot deletion request.'
+    );
+    assertTrueValue(
+        str_contains($deleteScript, 'IPS_ApplyChanges($id);'),
+        'The confirmation action must apply the deletion request immediately.'
+    );
+
+    $helper->setProperty('IPSViewHTMLDeleteRequest', 'request-1');
+    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
+    $helper->maintainPageVariable('IPSViewPadded', 'IPSView padded', 110);
+    assertSameValue([], $helper->variables(), 'Confirmed deletion must remove every optional IPSView variable.');
+    assertSameValue(
+        '{"IPSViewExample":"request-1","IPSViewPadded":"request-1"}',
+        $helper->attributes()['IPSViewHTMLDeleteState'],
+        'Each variable must remember the deletion request it already processed.'
+    );
+    assertSameValue(2, count($helper->pageFormItems()), 'Deletion controls must disappear after removal.');
+
+    $helper->setProperty('EnableIPSView', true);
+    assertTrueValue(
+        $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100, '<p>Recreated</p>'),
+        'Re-enabling IPSView must recreate a previously deleted variable.'
+    );
+    $helper->setProperty('EnableIPSView', false);
+    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
+    assertTrueValue(
+        array_key_exists('IPSViewExample', $helper->variables()),
+        'A handled deletion request must never delete a recreated variable without new confirmation.'
+    );
+
+    $helper->setProperty('IPSViewHTMLDeleteRequest', 'request-2');
+    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
+    assertSameValue([], $helper->variables(), 'A new explicit request must delete recreated variables.');
 
     $invalidVariableIdentRejected = false;
     try {

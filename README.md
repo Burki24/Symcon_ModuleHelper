@@ -239,7 +239,7 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 `src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter.
 
-Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden.
+Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.
 
 Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard, OpenCalendar eine Kalenderansicht und OpenLMNB mehrere fachlich getrennte Seiten rendern, während Aktivierung, Variablenpflege, Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
 
@@ -356,17 +356,17 @@ Der statische Formular-Marker für `InsertIPSViewHTMLPageFormItems()` lautet:
 Configure optional IPSView HTML output.
 ```
 
-Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und `UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei einmal aufgebaut und anschließend getrennt mit `RenderVisualizationHTMLPage(false, ...)` für Symcon sowie `RenderVisualizationHTMLPage(true, ...)` für IPSView gerendert werden.
+Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und `UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei einmal aufgebaut und anschließend getrennt mit `RenderVisualizationHTMLPage(false, ...)` für Symcon sowie `RenderVisualizationHTMLPage(true, ...)` für IPSView gerendert werden. Beim Deaktivieren werden vorhandene IPSView-Variablen automatisch im Konfigurationsformular als beibehalten erkannt. Erst die dortige bestätigte Löschaktion entfernt sie über `UnregisterVariable()`; ein einfaches Deaktivieren oder ein Modulupdate löscht keine Variablen.
 
 ### Methoden
 
 | Methode | Aufgabe |
 | --- | --- |
-| `RegisterIPSViewHTMLPageProperties()` | Registriert die gemeinsame, standardmäßig deaktivierte Eigenschaft `EnableIPSView`. |
-| `IPSViewHTMLPageFormItems()` | Liefert die zentral übersetzte Checkbox und den Hinweis zur optionalen IPSView-Ausgabe. |
+| `RegisterIPSViewHTMLPageProperties()` | Registriert `EnableIPSView` sowie die internen Eigenschaften und Attribute für sichere, bestätigte Löschaufträge. |
+| `IPSViewHTMLPageFormItems()` | Liefert die zentral übersetzte Checkbox, Hinweise und bei beibehaltenen Variablen den Bestätigungsdialog zur Löschung. |
 | `InsertIPSViewHTMLPageFormItems()` | Ersetzt einen verschachtelten Formular-Marker durch die gemeinsamen IPSView-Ausgabeeinstellungen. |
 | `IsIPSViewHTMLPageEnabled()` | Liefert den aktuellen Zustand der gemeinsamen IPSView-Aktivierung. |
-| `MaintainIPSViewHTMLVariable()` | Legt eine optionale Stringvariable mit WebContent-Darstellung an oder entfernt sie beim Deaktivieren. |
+| `MaintainIPSViewHTMLVariable()` | Legt eine optionale Stringvariable mit WebContent-Darstellung an, behält sie beim Deaktivieren und löscht sie nur nach ausdrücklicher Bestätigung. |
 | `UpdateIPSViewHTMLVariable()` | Aktualisiert eine vorhandene optionale IPSView-Variable nur bei aktivierter Ausgabe. |
 | `RenderVisualizationHTMLPage()` | Lädt Template, CSS und JavaScript, erzeugt den gemeinsamen Bootstrap und rendert das vollständige HTML-Dokument. |
 | `EncodeVisualizationHTMLJSON()` | Kodiert JSON mit zentralen Schutzflags für die sichere Einbettung in ein `script`-Element. |
