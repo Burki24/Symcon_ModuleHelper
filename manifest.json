@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.0.0",
+  "repository_version": "3.2.0",
   "helpers": {
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
@@ -35,8 +35,19 @@
     },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
-      "version": "1.0.0",
-      "sha256": "5cbe377be2277d40f20599d6b52dc4e0d631c03b54d3b8e14da5c9c6f48d9325"
+      "version": "1.1.0",
+      "sha256": "4142fbce1890051b31a8b6a728ebd512721dc3433cd50a6bc0e871a8619bf4f9",
+      "dependencies": [
+        "HelperTranslationHelper",
+        "VisualizationAssetHelper"
+      ],
+      "assets": [
+        {
+          "file": "src/translations/IPSViewHTMLPageHelper.json",
+          "target": "translations/IPSViewHTMLPageHelper.json",
+          "sha256": "dcaa876a0aa1c29a3d8d90e06a526b3fdcfcd921b21d8d0c9c5258212dcf62db"
+        }
+      ]
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",

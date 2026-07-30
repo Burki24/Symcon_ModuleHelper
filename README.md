@@ -239,7 +239,9 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 `src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter.
 
-Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard und OpenCalendar eine Kalenderansicht rendern, während Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
+Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden.
+
+Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard, OpenCalendar eine Kalenderansicht und OpenLMNB mehrere fachlich getrennte Seiten rendern, während Aktivierung, Variablenpflege, Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
 
 Der gemeinsame Bootstrap steht im Template als `window.SYMC_VISUALIZATION` bereit und enthält immer:
 
@@ -300,6 +302,37 @@ class ExampleModule extends IPSModuleStrict
     use VisualizationAssetHelper;
     use IPSViewHTMLPageHelper;
 
+    public function Create(): void
+    {
+        parent::Create();
+
+        $this->RegisterIPSViewHTMLPageProperties();
+    }
+
+    public function ApplyChanges(): void
+    {
+        parent::ApplyChanges();
+
+        $this->MaintainIPSViewHTMLVariable(
+            'IPSViewExample',
+            $this->Translate('IPSView example'),
+            500,
+            '<p>Die IPSView-Seite wird vorbereitet.</p>'
+        );
+
+        if ($this->IsIPSViewHTMLPageEnabled()) {
+            $this->UpdateIPSViewHTMLVariable('IPSViewExample', $this->RenderPage(true));
+        }
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $this->InsertIPSViewHTMLPageFormItems($form['elements']);
+
+        return json_encode($form, JSON_THROW_ON_ERROR);
+    }
+
     private function RenderPage(bool $ipsView): string
     {
         return $this->RenderVisualizationHTMLPage($ipsView, [
@@ -317,16 +350,30 @@ class ExampleModule extends IPSModuleStrict
 }
 ```
 
+Der statische Formular-Marker für `InsertIPSViewHTMLPageFormItems()` lautet:
+
+```text
+Configure optional IPSView HTML output.
+```
+
+Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und `UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei einmal aufgebaut und anschließend getrennt mit `RenderVisualizationHTMLPage(false, ...)` für Symcon sowie `RenderVisualizationHTMLPage(true, ...)` für IPSView gerendert werden.
+
 ### Methoden
 
 | Methode | Aufgabe |
 | --- | --- |
+| `RegisterIPSViewHTMLPageProperties()` | Registriert die gemeinsame, standardmäßig deaktivierte Eigenschaft `EnableIPSView`. |
+| `IPSViewHTMLPageFormItems()` | Liefert die zentral übersetzte Checkbox und den Hinweis zur optionalen IPSView-Ausgabe. |
+| `InsertIPSViewHTMLPageFormItems()` | Ersetzt einen verschachtelten Formular-Marker durch die gemeinsamen IPSView-Ausgabeeinstellungen. |
+| `IsIPSViewHTMLPageEnabled()` | Liefert den aktuellen Zustand der gemeinsamen IPSView-Aktivierung. |
+| `MaintainIPSViewHTMLVariable()` | Legt eine optionale Stringvariable mit WebContent-Darstellung an oder entfernt sie beim Deaktivieren. |
+| `UpdateIPSViewHTMLVariable()` | Aktualisiert eine vorhandene optionale IPSView-Variable nur bei aktivierter Ausgabe. |
 | `RenderVisualizationHTMLPage()` | Lädt Template, CSS und JavaScript, erzeugt den gemeinsamen Bootstrap und rendert das vollständige HTML-Dokument. |
 | `EncodeVisualizationHTMLJSON()` | Kodiert JSON mit zentralen Schutzflags für die sichere Einbettung in ein `script`-Element. |
 | `IPSViewTranslationsFromLocale()` | Liest alle Quelltexte aus der `locale.json` des konkreten Moduls und übersetzt sie mit der aktiven Symcon-Sprache. |
 | `IPSViewTranslationsFor()` | Übersetzt einen explizit übergebenen Satz von Quelltexten. |
 
-Der Helper setzt den `VisualizationAssetHelper` voraus. `VisualizationThemeHelper` und `IPSViewStyleHelper` bleiben eigenständige Bausteine; deren CSS wird dem Seiten-Helper lediglich übergeben.
+Der Helper bezieht `HelperTranslationHelper` und `VisualizationAssetHelper` als zentrale Abhängigkeiten. Die helper-eigenen Formulartexte werden aus `translations/IPSViewHTMLPageHelper.json` geladen; Consumer benötigen dafür keine zusätzlichen `locale.json`-Einträge. `VisualizationThemeHelper` und `IPSViewStyleHelper` bleiben eigenständige Bausteine; deren CSS wird dem Seiten-Helper lediglich übergeben.
 
 ## VisualizationThemeHelper
 
@@ -762,8 +809,10 @@ libs/
     ├── HelperTranslationHelper.php
     ├── HttpResponseHelper.php
     ├── IPSViewColorPaletteHelper.php
+    ├── IPSViewHTMLPageHelper.php
     ├── IPSViewStyleHelper.php
     ├── translations/
+    │   ├── IPSViewHTMLPageHelper.json
     │   └── IPSViewStyleHelper.json
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php

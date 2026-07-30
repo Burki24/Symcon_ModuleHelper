@@ -5,6 +5,14 @@ declare(strict_types=1);
 use Burki24\SymconModuleHelper\IPSViewHTMLPageHelper;
 
 require_once __DIR__ . '/bootstrap.php';
+
+if (!defined('VARIABLETYPE_STRING')) {
+    define('VARIABLETYPE_STRING', 3);
+}
+if (!defined('VARIABLE_PRESENTATION_WEB_CONTENT')) {
+    define('VARIABLE_PRESENTATION_WEB_CONTENT', '{9DE1D610-5106-97FB-714D-1AADEDF8377A}');
+}
+
 require_once __DIR__ . '/../src/IPSViewHTMLPageHelper.php';
 
 final class IPSViewHTMLPageHelperHarness
@@ -13,6 +21,94 @@ final class IPSViewHTMLPageHelperHarness
 
     /** @var list<array{message:string,data:mixed,format:int}> */
     private array $debugMessages = [];
+
+    /** @var array<string,bool> */
+    private array $properties = [];
+
+    /** @var array<string,array{caption:string,type:int,presentation:array<string,mixed>,position:int}> */
+    private array $variables = [];
+
+    /** @var array<string,string> */
+    private array $values = [];
+
+    /** @var list<array{ident:string,caption:string,type:int,presentation:array<string,mixed>,position:int,maintain:bool}> */
+    private array $maintainCalls = [];
+
+    private string $helperLanguage = 'en';
+
+    public function registerPageProperties(): void
+    {
+        $this->RegisterIPSViewHTMLPageProperties();
+    }
+
+    /** @return array<int,array<string,mixed>> */
+    public function pageFormItems(string $description = ''): array
+    {
+        return $this->IPSViewHTMLPageFormItems($description);
+    }
+
+    /** @param array<int,array<string,mixed>> $elements */
+    public function insertPageFormItems(
+        array &$elements,
+        string $markerCaption = 'Configure optional IPSView HTML output.',
+        string $description = ''
+    ): bool {
+        return $this->InsertIPSViewHTMLPageFormItems($elements, $markerCaption, $description);
+    }
+
+    public function enabled(): bool
+    {
+        return $this->IsIPSViewHTMLPageEnabled();
+    }
+
+    public function maintainPageVariable(
+        string $ident,
+        string $caption,
+        int $position,
+        string $initialHtml = '',
+        ?bool $padding = null
+    ): bool {
+        return $this->MaintainIPSViewHTMLVariable($ident, $caption, $position, $initialHtml, $padding);
+    }
+
+    public function updatePageVariable(string $ident, string $html): bool
+    {
+        return $this->UpdateIPSViewHTMLVariable($ident, $html);
+    }
+
+    public function setProperty(string $name, bool $value): void
+    {
+        $this->properties[$name] = $value;
+    }
+
+    public function setHelperLanguage(string $language): void
+    {
+        $this->helperLanguage = $language;
+    }
+
+    /** @return array<string,bool> */
+    public function properties(): array
+    {
+        return $this->properties;
+    }
+
+    /** @return array<string,array{caption:string,type:int,presentation:array<string,mixed>,position:int}> */
+    public function variables(): array
+    {
+        return $this->variables;
+    }
+
+    /** @return array<string,string> */
+    public function values(): array
+    {
+        return $this->values;
+    }
+
+    /** @return list<array{ident:string,caption:string,type:int,presentation:array<string,mixed>,position:int,maintain:bool}> */
+    public function maintainCalls(): array
+    {
+        return $this->maintainCalls;
+    }
 
     /** @param array<string,mixed> $configuration */
     public function render(bool $ipsView, array $configuration = []): string
@@ -41,6 +137,73 @@ final class IPSViewHTMLPageHelperHarness
     public function debugMessages(): array
     {
         return $this->debugMessages;
+    }
+
+    protected function RegisterPropertyBoolean(string $name, bool $default): void
+    {
+        $this->properties[$name] = $default;
+    }
+
+    protected function ReadPropertyBoolean(string $name): bool
+    {
+        return $this->properties[$name] ?? false;
+    }
+
+    /** @param array<string,mixed> $presentation */
+    protected function MaintainVariable(
+        string $ident,
+        string $caption,
+        int $type,
+        array $presentation,
+        int $position,
+        bool $maintain
+    ): bool {
+        $this->maintainCalls[] = [
+            'ident'        => $ident,
+            'caption'      => $caption,
+            'type'         => $type,
+            'presentation' => $presentation,
+            'position'     => $position,
+            'maintain'     => $maintain
+        ];
+
+        if (!$maintain) {
+            unset($this->variables[$ident], $this->values[$ident]);
+
+            return false;
+        }
+
+        $created = !array_key_exists($ident, $this->variables);
+        $this->variables[$ident] = [
+            'caption'      => $caption,
+            'type'         => $type,
+            'presentation' => $presentation,
+            'position'     => $position
+        ];
+
+        return $created;
+    }
+
+    protected function VariableExists(string $ident): bool
+    {
+        return array_key_exists($ident, $this->variables);
+    }
+
+    protected function SetValue(string $ident, mixed $value): void
+    {
+        if (!array_key_exists($ident, $this->variables)) {
+            throw new RuntimeException('Unknown variable: ' . $ident);
+        }
+        if (!is_string($value)) {
+            throw new RuntimeException('The test harness expects String values.');
+        }
+
+        $this->values[$ident] = $value;
+    }
+
+    protected function HelperTranslationLanguageOverride(): string
+    {
+        return $this->helperLanguage;
     }
 
     protected function VisualizationAsset(string $filename): string
@@ -122,6 +285,151 @@ file_put_contents(
 
 try {
     $helper = new IPSViewHTMLPageHelperHarness();
+
+    $helper->registerPageProperties();
+    assertSameValue(
+        ['EnableIPSView' => false],
+        $helper->properties(),
+        'The optional IPSView output property must default to false.'
+    );
+    assertFalseValue($helper->enabled(), 'IPSView output must be disabled by default.');
+
+    $englishFormItems = $helper->pageFormItems();
+    assertSameValue('CheckBox', $englishFormItems[0]['type'], 'The first form item must be a checkbox.');
+    assertSameValue('EnableIPSView', $englishFormItems[0]['name'], 'The checkbox must use the shared property.');
+    assertSameValue(
+        'Provide IPSView HTML output',
+        $englishFormItems[0]['caption'],
+        'The English helper-owned checkbox caption must be available.'
+    );
+    assertTrueValue(
+        str_contains((string) $englishFormItems[1]['caption'], 'additional String variables'),
+        'The generic hint must explain that additional String variables are created.'
+    );
+
+    $helper->setHelperLanguage('de_DE.UTF-8');
+    $germanFormItems = $helper->pageFormItems();
+    assertSameValue(
+        'IPSView-HTML-Ausgabe bereitstellen',
+        $germanFormItems[0]['caption'],
+        'The helper must provide its German checkbox caption without consumer locale entries.'
+    );
+    assertTrueValue(
+        str_contains((string) $germanFormItems[1]['caption'], 'String-Variablen'),
+        'The German helper hint must describe the optional variables.'
+    );
+    assertSameValue(
+        'Modulspezifischer Hinweis',
+        $helper->pageFormItems(' Modulspezifischer Hinweis ')[1]['caption'],
+        'Consumers must be able to replace the generic description.'
+    );
+
+    $form = [
+        [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'IPSView',
+            'items'   => [
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Configure optional IPSView HTML output.'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'After marker'
+                ]
+            ]
+        ]
+    ];
+    assertTrueValue($helper->insertPageFormItems($form), 'Nested IPSView form markers must be replaced.');
+    assertSameValue('CheckBox', $form[0]['items'][0]['type'], 'The marker must be replaced by the checkbox.');
+    assertSameValue('Label', $form[0]['items'][1]['type'], 'The helper hint must follow the checkbox.');
+    assertSameValue('After marker', $form[0]['items'][2]['caption'], 'Following form items must be retained.');
+
+    assertFalseValue(
+        $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100, '<p>Initial</p>'),
+        'Disabled output must not create the optional variable.'
+    );
+    assertSameValue([], $helper->variables(), 'No IPSView variable may exist while the switch is disabled.');
+
+    $helper->setProperty('EnableIPSView', true);
+    assertTrueValue($helper->enabled(), 'The common switch must be readable through the helper.');
+    assertTrueValue(
+        $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100, '<p>Initial</p>'),
+        'Enabled output must create the optional variable.'
+    );
+    assertSameValue(
+        [
+            'PRESENTATION' => VARIABLE_PRESENTATION_WEB_CONTENT,
+            'HTML_TYPE'    => 0
+        ],
+        $helper->variables()['IPSViewExample']['presentation'],
+        'The optional variable must use the WebContent presentation in HTML mode.'
+    );
+    assertSameValue(
+        VARIABLETYPE_STRING,
+        $helper->variables()['IPSViewExample']['type'],
+        'The optional IPSView output must be stored in a String variable.'
+    );
+    assertSameValue(
+        '<p>Initial</p>',
+        $helper->values()['IPSViewExample'],
+        'New optional variables must receive their initial HTML.'
+    );
+    assertFalseValue(
+        $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100, '<p>Overwrite</p>'),
+        'Maintaining an existing optional variable must not report a new creation.'
+    );
+    assertSameValue(
+        '<p>Initial</p>',
+        $helper->values()['IPSViewExample'],
+        'Existing values must not be overwritten by the initial HTML.'
+    );
+    assertTrueValue(
+        $helper->updatePageVariable('IPSViewExample', '<p>Updated</p>'),
+        'Enabled existing IPSView variables must be updateable centrally.'
+    );
+    assertSameValue('<p>Updated</p>', $helper->values()['IPSViewExample'], 'The updated HTML must be stored.');
+    assertFalseValue(
+        $helper->updatePageVariable('MissingIPSViewVariable', '<p>Missing</p>'),
+        'Missing IPSView variables must be ignored.'
+    );
+
+    assertTrueValue(
+        $helper->maintainPageVariable('IPSViewPadded', 'IPSView padded', 110, '', false),
+        'A second IPSView variable must be maintainable.'
+    );
+    assertSameValue(
+        false,
+        $helper->variables()['IPSViewPadded']['presentation']['PADDING'],
+        'Consumers must be able to set the WebContent padding explicitly.'
+    );
+
+    $helper->setProperty('EnableIPSView', false);
+    assertFalseValue(
+        $helper->updatePageVariable('IPSViewExample', '<p>Disabled</p>'),
+        'Disabled output must not update optional variables.'
+    );
+    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
+    $helper->maintainPageVariable('IPSViewPadded', 'IPSView padded', 110);
+    assertSameValue([], $helper->variables(), 'Disabling output must remove only the optional variables.');
+
+    $invalidVariableIdentRejected = false;
+    try {
+        $helper->maintainPageVariable('Invalid ident', 'Invalid', 1);
+    } catch (InvalidArgumentException) {
+        $invalidVariableIdentRejected = true;
+    }
+    assertTrueValue($invalidVariableIdentRejected, 'Invalid IPSView variable idents must be rejected.');
+
+    $emptyMarkerRejected = false;
+    try {
+        $helper->insertPageFormItems($form, '');
+    } catch (InvalidArgumentException) {
+        $emptyMarkerRejected = true;
+    }
+    assertTrueValue($emptyMarkerRejected, 'Empty IPSView form markers must be rejected.');
+
+    $helper->setHelperLanguage('en');
 
     $nativeHtml = $helper->render(false, [
         'language'           => 'de-DE',

@@ -16,30 +16,57 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-files, entries = MODULE.bundle_files(
+
+style_files, style_entries = MODULE.bundle_files(
     manifest,
     "IPSViewStyleHelper",
     "libs/helper/IPSViewStyleHelper.php",
 )
 
-if set(entries) != {"IPSViewStyleHelper"}:
-    raise SystemExit(f"Unexpected top-level consumer manifest entries: {sorted(entries)}")
+if set(style_entries) != {"IPSViewStyleHelper"}:
+    raise SystemExit(f"Unexpected top-level style manifest entries: {sorted(style_entries)}")
 
-style_entry = entries["IPSViewStyleHelper"]
-dependencies = style_entry.get("dependencies", [])
-if [entry.get("name") for entry in dependencies] != ["HelperTranslationHelper"]:
-    raise SystemExit(f"Unexpected bundled dependencies: {dependencies}")
+style_entry = style_entries["IPSViewStyleHelper"]
+style_dependencies = style_entry.get("dependencies", [])
+if [entry.get("name") for entry in style_dependencies] != ["HelperTranslationHelper"]:
+    raise SystemExit(f"Unexpected style dependencies: {style_dependencies}")
 
-expected_files = {
+expected_style_files = {
     "libs/helper/IPSViewStyleHelper.php",
     "libs/helper/HelperTranslationHelper.php",
     "libs/helper/translations/IPSViewStyleHelper.json",
 }
-if not expected_files.issubset(files):
-    raise SystemExit(f"Missing bundle files: {sorted(expected_files - set(files))}")
+if not expected_style_files.issubset(style_files):
+    raise SystemExit(f"Missing style bundle files: {sorted(expected_style_files - set(style_files))}")
 
-subscriptions = {"IPSViewStyleHelper"}
-if subscriptions != set(entries):
-    raise SystemExit("Consumer subscription and top-level manifest entries must remain identical.")
+page_files, page_entries = MODULE.bundle_files(
+    manifest,
+    "IPSViewHTMLPageHelper",
+    "libs/helper/IPSViewHTMLPageHelper.php",
+)
 
-print("Helper dependency bundle manifest verified.")
+if set(page_entries) != {"IPSViewHTMLPageHelper"}:
+    raise SystemExit(f"Unexpected top-level page manifest entries: {sorted(page_entries)}")
+
+page_entry = page_entries["IPSViewHTMLPageHelper"]
+page_dependencies = page_entry.get("dependencies", [])
+if [entry.get("name") for entry in page_dependencies] != [
+    "HelperTranslationHelper",
+    "VisualizationAssetHelper",
+]:
+    raise SystemExit(f"Unexpected page dependencies: {page_dependencies}")
+
+expected_page_files = {
+    "libs/helper/IPSViewHTMLPageHelper.php",
+    "libs/helper/HelperTranslationHelper.php",
+    "libs/helper/VisualizationAssetHelper.php",
+    "libs/helper/translations/IPSViewHTMLPageHelper.json",
+}
+if not expected_page_files.issubset(page_files):
+    raise SystemExit(f"Missing page bundle files: {sorted(expected_page_files - set(page_files))}")
+
+subscriptions = {"IPSViewStyleHelper", "IPSViewHTMLPageHelper"}
+if subscriptions != set(style_entries) | set(page_entries):
+    raise SystemExit("Consumer subscriptions and top-level manifest entries must remain identical.")
+
+print("Helper dependency bundle manifests verified.")

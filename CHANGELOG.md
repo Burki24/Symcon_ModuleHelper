@@ -2,6 +2,16 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.2.0 - 2026-07-30
+
+### Added
+
+- `IPSViewHTMLPageHelper` Version 1.1.0 registriert die gemeinsame, standardmäßig deaktivierte Eigenschaft `EnableIPSView`.
+- Zentral übersetzte Formularelemente ermöglichen die optionale Bereitstellung eigenständiger IPSView-HTML-Ausgaben ohne zusätzliche Consumer-Übersetzungen.
+- Zusätzliche IPSView-Seiten werden zentral als String-Variablen mit nativer WebContent-Darstellung angelegt, initialisiert, aktualisiert und beim Deaktivieren wieder entfernt.
+- Native Symcon-Kacheln und deren HTML-Ausgaben bleiben dabei ausdrücklich getrennt von den optionalen IPSView-Variablen.
+- Der Helper-Sync verteilt die benötigten Abhängigkeiten und den neuen Übersetzungskatalog automatisch mit.
+
 ## 3.1.0 - 2026-07-30
 
 ### Changed
