@@ -2,6 +2,14 @@
 
 Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
+## 3.3.1 - 2026-07-30
+
+### Fixed
+
+- `IPSViewHTMLPageHelper` auf Version 1.2.1 angehoben.
+- Die Existenzprüfung optionaler IPSView-Variablen unterdrückt nun die von Symcon vorgesehene Warnung, wenn ein Ident noch nicht vorhanden ist. Dadurch lässt sich das Konfigurationsformular auch bei deaktivierter IPSView-Ausgabe und noch nicht angelegter Variable fehlerfrei laden.
+- Regressionstest für den Fallback über `GetIDForIdent()` ergänzt.
+
 ## 3.3.0 - 2026-07-30
 
 ### Changed

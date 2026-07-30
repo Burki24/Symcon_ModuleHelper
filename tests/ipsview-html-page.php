@@ -273,6 +273,41 @@ final class IPSViewHTMLPageHelperHarness
     }
 }
 
+final class IPSViewHTMLPageMissingVariableFallbackHarness
+{
+    use IPSViewHTMLPageHelper;
+
+    /** @return array<int,array<string,mixed>> */
+    public function pageFormItems(): array
+    {
+        return $this->IPSViewHTMLPageFormItems();
+    }
+
+    protected function ReadPropertyBoolean(string $name): bool
+    {
+        return false;
+    }
+
+    protected function ReadAttributeString(string $name): string
+    {
+        return $name === 'IPSViewHTMLVariableRegistry'
+            ? '{"IPSViewAlarm":"IPSView alarm"}'
+            : '{}';
+    }
+
+    protected function GetIDForIdent(string $ident): int
+    {
+        trigger_error('Object with ident ' . $ident . ' was not found.', E_USER_WARNING);
+
+        return 0;
+    }
+
+    protected function HelperTranslationLanguageOverride(): string
+    {
+        return 'en';
+    }
+}
+
 $visualizationDirectory = __DIR__ . '/visualization';
 $templatePath = $visualizationDirectory . '/index.html';
 $stylePath = $visualizationDirectory . '/style.css';
@@ -323,6 +358,33 @@ file_put_contents(
 );
 
 try {
+    $fallbackHelper = new IPSViewHTMLPageMissingVariableFallbackHarness();
+    $unsuppressedMissingVariableWarnings = 0;
+    set_error_handler(
+        static function (int $severity) use (&$unsuppressedMissingVariableWarnings): bool {
+            if ((error_reporting() & $severity) !== 0) {
+                $unsuppressedMissingVariableWarnings++;
+            }
+
+            return true;
+        }
+    );
+    try {
+        $fallbackFormItems = $fallbackHelper->pageFormItems();
+    } finally {
+        restore_error_handler();
+    }
+    assertSameValue(
+        0,
+        $unsuppressedMissingVariableWarnings,
+        'A missing optional IPSView variable must not emit a warning while loading the configuration form.'
+    );
+    assertSameValue(
+        2,
+        count($fallbackFormItems),
+        'A missing optional IPSView variable must not create retained-variable deletion controls.'
+    );
+
     $helper = new IPSViewHTMLPageHelperHarness();
 
     $helper->registerPageProperties();
