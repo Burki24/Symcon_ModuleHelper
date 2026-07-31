@@ -361,7 +361,8 @@ try {
     $fallbackHelper = new IPSViewHTMLPageMissingVariableFallbackHarness();
     $unsuppressedMissingVariableWarnings = 0;
     set_error_handler(
-        static function (int $severity) use (&$unsuppressedMissingVariableWarnings): bool {
+        static function (int $severity) use (&$unsuppressedMissingVariableWarnings): bool
+        {
             if ((error_reporting() & $severity) !== 0) {
                 $unsuppressedMissingVariableWarnings++;
             }

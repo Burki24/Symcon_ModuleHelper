@@ -9,6 +9,11 @@
 - Helper-Versionen, `@version`-Marker und SHA-256-Prüfsummen werden nach Änderungen automatisch synchronisiert.
 - Tests und Consumer-Sync arbeiten bereits vor dem Metadaten-Commit mit dem generierten konsistenten Manifeststand.
 
+### Fixed
+
+- StylePHP-konforme Klammerposition der anonymen Fehlerbehandlungsfunktion im `IPSViewHTMLPageHelper`-Test.
+- Die Metadaten-Versionierung benötigt keine Installation der Helper-Sync-App im Helper-Repository mehr; der Metadaten-Commit nutzt `GITHUB_TOKEN` und startet den Consumer-Sync anschließend explizit per `workflow_dispatch`.
+
 ## 3.4.1 - 2026-07-30
 
 ### Fixed

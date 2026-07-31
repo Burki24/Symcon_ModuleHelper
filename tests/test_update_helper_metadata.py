@@ -140,12 +140,24 @@ def test_metadata_commit_preserves_source_build_and_date() -> None:
         assert_equal(manifest["helpers"]["ExampleHelper"]["version"], "1.0.1", "Metadata helper version")
 
 
+def test_metadata_workflow_uses_repository_token_and_dispatches_sync() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "update-helper-metadata.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "actions/create-github-app-token" not in workflow
+    assert "actions: write" in workflow
+    assert "gh workflow run helper-sync.yml" in workflow
+    assert '--ref "${GITHUB_REF_NAME}"' in workflow
+    assert "-f helper=all" in workflow
+
+
 def main() -> None:
     test_semver()
     test_commit_classification()
     test_helper_and_repository_update()
     test_non_helper_change_keeps_helper_version()
     test_metadata_commit_preserves_source_build_and_date()
+    test_metadata_workflow_uses_repository_token_and_dispatches_sync()
     print("Automatic helper metadata tests passed.")
 
 

@@ -85,6 +85,9 @@ Vor der Verteilung validiert die CI, dass alle Pflichtsprachen und Platzhalter v
 Nach jedem fachlichen Push auf `main` aktualisiert der Workflow
 `update-helper-metadata.yml` zunächst Repository-Version, Build, Datum,
 betroffene Helper-Versionen und SHA-256-Prüfsummen. Erst der anschließend
-erzeugte Commit `CHORE: Update helper metadata ...` startet den
-Consumer-Sync. Dadurch erhalten automatische Helper-PRs immer einen
-konsistenten, bereits versionierten Manifeststand.
+erzeugte Commit `CHORE: Update helper metadata ...` wird mit dem
+repository-eigenen `GITHUB_TOKEN` geschrieben. Anschließend startet der
+Workflow den Consumer-Sync ausdrücklich per `workflow_dispatch`. Die
+Helper-Sync-App wird dadurch nur noch für die Consumer-Repositories benötigt.
+Automatische Helper-PRs erhalten immer einen konsistenten, bereits
+versionierten Manifeststand.

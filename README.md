@@ -20,8 +20,9 @@ aktualisiert anschließend:
 
 `FEAT:` erhöht die Minor-Version, `BREAKING:` beziehungsweise ein `!` im
 Commit-Typ die Major-Version; alle übrigen fachlichen Änderungen erhöhen die
-Patch-Version. Reine Metadaten-Commits werden ignoriert. Der erzeugte Commit
-stößt danach den bestehenden Helper-Sync zu den Consumer-Repositories an.
+Patch-Version. Reine Metadaten-Commits werden ignoriert. Der Metadaten-Commit wird mit dem
+repository-eigenen `GITHUB_TOKEN` geschrieben; anschließend startet der
+Workflow den bestehenden Helper-Sync ausdrücklich per `workflow_dispatch`.
 
 ## ConfigurationFormHelper
 
