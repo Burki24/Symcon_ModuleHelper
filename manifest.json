@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.4.1",
+  "repository_version": "3.4.2",
   "helpers": {
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
@@ -15,8 +15,8 @@
     },
     "DateHelper": {
       "file": "src/DateHelper.php",
-      "version": "1.0.0",
-      "sha256": "feee6f0260ac33bb87027ecb461e23007edfdc22aeff9c44369ca03e76f80fae"
+      "version": "1.0.1",
+      "sha256": "eb3ad3e82a61cab9d9d1dcd23a5943d078a674fa07013eb7902664a880ddcc7a"
     },
     "HelperTranslationHelper": {
       "file": "src/HelperTranslationHelper.php",
@@ -99,5 +99,7 @@
       "version": "1.0.0",
       "sha256": "81ca4cdeac42ac97cecdb73305e9f68597a6037b1d50b843df11900c96c48dbf"
     }
-  }
+  },
+  "repository_build": 246298684,
+  "repository_date": 1785477593
 }

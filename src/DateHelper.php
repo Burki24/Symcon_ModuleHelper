@@ -11,7 +11,7 @@ namespace Burki24\SymconModuleHelper;
  * helper formats parseable date strings and preserves the original text when
  * PHP cannot interpret the supplied date.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait DateHelper
 {
