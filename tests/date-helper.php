@@ -33,6 +33,11 @@ assertSameValue(
     $date->formatDateValue('not-a-date'),
     'Unparseable date text must be preserved unchanged.'
 );
+assertSameValue(
+    'Europe/Not_A_Timezone',
+    $date->formatDateValue('Europe/Not_A_Timezone'),
+    'Malformed timezone-like text must be preserved without throwing.'
+);
 assertSameValue('', $date->formatDateValue(''), 'An empty date string must return an empty string.');
 assertSameValue('', $date->formatDateValue(null), 'A non-string date value must return an empty string.');
 

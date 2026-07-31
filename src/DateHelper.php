@@ -32,10 +32,11 @@ trait DateHelper
             return '';
         }
 
-        try {
-            return (new \DateTimeImmutable($value))->format($format);
-        } catch (\Exception) {
+        $date = date_create_immutable($value);
+        if ($date === false) {
             return $value;
         }
+
+        return $date->format($format);
     }
 }

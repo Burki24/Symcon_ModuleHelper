@@ -11,6 +11,7 @@
 
 ### Fixed
 
+- `DateHelper` verwendet für externe Datumsstrings nun den nicht werfenden Parser `date_create_immutable()`. Ungültige Werte bleiben dadurch auch unter PHP 8.5 und aktivierter Debug-Erweiterung zuverlässig unverändert erhalten.
 - StylePHP-konforme Klammerposition der anonymen Fehlerbehandlungsfunktion im `IPSViewHTMLPageHelper`-Test.
 - Die Metadaten-Versionierung benötigt keine Installation der Helper-Sync-App im Helper-Repository mehr; der Metadaten-Commit nutzt `GITHUB_TOKEN` und startet den Consumer-Sync anschließend explizit per `workflow_dispatch`.
 
