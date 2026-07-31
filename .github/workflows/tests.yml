@@ -14,12 +14,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           coverage: none
+
+      - name: Prepare generated helper metadata
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          source_sha=$(git rev-parse HEAD)
+          if [[ "$EVENT_NAME" == "pull_request" && -n "$PR_BASE_SHA" ]]; then
+            base_ref="$PR_BASE_SHA"
+          elif [[ -n "$PUSH_BEFORE_SHA" && ! "$PUSH_BEFORE_SHA" =~ ^0+$ ]] && git cat-file -e "${PUSH_BEFORE_SHA}^{commit}" 2>/dev/null; then
+            base_ref="$PUSH_BEFORE_SHA"
+          else
+            base_ref=$(git rev-parse "${source_sha}^")
+          fi
+          commit_date=$(git show -s --format=%ct "$source_sha")
+
+          python3 .github/scripts/update_helper_metadata.py \
+            --root . \
+            --base-ref "$base_ref" \
+            --sha "$source_sha" \
+            --date "$commit_date"
 
       - name: Validate JSON configuration
         run: |
@@ -30,7 +58,10 @@ jobs:
         run: python3 .github/scripts/update_helper_translations.py
 
       - name: Python syntax
-        run: python3 -m py_compile .github/scripts/*.py tests/helper_sync_bundle.py
+        run: python3 -m py_compile .github/scripts/*.py tests/*.py
+
+      - name: Test metadata updater
+        run: python3 tests/test_update_helper_metadata.py
 
       - name: Validate helper dependency bundles
         run: python3 tests/helper_sync_bundle.py

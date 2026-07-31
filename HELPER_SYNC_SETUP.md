@@ -78,3 +78,13 @@ Neue sichtbare Helper-Texte werden in einer `_TRANSLATION_SOURCES`-Konstanten al
 5. nach dem Merge der normale Helper-Sync für die betroffenen Consumer ausgelöst.
 
 Vor der Verteilung validiert die CI, dass alle Pflichtsprachen und Platzhalter vollständig und synchron sind.
+
+
+## Automatische Metadaten-Versionierung
+
+Nach jedem fachlichen Push auf `main` aktualisiert der Workflow
+`update-helper-metadata.yml` zunächst Repository-Version, Build, Datum,
+betroffene Helper-Versionen und SHA-256-Prüfsummen. Erst der anschließend
+erzeugte Commit `CHORE: Update helper metadata ...` startet den
+Consumer-Sync. Dadurch erhalten automatische Helper-PRs immer einen
+konsistenten, bereits versionierten Manifeststand.

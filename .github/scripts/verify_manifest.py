@@ -12,6 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "manifest.json"
 VERSION_PATTERN = re.compile(r"@version\s+([0-9]+\.[0-9]+\.[0-9]+)")
+SEMVER_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 
 
 def digest(path: Path) -> str:
@@ -71,6 +72,18 @@ def main() -> None:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     if manifest.get("schema") not in (1, 2):
         raise SystemExit("Unsupported helper manifest schema.")
+
+    repository_version = manifest.get("repository_version")
+    if not isinstance(repository_version, str) or SEMVER_PATTERN.fullmatch(repository_version) is None:
+        raise SystemExit("repository_version must use the format major.minor.patch.")
+
+    repository_build = manifest.get("repository_build")
+    if repository_build is not None and (not isinstance(repository_build, int) or repository_build < 0):
+        raise SystemExit("repository_build must be a non-negative integer.")
+
+    repository_date = manifest.get("repository_date")
+    if repository_date is not None and (not isinstance(repository_date, int) or repository_date < 0):
+        raise SystemExit("repository_date must be a non-negative Unix timestamp.")
     helpers = manifest.get("helpers", {})
     if not isinstance(helpers, dict) or not helpers:
         raise SystemExit("manifest.json does not contain helper entries.")

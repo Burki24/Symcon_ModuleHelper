@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Automatische semantische Versionierung für das Helper-Repository und alle direkt geänderten Helper.
+- Repository-Build und Änderungsdatum werden aus dem auslösenden Commit erzeugt.
+- Helper-Versionen, `@version`-Marker und SHA-256-Prüfsummen werden nach Änderungen automatisch synchronisiert.
+- Tests und Consumer-Sync arbeiten bereits vor dem Metadaten-Commit mit dem generierten konsistenten Manifeststand.
+
 ## 3.4.1 - 2026-07-30
 
 ### Fixed

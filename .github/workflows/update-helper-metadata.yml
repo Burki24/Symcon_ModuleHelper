@@ -1,0 +1,112 @@
+name: Update helper metadata
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-helper-metadata-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update-helper-metadata:
+    if: "${{ !startsWith(github.event.head_commit.message, 'CHORE: Update helper metadata') }}"
+    runs-on: ubuntu-latest
+    env:
+      APP_CLIENT_ID: ${{ vars.HELPER_SYNC_APP_CLIENT_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.HELPER_SYNC_APP_PRIVATE_KEY }}
+
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ env.APP_CLIENT_ID }}
+          private-key: ${{ env.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            Symcon_ModuleHelper
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Resolve source range
+        id: source
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$BEFORE_SHA" =~ ^0+$ ]] || ! git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+            base_ref=$(git rev-parse "${SOURCE_SHA}^")
+          else
+            base_ref="$BEFORE_SHA"
+          fi
+
+          commit_date=$(git show -s --format=%ct "$SOURCE_SHA")
+          short_sha=${SOURCE_SHA:0:7}
+
+          echo "base_ref=$base_ref" >> "$GITHUB_OUTPUT"
+          echo "commit_date=$commit_date" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$short_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Test metadata updater
+        run: python3 tests/test_update_helper_metadata.py
+
+      - name: Update helper metadata
+        run: |
+          python3 .github/scripts/update_helper_metadata.py \
+            --root . \
+            --base-ref "${{ steps.source.outputs.base_ref }}" \
+            --sha "${{ github.sha }}" \
+            --date "${{ steps.source.outputs.commit_date }}"
+
+      - name: Validate generated metadata
+        run: |
+          python3 -m json.tool manifest.json > /dev/null
+          python3 .github/scripts/verify_manifest.py
+          python3 .github/scripts/update_helper_translations.py
+          php tests/run.php
+
+      - name: Commit and push metadata
+        shell: bash
+        env:
+          SHORT_SHA: ${{ steps.source.outputs.short_sha }}
+          SOURCE_BEFORE: ${{ steps.source.outputs.base_ref }}
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- manifest.json src; then
+            echo "Helper metadata is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          version=$(
+            python3 -c 'import json; print(json.load(open("manifest.json", encoding="utf-8"))["repository_version"])'
+          )
+
+          git add manifest.json src
+          git commit \
+            -m "CHORE: Update helper metadata to v${version} (${SHORT_SHA})" \
+            -m "Source-Before: ${SOURCE_BEFORE}" \
+            -m "Source-Commit: ${SOURCE_COMMIT}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

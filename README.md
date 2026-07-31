@@ -8,6 +8,21 @@ Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Ger�
 
 Die Helper werden für aktuelle `IPSModuleStrict`-Module entwickelt und mit **PHP 8.5 / Symcon 9.0** getestet.
 
+## Automatische Versionierung
+
+Änderungen auf `main` werden automatisch versioniert. Der Workflow
+`.github/workflows/update-helper-metadata.yml` wertet die Commit-Titel aus und
+aktualisiert anschließend:
+
+- `repository_version`, `repository_build` und `repository_date` in `manifest.json`,
+- die `@version` des jeweils geänderten Helpers,
+- die zugehörige Helper-Version und sämtliche SHA-256-Prüfsummen im Manifest.
+
+`FEAT:` erhöht die Minor-Version, `BREAKING:` beziehungsweise ein `!` im
+Commit-Typ die Major-Version; alle übrigen fachlichen Änderungen erhöhen die
+Patch-Version. Reine Metadaten-Commits werden ignoriert. Der erzeugte Commit
+stößt danach den bestehenden Helper-Sync zu den Consumer-Repositories an.
+
 ## ConfigurationFormHelper
 
 `src/ConfigurationFormHelper.php` unterstützt dynamische Symcon-Konfigurationsformulare. Der Helper ermittelt per Reflection das Verzeichnis der konkreten Modulklasse und lädt von dort die zugehörige `form.json`.
