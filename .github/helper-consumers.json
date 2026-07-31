@@ -17,8 +17,12 @@
       "repository": "Burki24/OpenHomeAlarm",
       "branch": "dev"
     },
-        {
+    {
       "repository": "Burki24/Zirkulationspumpensteuerung",
+      "branch": "dev"
+    },
+    {
+      "repository": "Burki24/ShutterButtonControl",
       "branch": "dev"
     }
   ]
