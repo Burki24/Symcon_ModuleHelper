@@ -66,6 +66,9 @@ jobs:
       - name: Validate helper dependency bundles
         run: python3 tests/helper_sync_bundle.py
 
+      - name: Validate guarded helper auto-merge
+        run: python3 tests/helper_sync_auto_merge.py
+
       - name: PHP lint
         shell: bash
         run: |

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Reine, von der Helper-Sync-App erzeugte Vendor-PRs können automatisch per Squash-Merge zusammengeführt werden, sobald alle vorgeschriebenen Repository-Prüfungen erfolgreich sind.
+- Vor dem Aktivieren von Auto-Merge werden Bot-Autor, Helper-Branch, Zielbranch und der vollständige Dateiumfang des Pull Requests geprüft; fremde Modul- oder Workflow-Dateien verhindern den automatischen Merge.
 - Automatische semantische Versionierung für das Helper-Repository und alle direkt geänderten Helper.
 - Repository-Build und Änderungsdatum werden aus dem auslösenden Commit erzeugt.
 - Helper-Versionen, `@version`-Marker und SHA-256-Prüfsummen werden nach Änderungen automatisch synchronisiert.

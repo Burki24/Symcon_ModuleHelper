@@ -84,11 +84,18 @@ jobs:
           owner = os.environ["REPOSITORY_OWNER"]
           prefix = f"{owner}/"
           data = json.loads(Path(".github/helper-consumers.json").read_text(encoding="utf-8"))
+          auto_merge = data.get("auto_merge", {})
+          merge_method = str(auto_merge.get("merge_method", "SQUASH")).upper()
+          if bool(auto_merge.get("enabled", False)) and merge_method not in {"MERGE", "SQUASH", "REBASE"}:
+              raise SystemExit(f"Unsupported global auto-merge method: {merge_method}")
           repositories = []
           for consumer in data.get("consumers", []):
               repository = str(consumer.get("repository", ""))
               if not repository.startswith(prefix):
                   raise SystemExit(f"Consumer repository must belong to {owner}: {repository}")
+              consumer_method = str(consumer.get("merge_method", merge_method)).upper()
+              if bool(consumer.get("auto_merge", auto_merge.get("enabled", False))) and consumer_method not in {"MERGE", "SQUASH", "REBASE"}:
+                  raise SystemExit(f"Unsupported auto-merge method for {repository}: {consumer_method}")
               repositories.append(repository[len(prefix):])
           if not repositories:
               raise SystemExit("No consumer repositories configured.")

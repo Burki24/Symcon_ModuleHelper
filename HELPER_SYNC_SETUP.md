@@ -21,6 +21,8 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `OpenCalendar`
 - `OpenHomeAlarm`
 - `IPS_Wolf_WSR1`
+- `Zirkulationspumpensteuerung`
+- `ShutterButtonControl`
 
 ## 2. Symcon_ModuleHelper konfigurieren
 
@@ -52,9 +54,31 @@ Bei einer Änderung unter `src/` oder an `manifest.json`:
 4. erzeugt für veraltete Helper einen Branch `helper-sync/...`,
 5. schreibt das vollständige Helper-Bundle einschließlich Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md` in einem Commit,
 6. dokumentiert transitive Abhängigkeiten innerhalb des abonnierten Helper-Eintrags, sodass `.helper-sync.json` ausschließlich die bewusst abonnierten Helper enthält,
-7. eröffnet einen Pull Request gegen `dev`.
+7. eröffnet einen Pull Request gegen `dev`,
+8. prüft Bot-Autor, `helper-sync/`-Branch, Zielbranch und den tatsächlichen Dateiumfang,
+9. aktiviert bei einem reinen Helper-PR automatisch Squash-Auto-Merge.
 
-Die Consumer-CI prüft den PR. Der Merge bleibt bewusst manuell.
+GitHub führt den PR erst zusammen, wenn alle durch Branch Protection oder Rulesets vorgeschriebenen Bedingungen erfüllt sind. Der Sync umgeht keine Prüfungen und führt keinen direkten Merge aus. Sobald eine nicht zum erzeugten Helper-Bundle gehörende Datei im PR auftaucht, wird Auto-Merge verweigert.
+
+### Erforderliche Consumer-Einstellungen
+
+In jedem Consumer-Repository:
+
+1. **Settings → General → Pull Requests → Allow auto-merge** aktivieren.
+2. **Allow squash merging** aktiviert lassen.
+3. Für den Zielbranch `dev` eine Branch Protection Rule oder ein Ruleset mit den gewünschten **Required status checks** einrichten.
+4. Optional **Automatically delete head branches** aktivieren, damit der `helper-sync/...`-Branch nach dem Merge entfernt wird.
+
+Die globale Vorgabe steht in `.github/helper-consumers.json`:
+
+```json
+"auto_merge": {
+  "enabled": true,
+  "merge_method": "SQUASH"
+}
+```
+
+Ein einzelner Consumer kann Auto-Merge mit `"auto_merge": false` deaktivieren oder über `"merge_method"` eine andere im Repository erlaubte Methode wählen.
 
 ## 4. Manueller Lauf
 

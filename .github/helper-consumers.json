@@ -1,5 +1,9 @@
 {
   "schema": 1,
+  "auto_merge": {
+    "enabled": true,
+    "merge_method": "SQUASH"
+  },
   "consumers": [
     {
       "repository": "Burki24/OpenLMNB",

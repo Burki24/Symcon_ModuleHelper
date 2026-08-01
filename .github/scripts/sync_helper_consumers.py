@@ -24,6 +24,7 @@ EVENT_NAME = os.environ.get("EVENT_NAME", "")
 REQUESTED_HELPER = os.environ.get("REQUESTED_HELPER", "all").strip() or "all"
 OWNER = "Burki24"
 VERSION_PATTERN = re.compile(r"@version\s+([0-9]+\.[0-9]+\.[0-9]+)")
+AUTO_MERGE_METHODS = {"MERGE", "SQUASH", "REBASE"}
 
 
 def api(method: str, path: str, payload: Any | None = None) -> Any:
@@ -48,6 +49,20 @@ def api(method: str, path: str, payload: Any | None = None) -> Any:
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"GitHub API {method} {path} failed: {error.code} {body}") from error
+
+
+def graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
+    result = api("POST", "/graphql", {"query": query, "variables": variables})
+    if not isinstance(result, dict):
+        raise RuntimeError("Unexpected GitHub GraphQL response.")
+    errors = result.get("errors")
+    if errors:
+        messages = "; ".join(str(error.get("message", error)) for error in errors)
+        raise RuntimeError(f"GitHub GraphQL request failed: {messages}")
+    data = result.get("data")
+    if not isinstance(data, dict):
+        raise RuntimeError("GitHub GraphQL response is missing data.")
+    return data
 
 
 def optional_api(method: str, path: str) -> Any | None:
@@ -268,7 +283,14 @@ def readme(manifest: dict[str, Any], language: str) -> bytes:
     return "\n".join(lines).encode("utf-8")
 
 
-def open_pull_request(repo: str, base_branch: str, branch: str, helper: str, version: str, digest: str) -> None:
+def open_pull_request(
+    repo: str,
+    base_branch: str,
+    branch: str,
+    helper: str,
+    version: str,
+    digest: str,
+) -> dict[str, Any]:
     head = urllib.parse.quote(f"{OWNER}:{branch}", safe="")
     base = urllib.parse.quote(base_branch, safe="")
     pulls = api("GET", f"/repos/{repo}/pulls?state=open&head={head}&base={base}")
@@ -279,15 +301,136 @@ def open_pull_request(repo: str, base_branch: str, branch: str, helper: str, ver
         f"- Version: `{version}`\n"
         f"- SHA-256: `{digest}`\n"
         f"- Source commit: `{SOURCE_SHA}`\n\n"
-        "Please merge only after the repository checks are green."
+        "This pull request is eligible for automatic merging only when it contains "
+        "the generated helper bundle exclusively and all required repository checks pass."
     )
     if pulls:
-        number = pulls[0]["number"]
+        number = int(pulls[0]["number"])
         api("PATCH", f"/repos/{repo}/pulls/{number}", {"title": title, "body": body})
+        result = api("GET", f"/repos/{repo}/pulls/{number}")
         print(f"Updated PR #{number} in {repo} for {helper}.")
-        return
-    result = api("POST", f"/repos/{repo}/pulls", {"title": title, "head": branch, "base": base_branch, "body": body})
+        return result
+    result = api(
+        "POST",
+        f"/repos/{repo}/pulls",
+        {"title": title, "head": branch, "base": base_branch, "body": body},
+    )
     print(f"Created PR #{result['number']} in {repo} for {helper}.")
+    return result
+
+
+def pull_request_files(repo: str, number: int) -> set[str]:
+    files: set[str] = set()
+    page = 1
+    while True:
+        result = api("GET", f"/repos/{repo}/pulls/{number}/files?per_page=100&page={page}")
+        if not isinstance(result, list):
+            raise RuntimeError(f"Unexpected pull request files response for {repo}#{number}.")
+        files.update(str(item["filename"]) for item in result)
+        if len(result) < 100:
+            break
+        page += 1
+    return files
+
+
+def validate_auto_merge_candidate(
+    pull_request: dict[str, Any],
+    repo: str,
+    base_branch: str,
+    branch: str,
+    expected_files: set[str],
+    actual_files: set[str],
+) -> str:
+    number = int(pull_request.get("number", 0))
+    if pull_request.get("draft") is True:
+        raise RuntimeError(f"Refusing auto-merge for draft PR {repo}#{number}.")
+    if str(pull_request.get("base", {}).get("ref", "")) != base_branch:
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: unexpected base branch.")
+    if str(pull_request.get("head", {}).get("ref", "")) != branch:
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: unexpected head branch.")
+    if not branch.startswith("helper-sync/"):
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: invalid helper-sync branch.")
+    head_repo = str(pull_request.get("head", {}).get("repo", {}).get("full_name", ""))
+    if head_repo != repo:
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: head repository differs.")
+    author_type = str(pull_request.get("user", {}).get("type", ""))
+    if author_type != "Bot":
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: PR author is not a GitHub App bot.")
+    title = str(pull_request.get("title", ""))
+    if not title.startswith("CHORE: Update "):
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: unexpected PR title.")
+    if not actual_files:
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: pull request has no changed files.")
+    unexpected = actual_files - expected_files
+    if unexpected:
+        raise RuntimeError(
+            f"Refusing auto-merge for {repo}#{number}: unexpected files: {', '.join(sorted(unexpected))}"
+        )
+    node_id = str(pull_request.get("node_id", ""))
+    if not node_id:
+        raise RuntimeError(f"Refusing auto-merge for {repo}#{number}: missing GraphQL node ID.")
+    return node_id
+
+
+def enable_auto_merge(
+    repo: str,
+    pull_request: dict[str, Any],
+    base_branch: str,
+    branch: str,
+    expected_files: set[str],
+    merge_method: str,
+) -> None:
+    merge_method = merge_method.upper()
+    if merge_method not in AUTO_MERGE_METHODS:
+        raise RuntimeError(f"Unsupported auto-merge method for {repo}: {merge_method}")
+
+    repository = api("GET", f"/repos/{repo}")
+    if not bool(repository.get("allow_auto_merge")):
+        raise RuntimeError(
+            f"Auto-merge is not enabled in {repo}. Enable Settings > General > Allow auto-merge."
+        )
+    method_flag = {
+        "MERGE": "allow_merge_commit",
+        "SQUASH": "allow_squash_merge",
+        "REBASE": "allow_rebase_merge",
+    }[merge_method]
+    if not bool(repository.get(method_flag)):
+        raise RuntimeError(f"{repo} does not allow the configured {merge_method.lower()} merge method.")
+
+    number = int(pull_request["number"])
+    actual_files = pull_request_files(repo, number)
+    node_id = validate_auto_merge_candidate(
+        pull_request, repo, base_branch, branch, expected_files, actual_files
+    )
+
+    state_query = """
+        query($pullRequestId: ID!) {
+          node(id: $pullRequestId) {
+            ... on PullRequest {
+              autoMergeRequest { mergeMethod }
+            }
+          }
+        }
+    """
+    state = graphql(state_query, {"pullRequestId": node_id})
+    node = state.get("node")
+    current = node.get("autoMergeRequest") if isinstance(node, dict) else None
+    if isinstance(current, dict) and str(current.get("mergeMethod", "")) == merge_method:
+        print(f"Auto-merge already enabled for {repo}#{number} ({merge_method}).")
+        return
+
+    mutation = """
+        mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+          enablePullRequestAutoMerge(input: {
+            pullRequestId: $pullRequestId,
+            mergeMethod: $mergeMethod
+          }) {
+            pullRequest { number }
+          }
+        }
+    """
+    graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
+    print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
 
 
 def validate_source_helper(name: str, meta: dict[str, Any]) -> tuple[bytes, str]:
@@ -362,6 +505,8 @@ def sync(
     helper: str,
     source_meta: dict[str, Any],
     manifest: dict[str, Any],
+    auto_merge: bool,
+    merge_method: str,
 ) -> None:
     config = load_json_content(repo, ".helper-sync.json", base_branch)
     if config is None:
@@ -408,12 +553,20 @@ def sync(
 
     commit_prefix = f"CHORE: Update {helper} to v{source_meta['version']}"
     create_sync_commit(repo, base_branch, branch, files, commit_prefix)
-    open_pull_request(repo, base_branch, branch, helper, source_meta["version"], source_meta["sha256"])
+    pull_request = open_pull_request(
+        repo, base_branch, branch, helper, source_meta["version"], source_meta["sha256"]
+    )
+    if auto_merge:
+        enable_auto_merge(repo, pull_request, base_branch, branch, set(files), merge_method)
 
 
 def main() -> None:
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    consumers = json.loads((ROOT / ".github/helper-consumers.json").read_text(encoding="utf-8"))["consumers"]
+    consumer_config = json.loads(
+        (ROOT / ".github/helper-consumers.json").read_text(encoding="utf-8")
+    )
+    consumers = consumer_config["consumers"]
+    auto_merge_defaults = consumer_config.get("auto_merge", {})
     helpers = changed_helpers(manifest)
     if not helpers:
         print("No helper changes detected.")
@@ -422,7 +575,19 @@ def main() -> None:
     for helper in helpers:
         source_meta = manifest["helpers"][helper]
         for consumer in consumers:
-            sync(str(consumer["repository"]), str(consumer["branch"]), helper, source_meta, manifest)
+            auto_merge = bool(consumer.get("auto_merge", auto_merge_defaults.get("enabled", False)))
+            merge_method = str(
+                consumer.get("merge_method", auto_merge_defaults.get("merge_method", "SQUASH"))
+            )
+            sync(
+                str(consumer["repository"]),
+                str(consumer["branch"]),
+                helper,
+                source_meta,
+                manifest,
+                auto_merge,
+                merge_method,
+            )
 
 
 if __name__ == "__main__":

@@ -897,4 +897,8 @@ Für den repositoryübergreifenden Zugriff wird eine GitHub App verwendet. Im Re
 
 Die GitHub App wird auf den Consumer-Repositories installiert und benötigt dort nur `Contents: Read and write` sowie `Pull requests: Read and write`.
 
+Die zentrale Consumer-Konfiguration aktiviert standardmäßig `SQUASH`-Auto-Merge. Vor der Aktivierung prüft der Sync, dass der Pull Request von einem GitHub-App-Bot stammt, einen `helper-sync/`-Branch gegen den konfigurierten Zielbranch verwendet und ausschließlich die für das konkrete Helper-Bundle erzeugten Dateien verändert. Enthält ein PR zusätzliche Modul-, Test-, Workflow- oder Dokumentationsdateien außerhalb des generierten Bundles, wird Auto-Merge abgelehnt und der Sync-Lauf schlägt sichtbar fehl.
+
+Damit GitHub den PR erst nach der CI zusammenführt, müssen in jedem Consumer unter **Settings → General → Pull Requests** `Allow auto-merge` und `Allow squash merging` aktiviert sein. Für den jeweiligen `dev`-Branch müssen außerdem die gewünschten Tests als erforderliche Statusprüfungen in einer Branch Protection Rule oder einem Ruleset hinterlegt sein. Ohne unerfüllte Merge-Anforderung stellt GitHub Auto-Merge nicht bereit; der Sync führt niemals einen direkten Merge als Fallback aus.
+
 Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.
