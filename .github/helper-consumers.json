@@ -6,7 +6,7 @@
   },
   "consumers": [
     {
-      "repository": "Burki24/OpenLMNB",
+      "repository": "Burki24/LMNB",
       "branch": "dev"
     },
     {
@@ -14,7 +14,7 @@
       "branch": "dev"
     },
     {
-      "repository": "Burki24/IPS_Wolf_WSR1",
+      "repository": "Burki24/WolfWSR",
       "branch": "dev"
     },
     {
@@ -22,11 +22,11 @@
       "branch": "dev"
     },
     {
-      "repository": "Burki24/Zirkulationspumpensteuerung",
+      "repository": "Burki24/OpenHotWaterCirculationControl",
       "branch": "dev"
     },
     {
-      "repository": "Burki24/ShutterButtonControl",
+      "repository": "Burki24/OpenShutterButtonControl",
       "branch": "dev"
     }
   ]

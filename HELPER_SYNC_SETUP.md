@@ -17,12 +17,12 @@ Empfohlene Einstellungen:
 Danach einen Private Key erzeugen und die App für diese Repositories installieren:
 
 - `Symcon_ModuleHelper` (für automatisch erzeugte Übersetzungs-PRs)
-- `OpenLMNB`
+- `LMNB`
 - `OpenCalendar`
 - `OpenHomeAlarm`
-- `IPS_Wolf_WSR1`
-- `Zirkulationspumpensteuerung`
-- `ShutterButtonControl`
+- `WolfWSR`
+- `OpenHotWaterCirculationControl`
+- `OpenShutterButtonControl`
 
 ## 2. Symcon_ModuleHelper konfigurieren
 

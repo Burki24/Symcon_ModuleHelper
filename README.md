@@ -107,7 +107,7 @@ class ExampleModule extends IPSModuleStrict
 
 ## VariablePresentationHelper
 
-`src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `IPS_Wolf_WSR1` zusammen.
+`src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `WolfWSR` zusammen.
 
 Der Helper bleibt vollständig unabhängig von konkreten Geräten, Protokollen, Expose-/Feature-Strukturen oder Modul-Properties. Übernommen wurden ausschließlich generische Symcon-Darstellungen; geräte- oder dienstspezifische Ableitungslogik bleibt in den jeweiligen Libraries.
 
@@ -257,7 +257,7 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.
 
-Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard, OpenCalendar eine Kalenderansicht und OpenLMNB mehrere fachlich getrennte Seiten rendern, während Aktivierung, Variablenpflege, Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
+Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard, OpenCalendar eine Kalenderansicht und LMNB mehrere fachlich getrennte Seiten rendern, während Aktivierung, Variablenpflege, Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
 
 Der gemeinsame Bootstrap steht im Template als `window.SYMC_VISUALIZATION` bereit und enthält immer:
 

@@ -11,6 +11,10 @@
 - Helper-Versionen, `@version`-Marker und SHA-256-Prüfsummen werden nach Änderungen automatisch synchronisiert.
 - Tests und Consumer-Sync arbeiten bereits vor dem Metadaten-Commit mit dem generierten konsistenten Manifeststand.
 
+### Changed
+
+- Consumer-Liste, Einrichtungsdokumentation und Auto-Merge-Regressionstest verwenden die endgültigen Repositorynamen `LMNB`, `WolfWSR`, `OpenHotWaterCirculationControl` und `OpenShutterButtonControl`.
+
 ### Fixed
 
 - `DateHelper` verwendet für externe Datumsstrings nun den nicht werfenden Parser `date_create_immutable()`. Ungültige Werte bleiben dadurch auch unter PHP 8.5 und aktivierter Debug-Erweiterung zuverlässig unverändert erhalten.
@@ -205,7 +209,7 @@ Alle relevanten Änderungen an den Helpern werden in dieser Datei dokumentiert.
 
 ### Changed
 
-- `VariablePresentationHelper` auf Version 2.0.0 erweitert und mit den allgemein nutzbaren Darstellungsfunktionen aus `IPS_Wolf_WSR1` zusammengeführt.
+- `VariablePresentationHelper` auf Version 2.0.0 erweitert und mit den allgemein nutzbaren Darstellungsfunktionen aus `WolfWSR` zusammengeführt.
 - Bestehende API für Boolean, Text, WebContent und DateTime vollständig beibehalten.
 - Geräte-, Expose-, Feature-, Preset- und Property-spezifische Logik bewusst nicht in den zentralen Helper übernommen.
 

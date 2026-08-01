@@ -15,7 +15,7 @@ if SPEC is None or SPEC.loader is None:
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
-REPOSITORY = "Burki24/OpenLMNB"
+REPOSITORY = "Burki24/LMNB"
 BASE_BRANCH = "dev"
 HEAD_BRANCH = "helper-sync/date-helper-v1.0.2"
 EXPECTED_FILES = {
@@ -58,7 +58,7 @@ try:
         BASE_BRANCH,
         HEAD_BRANCH,
         EXPECTED_FILES,
-        {"libs/helper/DateHelper.php", "OpenLMNB Station/module.php"},
+        {"libs/helper/DateHelper.php", "LMNB Station/module.php"},
     )
 except RuntimeError as error:
     if "unexpected files" not in str(error):
