@@ -28,6 +28,10 @@
     {
       "repository": "Burki24/OpenShutterButtonControl",
       "branch": "dev"
+    },
+    {
+      "repository": "Burki24/IPSViewAssistant",
+      "branch": "dev"
     }
   ]
 }
