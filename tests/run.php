@@ -8,6 +8,7 @@ $tests = [
     'persistent-json-cache.php',
     'configuration-form.php',
     'data-flow.php',
+    'chunked-json-transfer.php',
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',

@@ -4,6 +4,9 @@
 
 ### Added
 
+- `ChunkedJsonTransferHelper` für kurzlebige, größenbegrenzte JSON-Seiten bei mehrstufigen Symcon-Modultransfers.
+- Bufferseiten mit standardmäßig 192 KiB, Transfer-Token, Ablaufzeit, explizitem Abschluss und Cleanup verwaister Transfers vermeiden das 1-MiB-Ausgabelimit, ohne das Buffer-Softlimit von 256 KiB auszureizen.
+- Regressionstests für Aufteilung nach tatsächlicher Bytegröße, Reihenfolge, Unicode, Metadaten, Ablauf, Cleanup und fehlerhafte Transferdaten.
 - Reine, von der Helper-Sync-App erzeugte Vendor-PRs können automatisch per Squash-Merge zusammengeführt werden, sobald alle vorgeschriebenen Repository-Prüfungen erfolgreich sind.
 - Vor dem Aktivieren von Auto-Merge werden Bot-Autor, Helper-Branch, Zielbranch und der vollständige Dateiumfang des Pull Requests geprüft; fremde Modul- oder Workflow-Dateien verhindern den automatischen Merge.
 - Automatische semantische Versionierung für das Helper-Repository und alle direkt geänderten Helper.

@@ -105,6 +105,57 @@ class ExampleModule extends IPSModuleStrict
 | `EncodeDataFlowMessage()` | Erzeugt ein JSON-Datenflussobjekt aus `DataID` und Payload und verhindert eine zweite `DataID` in der Payload. |
 | `DecodeDataFlowMessage()` | Decodiert und validiert ein JSON-Datenflussobjekt und prüft optional die erwartete `DataID`. |
 
+## ChunkedJsonTransferHelper
+
+`src/ChunkedJsonTransferHelper.php` zerlegt große JSON-Listen in kurzlebige, größenbegrenzte Seiten für mehrstufige Symcon-Modulaufrufe. Damit können Child-, Splitter- und Parent-Module Datenmengen austauschen, die Symcons festes 1-MiB-Limit für PHP- und Datenflussausgaben überschreiten würden.
+
+Jede Seite wird in einem eigenen Modulbuffer abgelegt. Die Standardgröße von 192 KiB bleibt bewusst unter dem Buffer-Softlimit von 256 KiB; auch die maximal zulässige Seitengröße von 240 KiB hält einen Sicherheitsabstand ein. Der Helper gibt kleine Transfermetadaten und einzelne Seiten zurück, definiert aber bewusst keine fachlichen Operationen oder Response-Hüllen. Diese bleiben Aufgabe des jeweiligen Moduls und können mit dem `DataFlowHelper` kombiniert werden.
+
+Transfers sind nicht persistent, laufen standardmäßig nach fünf Minuten ab und müssen nach erfolgreichem Empfang explizit gelöscht werden. Ein einzelnes Listenelement muss vollständig in eine Seite passen. Der Helper ist deshalb für bereits geparste Datensätze gedacht, nicht zum beliebigen Zerschneiden binärer Dateien oder einzelner übergroßer Objekte.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ChunkedJsonTransferHelper.php';
+
+use Burki24\SymconModuleHelper\ChunkedJsonTransferHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ChunkedJsonTransferHelper;
+
+    private const TRANSFER_SCOPE = 'ApiItems';
+
+    /** @param list<array<string,mixed>> $items */
+    private function BeginItemTransfer(array $items): array
+    {
+        // Kleine Metadaten: Token, PageCount, ItemCount und ExpiresAt.
+        return $this->CreateChunkedJsonTransfer(self::TRANSFER_SCOPE, $items);
+    }
+
+    private function ReadItemTransferPage(string $token, int $page): array
+    {
+        return $this->ReadChunkedJsonTransferPage(self::TRANSFER_SCOPE, $token, $page);
+    }
+
+    private function FinishItemTransfer(string $token): void
+    {
+        $this->ClearChunkedJsonTransfer(self::TRANSFER_SCOPE, $token);
+    }
+}
+```
+
+Der Empfänger startet zunächst einen Transfer, ruft danach die Seiten `0` bis `PageCount - 1` einzeln ab, führt deren `Items` in derselben Reihenfolge zusammen und beendet anschließend den Transfer. Bei Fehlern sollte er den Transfer ebenfalls bestmöglich löschen; verwaiste Transfers werden beim nächsten Start oder bei einem expliziten Cleanup desselben Scopes nach Ablauf entfernt.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `CreateChunkedJsonTransfer()` | Zerlegt eine JSON-Liste nach tatsächlicher UTF-8-Bytegröße, legt die Seiten in separaten Buffern ab und liefert kleine Transfermetadaten. |
+| `ReadChunkedJsonTransferPage()` | Liest eine nullbasiert adressierte Seite einschließlich Seitenzahl, Gesamtzahl, Abschlussstatus und Items. |
+| `ClearChunkedJsonTransfer()` | Entfernt Metadaten und alle bekannten Seiten eines Transfers. |
+| `CleanupExpiredChunkedJsonTransfers()` | Entfernt abgelaufene Transfers eines Scopes und liefert deren Anzahl. |
+
 ## VariablePresentationHelper
 
 `src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `WolfWSR` zusammen.
@@ -850,6 +901,7 @@ Empfohlen ist, nur die benötigten Helper-Dateien direkt in das jeweilige Reposi
 ```text
 libs/
 └── helper/
+    ├── ChunkedJsonTransferHelper.php
     ├── ConfigurationFormHelper.php
     ├── DateHelper.php
     ├── HelperTranslationHelper.php
