@@ -79,6 +79,11 @@ final class IPSViewHTMLPageHelperHarness
         return $this->UpdateIPSViewHTMLVariable($ident, $html);
     }
 
+    public function handlePageAction(string $ident, mixed $value = ''): bool
+    {
+        return $this->HandleIPSViewHTMLPageAction($ident, $value);
+    }
+
     public function setProperty(string $name, bool|string $value): void
     {
         $this->properties[$name] = $value;
@@ -390,18 +395,12 @@ try {
 
     $helper->registerPageProperties();
     assertSameValue(
-        [
-            'EnableIPSView'            => false,
-            'IPSViewHTMLDeleteRequest' => ''
-        ],
+        ['EnableIPSView' => false],
         $helper->properties(),
         'The optional IPSView output properties must use safe defaults.'
     );
     assertSameValue(
-        [
-            'IPSViewHTMLVariableRegistry' => '[]',
-            'IPSViewHTMLDeleteState'      => '{}'
-        ],
+        ['IPSViewHTMLVariableRegistry' => '[]'],
         $helper->attributes(),
         'The optional IPSView output attributes must use empty defaults.'
     );
@@ -575,22 +574,27 @@ try {
     );
     $deleteScript = implode("\n", $retainedFormItems[3]['popup']['buttons'][0]['onClick']);
     assertTrueValue(
-        str_contains($deleteScript, "IPS_SetProperty(\$id, 'IPSViewHTMLDeleteRequest'"),
-        'The confirmation action must create a new one-shot deletion request.'
+        str_contains($deleteScript, "IPS_RequestAction(\$id, 'IPSViewHTMLDeleteVariables', \"\");"),
+        'The confirmation action must use the helper-owned module action.'
     );
     assertTrueValue(
-        str_contains($deleteScript, 'IPS_ApplyChanges($id);'),
-        'The confirmation action must apply the deletion request immediately.'
+        !str_contains($deleteScript, 'IPS_SetProperty') && !str_contains($deleteScript, 'IPS_ApplyChanges'),
+        'The confirmation action must not manipulate user-owned properties.'
     );
 
-    $helper->setProperty('IPSViewHTMLDeleteRequest', 'request-1');
-    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
-    $helper->maintainPageVariable('IPSViewPadded', 'IPSView padded', 110);
+    assertFalseValue(
+        $helper->handlePageAction('UnrelatedAction'),
+        'Unrelated module actions must remain available to the consuming module.'
+    );
+    assertTrueValue(
+        $helper->handlePageAction('IPSViewHTMLDeleteVariables'),
+        'The helper-owned delete action must be handled.'
+    );
     assertSameValue([], $helper->variables(), 'Confirmed deletion must remove every optional IPSView variable.');
     assertSameValue(
-        '{"IPSViewExample":"request-1","IPSViewPadded":"request-1"}',
-        $helper->attributes()['IPSViewHTMLDeleteState'],
-        'Each variable must remember the deletion request it already processed.'
+        '[]',
+        $helper->attributes()['IPSViewHTMLVariableRegistry'],
+        'Confirmed deletion must clear the retained-variable registry.'
     );
     assertSameValue(2, count($helper->pageFormItems()), 'Deletion controls must disappear after removal.');
 
@@ -606,8 +610,7 @@ try {
         'A handled deletion request must never delete a recreated variable without new confirmation.'
     );
 
-    $helper->setProperty('IPSViewHTMLDeleteRequest', 'request-2');
-    $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100);
+    $helper->handlePageAction('IPSViewHTMLDeleteVariables');
     assertSameValue([], $helper->variables(), 'A new explicit request must delete recreated variables.');
 
     $invalidVariableIdentRejected = false;
