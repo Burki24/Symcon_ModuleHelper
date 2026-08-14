@@ -18,6 +18,7 @@ SPEC.loader.exec_module(MODULE)
 REPOSITORY = "Burki24/LMNB"
 BASE_BRANCH = "dev"
 HEAD_BRANCH = "helper-sync/date-helper-v1.0.2"
+EXPECTED_HEAD_SHA = "0123456789abcdef0123456789abcdef01234567"
 EXPECTED_FILES = {
     "libs/helper/DateHelper.php",
     "libs/helper/manifest.json",
@@ -25,7 +26,11 @@ EXPECTED_FILES = {
 }
 
 
-def pull_request(*, author_type: str = "Bot") -> dict[str, object]:
+def pull_request(
+    *,
+    author_type: str = "Bot",
+    head_sha: str = EXPECTED_HEAD_SHA,
+) -> dict[str, object]:
     return {
         "number": 17,
         "node_id": "PR_kwDOExample",
@@ -35,7 +40,7 @@ def pull_request(*, author_type: str = "Bot") -> dict[str, object]:
         "base": {"ref": BASE_BRANCH},
         "head": {
             "ref": HEAD_BRANCH,
-            "sha": "0123456789abcdef0123456789abcdef01234567",
+            "sha": head_sha,
             "repo": {"full_name": REPOSITORY},
         },
     }
@@ -95,6 +100,8 @@ def fake_api(method: str, path: str, payload: object | None = None) -> object:
             "allow_squash_merge": True,
             "allow_rebase_merge": True,
         }
+    if method == "GET" and path == f"/repos/{REPOSITORY}/pulls/17":
+        return pull_request()
     if path == f"/repos/{REPOSITORY}/pulls/17/files?per_page=100&page=1":
         return [
             {"filename": "libs/helper/DateHelper.php"},
@@ -121,6 +128,7 @@ MODULE.enable_auto_merge(
     HEAD_BRANCH,
     EXPECTED_FILES,
     "SQUASH",
+    EXPECTED_HEAD_SHA,
 )
 
 if len(graphql_calls) != 2:
@@ -140,6 +148,8 @@ def fake_clean_api(method: str, path: str, payload: object | None = None) -> obj
             "allow_squash_merge": True,
             "allow_rebase_merge": True,
         }
+    if method == "GET" and path == f"/repos/{REPOSITORY}/pulls/17":
+        return pull_request()
     if path == f"/repos/{REPOSITORY}/pulls/17/files?per_page=100&page=1":
         return [
             {"filename": "libs/helper/DateHelper.php"},
@@ -169,13 +179,14 @@ MODULE.enable_auto_merge(
     HEAD_BRANCH,
     EXPECTED_FILES,
     "SQUASH",
+    EXPECTED_HEAD_SHA,
 )
 
 merge_calls = [call for call in direct_merge_calls if call[0] == "PUT"]
 if len(merge_calls) != 1:
     raise SystemExit(f"Expected one direct clean-PR merge, got {len(merge_calls)}.")
 if merge_calls[0][2] != {
-    "sha": "0123456789abcdef0123456789abcdef01234567",
+    "sha": EXPECTED_HEAD_SHA,
     "merge_method": "squash",
 }:
     raise SystemExit(f"Direct merge was not pinned to the expected head SHA: {merge_calls[0][2]}")
@@ -201,9 +212,65 @@ MODULE.enable_auto_merge(
     HEAD_BRANCH,
     EXPECTED_FILES,
     "SQUASH",
+    EXPECTED_HEAD_SHA,
 )
 if len([call for call in direct_merge_calls if call[0] == "PUT"]) != 1:
     raise SystemExit("A repository without protected branch rules did not use direct merge.")
+
+stale_head_sha = "abcdefabcdefabcdefabcdefabcdefabcdefabcd"
+refresh_count = 0
+merge_attempts = 0
+
+
+def fake_propagating_api(method: str, path: str, payload: object | None = None) -> object:
+    global merge_attempts, refresh_count
+    direct_merge_calls.append((method, path, payload))
+    if path == f"/repos/{REPOSITORY}":
+        return {
+            "allow_auto_merge": True,
+            "allow_merge_commit": True,
+            "allow_squash_merge": True,
+            "allow_rebase_merge": True,
+        }
+    if method == "GET" and path == f"/repos/{REPOSITORY}/pulls/17":
+        refresh_count += 1
+        return pull_request(head_sha=stale_head_sha if refresh_count == 1 else EXPECTED_HEAD_SHA)
+    if path == f"/repos/{REPOSITORY}/pulls/17/files?per_page=100&page=1":
+        return [
+            {"filename": "libs/helper/DateHelper.php"},
+            {"filename": "libs/helper/manifest.json"},
+        ]
+    if method == "PUT" and path == f"/repos/{REPOSITORY}/pulls/17/merge":
+        merge_attempts += 1
+        if merge_attempts == 1:
+            raise RuntimeError(
+                "GitHub API PUT /repos/Burki24/LMNB/pulls/17/merge failed: "
+                "409 Head branch was modified. Review and try the merge again."
+            )
+        return {"merged": True, "message": "Pull Request successfully merged"}
+    raise AssertionError(f"Unexpected API call: {method} {path}")
+
+
+direct_merge_calls.clear()
+MODULE.api = fake_propagating_api
+MODULE.time.sleep = lambda _seconds: None
+MODULE.enable_auto_merge(
+    REPOSITORY,
+    pull_request(head_sha=stale_head_sha),
+    BASE_BRANCH,
+    HEAD_BRANCH,
+    EXPECTED_FILES,
+    "SQUASH",
+    EXPECTED_HEAD_SHA,
+)
+if refresh_count != 3:
+    raise SystemExit(f"Expected one stale and two current PR refreshes, got {refresh_count}.")
+propagation_merges = [call for call in direct_merge_calls if call[0] == "PUT"]
+expected_merge_payload = {"sha": EXPECTED_HEAD_SHA, "merge_method": "squash"}
+if len(propagation_merges) != 2 or any(
+    call[2] != expected_merge_payload for call in propagation_merges
+):
+    raise SystemExit("The propagated PR head was not merged with the expected SHA guard.")
 
 consumer_config = json.loads((ROOT / ".github/helper-consumers.json").read_text(encoding="utf-8"))
 auto_merge = consumer_config.get("auto_merge", {})

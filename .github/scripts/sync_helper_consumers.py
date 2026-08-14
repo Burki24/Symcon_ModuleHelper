@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -29,6 +30,8 @@ AUTO_MERGE_DIRECT_FALLBACK_MESSAGES = (
     "is in clean status",
     "protected branch rules not configured",
 )
+PULL_REQUEST_HEAD_REFRESH_ATTEMPTS = 8
+DIRECT_MERGE_ATTEMPTS = 3
 
 
 def api(method: str, path: str, payload: Any | None = None) -> Any:
@@ -105,7 +108,7 @@ def create_sync_commit(
     branch: str,
     files: dict[str, bytes],
     message: str,
-) -> None:
+) -> str:
     encoded_base = urllib.parse.quote(f"heads/{base_branch}", safe="/")
     base_ref = api("GET", f"/repos/{repo}/git/ref/{encoded_base}")
     base_sha = str(base_ref["object"]["sha"])
@@ -134,6 +137,7 @@ def create_sync_commit(
         api("POST", f"/repos/{repo}/git/refs", {"ref": f"refs/heads/{branch}", "sha": commit_sha})
     else:
         api("PATCH", f"/repos/{repo}/git/refs/{encoded_branch}", {"sha": commit_sha, "force": True})
+    return commit_sha
 
 
 def load_json_content(repo: str, path: str, ref: str) -> dict[str, Any] | None:
@@ -376,22 +380,61 @@ def validate_auto_merge_candidate(
     return node_id
 
 
+def refresh_pull_request_head(
+    repo: str,
+    number: int,
+    expected_head_sha: str,
+) -> dict[str, Any]:
+    if not expected_head_sha:
+        raise RuntimeError(f"Unable to refresh {repo}#{number}: expected head SHA is missing.")
+
+    observed_head_sha = ""
+    for attempt in range(PULL_REQUEST_HEAD_REFRESH_ATTEMPTS):
+        pull_request = api("GET", f"/repos/{repo}/pulls/{number}")
+        if not isinstance(pull_request, dict):
+            raise RuntimeError(f"Unexpected pull request response for {repo}#{number}.")
+        head = pull_request.get("head")
+        observed_head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
+        if observed_head_sha == expected_head_sha:
+            return pull_request
+        if attempt + 1 < PULL_REQUEST_HEAD_REFRESH_ATTEMPTS:
+            time.sleep(1)
+
+    raise RuntimeError(
+        f"Timed out waiting for {repo}#{number} to expose expected head SHA "
+        f"{expected_head_sha}; last observed {observed_head_sha or 'none'}."
+    )
+
+
 def merge_validated_pull_request(
     repo: str,
     pull_request: dict[str, Any],
     merge_method: str,
+    expected_head_sha: str,
 ) -> None:
     number = int(pull_request["number"])
     head = pull_request.get("head")
     head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
-    if not head_sha:
-        raise RuntimeError(f"Refusing direct merge for {repo}#{number}: missing head SHA.")
+    if head_sha != expected_head_sha:
+        raise RuntimeError(f"Refusing direct merge for {repo}#{number}: unexpected head SHA.")
 
-    result = api(
-        "PUT",
-        f"/repos/{repo}/pulls/{number}/merge",
-        {"sha": head_sha, "merge_method": merge_method.lower()},
-    )
+    result: Any = None
+    for attempt in range(DIRECT_MERGE_ATTEMPTS):
+        try:
+            result = api(
+                "PUT",
+                f"/repos/{repo}/pulls/{number}/merge",
+                {"sha": expected_head_sha, "merge_method": merge_method.lower()},
+            )
+            break
+        except RuntimeError as error:
+            message = str(error).lower()
+            retryable = " 409 " in message and "head branch was modified" in message
+            if not retryable or attempt + 1 >= DIRECT_MERGE_ATTEMPTS:
+                raise
+            pull_request = refresh_pull_request_head(repo, number, expected_head_sha)
+            time.sleep(1)
+
     if not isinstance(result, dict) or result.get("merged") is not True:
         message = (
             str(result.get("message", "unknown response"))
@@ -410,6 +453,7 @@ def enable_auto_merge(
     branch: str,
     expected_files: set[str],
     merge_method: str,
+    expected_head_sha: str,
 ) -> None:
     merge_method = merge_method.upper()
     if merge_method not in AUTO_MERGE_METHODS:
@@ -429,6 +473,7 @@ def enable_auto_merge(
         raise RuntimeError(f"{repo} does not allow the configured {merge_method.lower()} merge method.")
 
     number = int(pull_request["number"])
+    pull_request = refresh_pull_request_head(repo, number, expected_head_sha)
     actual_files = pull_request_files(repo, number)
     node_id = validate_auto_merge_candidate(
         pull_request, repo, base_branch, branch, expected_files, actual_files
@@ -466,7 +511,7 @@ def enable_auto_merge(
         message = str(error).lower()
         if not any(fragment in message for fragment in AUTO_MERGE_DIRECT_FALLBACK_MESSAGES):
             raise
-        merge_validated_pull_request(repo, pull_request, merge_method)
+        merge_validated_pull_request(repo, pull_request, merge_method, expected_head_sha)
         return
     print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
 
@@ -590,12 +635,20 @@ def sync(
     files["libs/helper/README.md"] = readme(target_manifest, str(config.get("readme_language", "en")))
 
     commit_prefix = f"CHORE: Update {helper} to v{source_meta['version']}"
-    create_sync_commit(repo, base_branch, branch, files, commit_prefix)
+    expected_head_sha = create_sync_commit(repo, base_branch, branch, files, commit_prefix)
     pull_request = open_pull_request(
         repo, base_branch, branch, helper, source_meta["version"], source_meta["sha256"]
     )
     if auto_merge:
-        enable_auto_merge(repo, pull_request, base_branch, branch, set(files), merge_method)
+        enable_auto_merge(
+            repo,
+            pull_request,
+            base_branch,
+            branch,
+            set(files),
+            merge_method,
+            expected_head_sha,
+        )
 
 
 def main() -> None:
