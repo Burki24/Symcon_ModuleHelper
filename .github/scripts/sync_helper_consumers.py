@@ -372,6 +372,33 @@ def validate_auto_merge_candidate(
     return node_id
 
 
+def merge_clean_pull_request(
+    repo: str,
+    pull_request: dict[str, Any],
+    merge_method: str,
+) -> None:
+    number = int(pull_request["number"])
+    head = pull_request.get("head")
+    head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
+    if not head_sha:
+        raise RuntimeError(f"Refusing direct merge for {repo}#{number}: missing head SHA.")
+
+    result = api(
+        "PUT",
+        f"/repos/{repo}/pulls/{number}/merge",
+        {"sha": head_sha, "merge_method": merge_method.lower()},
+    )
+    if not isinstance(result, dict) or result.get("merged") is not True:
+        message = (
+            str(result.get("message", "unknown response"))
+            if isinstance(result, dict)
+            else "invalid response"
+        )
+        raise RuntimeError(f"Direct merge failed for {repo}#{number}: {message}")
+
+    print(f"Directly merged clean helper PR {repo}#{number} ({merge_method}).")
+
+
 def enable_auto_merge(
     repo: str,
     pull_request: dict[str, Any],
@@ -429,7 +456,13 @@ def enable_auto_merge(
           }
         }
     """
-    graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
+    try:
+        graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
+    except RuntimeError as error:
+        if "is in clean status" not in str(error).lower():
+            raise
+        merge_clean_pull_request(repo, pull_request, merge_method)
+        return
     print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
 
 

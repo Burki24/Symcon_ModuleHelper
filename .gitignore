@@ -7,6 +7,10 @@ bin-release/
 # Other files and folders
 .settings/
 
+# Local Python test artifacts
+__pycache__/
+*.py[cod]
+
 # Executables
 *.swf
 *.air

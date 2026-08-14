@@ -35,6 +35,7 @@ def pull_request(*, author_type: str = "Bot") -> dict[str, object]:
         "base": {"ref": BASE_BRANCH},
         "head": {
             "ref": HEAD_BRANCH,
+            "sha": "0123456789abcdef0123456789abcdef01234567",
             "repo": {"full_name": REPOSITORY},
         },
     }
@@ -126,6 +127,58 @@ if len(graphql_calls) != 2:
     raise SystemExit(f"Expected GraphQL state query and mutation, got {len(graphql_calls)} calls.")
 if graphql_calls[-1][1].get("mergeMethod") != "SQUASH":
     raise SystemExit("Auto-merge mutation did not use the configured squash method.")
+
+direct_merge_calls: list[tuple[str, str, object | None]] = []
+
+
+def fake_clean_api(method: str, path: str, payload: object | None = None) -> object:
+    direct_merge_calls.append((method, path, payload))
+    if path == f"/repos/{REPOSITORY}":
+        return {
+            "allow_auto_merge": True,
+            "allow_merge_commit": True,
+            "allow_squash_merge": True,
+            "allow_rebase_merge": True,
+        }
+    if path == f"/repos/{REPOSITORY}/pulls/17/files?per_page=100&page=1":
+        return [
+            {"filename": "libs/helper/DateHelper.php"},
+            {"filename": "libs/helper/manifest.json"},
+        ]
+    if method == "PUT" and path == f"/repos/{REPOSITORY}/pulls/17/merge":
+        return {"merged": True, "message": "Pull Request successfully merged"}
+    raise AssertionError(f"Unexpected API call: {method} {path}")
+
+
+def fake_clean_graphql(query: str, variables: dict[str, object]) -> dict[str, object]:
+    if "query($pullRequestId" in query:
+        return {"node": {"autoMergeRequest": None}}
+    if "enablePullRequestAutoMerge" in query:
+        raise RuntimeError(
+            "GitHub GraphQL request failed: Pull request Pull Request is in clean status"
+        )
+    raise AssertionError("Unexpected GraphQL operation.")
+
+
+MODULE.api = fake_clean_api
+MODULE.graphql = fake_clean_graphql
+MODULE.enable_auto_merge(
+    REPOSITORY,
+    pull_request(),
+    BASE_BRANCH,
+    HEAD_BRANCH,
+    EXPECTED_FILES,
+    "SQUASH",
+)
+
+merge_calls = [call for call in direct_merge_calls if call[0] == "PUT"]
+if len(merge_calls) != 1:
+    raise SystemExit(f"Expected one direct clean-PR merge, got {len(merge_calls)}.")
+if merge_calls[0][2] != {
+    "sha": "0123456789abcdef0123456789abcdef01234567",
+    "merge_method": "squash",
+}:
+    raise SystemExit(f"Direct merge was not pinned to the expected head SHA: {merge_calls[0][2]}")
 
 consumer_config = json.loads((ROOT / ".github/helper-consumers.json").read_text(encoding="utf-8"))
 auto_merge = consumer_config.get("auto_merge", {})

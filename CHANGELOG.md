@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- Der Consumer-Sync führt vollständig geprüfte Helper-PRs mit Status `clean` direkt und an die geprüfte Head-SHA gebunden zusammen, wenn GitHub das Aktivieren von Auto-Merge für bereits mergefähige PRs ablehnt.
 - `IPSViewHTMLPageHelper` 1.3.0 löscht bestätigte, zurückbehaltene Variablen über eine Helper-Aktion, ohne Benutzer-Properties per `IPS_SetProperty` und `IPS_ApplyChanges` zu verändern.
 - `DateHelper` verwendet für externe Datumsstrings nun den nicht werfenden Parser `date_create_immutable()`. Ungültige Werte bleiben dadurch auch unter PHP 8.5 und aktivierter Debug-Erweiterung zuverlässig unverändert erhalten.
 - StylePHP-konforme Klammerposition der anonymen Fehlerbehandlungsfunktion im `IPSViewHTMLPageHelper`-Test.
