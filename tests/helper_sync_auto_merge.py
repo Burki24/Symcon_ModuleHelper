@@ -180,6 +180,31 @@ if merge_calls[0][2] != {
 }:
     raise SystemExit(f"Direct merge was not pinned to the expected head SHA: {merge_calls[0][2]}")
 
+
+def fake_unprotected_graphql(query: str, variables: dict[str, object]) -> dict[str, object]:
+    if "query($pullRequestId" in query:
+        return {"node": {"autoMergeRequest": None}}
+    if "enablePullRequestAutoMerge" in query:
+        raise RuntimeError(
+            "GitHub GraphQL request failed: "
+            "Pull request Protected branch rules not configured for this branch"
+        )
+    raise AssertionError("Unexpected GraphQL operation.")
+
+
+direct_merge_calls.clear()
+MODULE.graphql = fake_unprotected_graphql
+MODULE.enable_auto_merge(
+    REPOSITORY,
+    pull_request(),
+    BASE_BRANCH,
+    HEAD_BRANCH,
+    EXPECTED_FILES,
+    "SQUASH",
+)
+if len([call for call in direct_merge_calls if call[0] == "PUT"]) != 1:
+    raise SystemExit("A repository without protected branch rules did not use direct merge.")
+
 consumer_config = json.loads((ROOT / ".github/helper-consumers.json").read_text(encoding="utf-8"))
 auto_merge = consumer_config.get("auto_merge", {})
 if auto_merge != {"enabled": True, "merge_method": "SQUASH"}:

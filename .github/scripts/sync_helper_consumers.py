@@ -25,6 +25,10 @@ REQUESTED_HELPER = os.environ.get("REQUESTED_HELPER", "all").strip() or "all"
 OWNER = "Burki24"
 VERSION_PATTERN = re.compile(r"@version\s+([0-9]+\.[0-9]+\.[0-9]+)")
 AUTO_MERGE_METHODS = {"MERGE", "SQUASH", "REBASE"}
+AUTO_MERGE_DIRECT_FALLBACK_MESSAGES = (
+    "is in clean status",
+    "protected branch rules not configured",
+)
 
 
 def api(method: str, path: str, payload: Any | None = None) -> Any:
@@ -372,7 +376,7 @@ def validate_auto_merge_candidate(
     return node_id
 
 
-def merge_clean_pull_request(
+def merge_validated_pull_request(
     repo: str,
     pull_request: dict[str, Any],
     merge_method: str,
@@ -396,7 +400,7 @@ def merge_clean_pull_request(
         )
         raise RuntimeError(f"Direct merge failed for {repo}#{number}: {message}")
 
-    print(f"Directly merged clean helper PR {repo}#{number} ({merge_method}).")
+    print(f"Directly merged validated helper PR {repo}#{number} ({merge_method}).")
 
 
 def enable_auto_merge(
@@ -459,9 +463,10 @@ def enable_auto_merge(
     try:
         graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
     except RuntimeError as error:
-        if "is in clean status" not in str(error).lower():
+        message = str(error).lower()
+        if not any(fragment in message for fragment in AUTO_MERGE_DIRECT_FALLBACK_MESSAGES):
             raise
-        merge_clean_pull_request(repo, pull_request, merge_method)
+        merge_validated_pull_request(repo, pull_request, merge_method)
         return
     print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
 
