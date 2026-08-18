@@ -248,18 +248,37 @@ trait DebugHelper
         }
 
         $patterns = [
-            '/(?im)\b(Authorization|Proxy-Authorization)\s*:\s*[^\r\n]+/' => '$1: ' . self::DEBUG_MASK,
-            '/(?im)\b(Cookie|Set-Cookie)\s*:\s*[^\r\n]+/'                 => '$1: ' . self::DEBUG_MASK,
-            '/(?i)\bBearer\s+[A-Za-z0-9._~+\/-]+={0,2}/'                  => 'Bearer ' . self::DEBUG_MASK,
-            '/(?i)\bBasic\s+[A-Za-z0-9+\/=]+/'                           => 'Basic ' . self::DEBUG_MASK,
-            '/(?i)(:\/\/[^:\/\s]+:)[^@\s]+@/'                          => '$1' . self::DEBUG_MASK . '@',
-            '/(?i)([?&](?:access_token|refresh_token|id_token|client_secret|api_key|apikey|password|passwd|pwd)=)[^&#\s]+/'
-                => '$1' . self::DEBUG_MASK,
-            '/(?i)\b(access[_-]?token|refresh[_-]?token|id[_-]?token|client[_-]?secret|api[_-]?key|password|passwd|pwd)\b(\s*[:=]\s*)(["\']?)[^,\s}"\']+\3/'
-                => '$1$2$3' . self::DEBUG_MASK . '$3'
+            [
+                '/(?im)\b(Authorization|Proxy-Authorization)\s*:\s*[^\r\n]+/',
+                '$1: ' . self::DEBUG_MASK
+            ],
+            [
+                '/(?im)\b(Cookie|Set-Cookie)\s*:\s*[^\r\n]+/',
+                '$1: ' . self::DEBUG_MASK
+            ],
+            [
+                '/(?i)\bBearer\s+[A-Za-z0-9._~+\/-]+={0,2}/',
+                'Bearer ' . self::DEBUG_MASK
+            ],
+            [
+                '/(?i)\bBasic\s+[A-Za-z0-9+\/=]+/',
+                'Basic ' . self::DEBUG_MASK
+            ],
+            [
+                '/(?i)(:\/\/[^:\/\s]+:)[^@\s]+@/',
+                '$1' . self::DEBUG_MASK . '@'
+            ],
+            [
+                '/(?i)([?&](?:access_token|refresh_token|id_token|client_secret|api_key|apikey|password|passwd|pwd)=)[^&#\s]+/',
+                '$1' . self::DEBUG_MASK
+            ],
+            [
+                '/(?i)\b(access[_-]?token|refresh[_-]?token|id[_-]?token|client[_-]?secret|api[_-]?key|password|passwd|pwd)\b(\s*[:=]\s*)(["\']?)[^,\s}"\']+\3/',
+                '$1$2$3' . self::DEBUG_MASK . '$3'
+            ]
         ];
 
-        foreach ($patterns as $pattern => $replacement) {
+        foreach ($patterns as [$pattern, $replacement]) {
             $sanitized = preg_replace($pattern, $replacement, $text);
             if (is_string($sanitized)) {
                 $text = $sanitized;
