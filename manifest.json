@@ -23,6 +23,11 @@
       "version": "1.0.1",
       "sha256": "eb3ad3e82a61cab9d9d1dcd23a5943d078a674fa07013eb7902664a880ddcc7a"
     },
+    "DebugHelper": {
+      "file": "src/DebugHelper.php",
+      "version": "1.0.0",
+      "sha256": "928e9db2d18a72f108680abcb362ef87e61987f11fc73d9397ef6f2d54924e1f"
+    },
     "HelperTranslationHelper": {
       "file": "src/HelperTranslationHelper.php",
       "version": "1.0.0",
