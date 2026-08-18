@@ -17,7 +17,7 @@ use Throwable;
  * the native SendDebug() channel while normalizing structured data, masking
  * common secret fields and credentials, and limiting oversized messages.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait DebugHelper
 {
