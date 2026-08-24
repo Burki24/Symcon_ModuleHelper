@@ -18,6 +18,7 @@ $tests = [
     'visualization-theme.php',
     'ipsview-color-palette.php',
     'ipsview-style.php',
+    'ipsview-style-layout.php',
     'http-response.php',
     'symcon-oauth.php',
     'variable-helper.php',
