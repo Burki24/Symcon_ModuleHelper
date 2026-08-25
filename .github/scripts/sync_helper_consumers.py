@@ -30,6 +30,11 @@ AUTO_MERGE_DIRECT_FALLBACK_MESSAGES = (
     "is in clean status",
     "protected branch rules not configured",
 )
+AUTO_MERGE_TRANSIENT_MESSAGES = (
+    "is in unstable status",
+)
+AUTO_MERGE_ENABLE_ATTEMPTS = 24
+AUTO_MERGE_RETRY_DELAY_SECONDS = 5
 PULL_REQUEST_HEAD_REFRESH_ATTEMPTS = 8
 DIRECT_MERGE_ATTEMPTS = 3
 
@@ -505,15 +510,31 @@ def enable_auto_merge(
           }
         }
     """
-    try:
-        graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
-    except RuntimeError as error:
-        message = str(error).lower()
-        if not any(fragment in message for fragment in AUTO_MERGE_DIRECT_FALLBACK_MESSAGES):
-            raise
-        merge_validated_pull_request(repo, pull_request, merge_method, expected_head_sha)
+    for attempt in range(AUTO_MERGE_ENABLE_ATTEMPTS):
+        try:
+            graphql(mutation, {"pullRequestId": node_id, "mergeMethod": merge_method})
+        except RuntimeError as error:
+            message = str(error).lower()
+            if any(fragment in message for fragment in AUTO_MERGE_DIRECT_FALLBACK_MESSAGES):
+                merge_validated_pull_request(repo, pull_request, merge_method, expected_head_sha)
+                return
+            retryable = any(fragment in message for fragment in AUTO_MERGE_TRANSIENT_MESSAGES)
+            if not retryable or attempt + 1 >= AUTO_MERGE_ENABLE_ATTEMPTS:
+                raise
+            print(
+                f"Waiting to enable auto-merge for {repo}#{number}: "
+                f"GitHub still reports an unstable pull request status "
+                f"({attempt + 1}/{AUTO_MERGE_ENABLE_ATTEMPTS})."
+            )
+            time.sleep(AUTO_MERGE_RETRY_DELAY_SECONDS)
+            pull_request = refresh_pull_request_head(repo, number, expected_head_sha)
+            actual_files = pull_request_files(repo, number)
+            node_id = validate_auto_merge_candidate(
+                pull_request, repo, base_branch, branch, expected_files, actual_files
+            )
+            continue
+        print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
         return
-    print(f"Enabled {merge_method} auto-merge for {repo}#{number}.")
 
 
 def validate_source_helper(name: str, meta: dict[str, Any]) -> tuple[bytes, str]:

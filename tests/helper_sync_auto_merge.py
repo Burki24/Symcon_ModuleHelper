@@ -136,6 +136,43 @@ if len(graphql_calls) != 2:
 if graphql_calls[-1][1].get("mergeMethod") != "SQUASH":
     raise SystemExit("Auto-merge mutation did not use the configured squash method.")
 
+unstable_attempts = 0
+api_calls.clear()
+
+
+def fake_unstable_graphql(query: str, variables: dict[str, object]) -> dict[str, object]:
+    global unstable_attempts
+    if "query($pullRequestId" in query:
+        return {"node": {"autoMergeRequest": None}}
+    if "enablePullRequestAutoMerge" in query:
+        unstable_attempts += 1
+        if unstable_attempts < 3:
+            raise RuntimeError(
+                "GitHub GraphQL request failed: Pull request Pull request is in unstable status"
+            )
+        return {"enablePullRequestAutoMerge": {"pullRequest": {"number": 17}}}
+    raise AssertionError("Unexpected GraphQL operation.")
+
+
+MODULE.api = fake_api
+MODULE.graphql = fake_unstable_graphql
+MODULE.time.sleep = lambda _seconds: None
+MODULE.enable_auto_merge(
+    REPOSITORY,
+    pull_request(),
+    BASE_BRANCH,
+    HEAD_BRANCH,
+    EXPECTED_FILES,
+    "SQUASH",
+    EXPECTED_HEAD_SHA,
+)
+if unstable_attempts != 3:
+    raise SystemExit(
+        f"Expected unstable auto-merge status to be retried twice before success, got {unstable_attempts} attempts."
+    )
+if any(call[0] == "PUT" for call in api_calls):
+    raise SystemExit("An unstable pull request must never fall back to a direct merge.")
+
 direct_merge_calls: list[tuple[str, str, object | None]] = []
 
 
