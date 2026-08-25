@@ -16,7 +16,7 @@ require_once __DIR__ . '/HelperTranslationHelper.php';
  * their components, but do not define module-specific colors, gradients,
  * typography, borders or shadows.
  *
- * @version 1.4.2
+ * @version 1.4.3
  */
 trait IPSViewStyleHelper
 {
