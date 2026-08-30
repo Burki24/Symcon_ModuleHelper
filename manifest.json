@@ -43,6 +43,11 @@
       "version": "1.0.0",
       "sha256": "2f73639e1c25f09950dad90e5560276de5f8fb66bbc024ae35fa0c072a0e08fe"
     },
+    "IPSViewFontCatalogHelper": {
+      "file": "src/IPSViewFontCatalogHelper.php",
+      "version": "1.0.0",
+      "sha256": "8f352af086f4ac98b57e5768d15f538301c54cb41e5f8d1d41c62330592bc660"
+    },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
       "version": "1.3.0",

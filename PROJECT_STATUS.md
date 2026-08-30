@@ -10,8 +10,8 @@
 
 **Datum:** 2026-08-30  
 **Phase:** Paket A – Zentraler Fontkatalog  
-**Status:** Vorbereitung abgeschlossen, Implementierung noch nicht begonnen  
-**Nächster Schritt:** Zentralen IPSView-Fontkatalog und dessen API im `Symcon_ModuleHelper/dev` entwerfen und implementieren.
+**Status:** A1/A2 und Assistant-Umstellung A4 lokal umgesetzt und getestet; A3 steht als nächster Integrationsschritt an  
+**Nächster Schritt:** `IPSViewStyleHelper` auf den zentralen `IPSViewFontCatalogHelper` umstellen und dabei die Abwärtskompatibilität bestehender `IPSViewStyleFontFamily`-Werte erhalten.
 
 ---
 
@@ -142,20 +142,20 @@ Daher gilt vorerst:
 
 #### A1 – Zentralen Fontkatalog definieren
 
-- [ ] Geeigneten Ort/API im `Symcon_ModuleHelper` festlegen.
-- [ ] Acht bestätigte Fontfamilien zentral abbilden.
-- [ ] Verfügbare Schnitte/Fähigkeiten zentral abbilden.
-- [ ] Stabile interne Bezeichner und angezeigte Namen trennen, falls erforderlich.
+- [x] Geeigneten Ort/API im `Symcon_ModuleHelper` festlegen: eigenständiger `IPSViewFontCatalogHelper` ohne Style-/HTML-Abhängigkeit.
+- [x] Acht bestätigte Fontfamilien zentral abbilden.
+- [x] Verfügbare Schnitte/Fähigkeiten zentral abbilden.
+- [x] Kanonische IPSView-Dokumentwerte und lesbare Anzeigenamen getrennt abbilden.
 
 #### A2 – Gemeinsame Font-API implementieren
 
 Vorgesehene Fähigkeiten:
 
-- [ ] verfügbare Fontfamilien liefern
-- [ ] verfügbare Schnitte für eine Fontfamilie liefern
-- [ ] Fontfamilie validieren
-- [ ] Font-Schnitt validieren
-- [ ] Fontwerte normalisieren/Fallback bereitstellen
+- [x] verfügbare Fontfamilien liefern
+- [x] verfügbare Schnitte für eine Fontfamilie liefern
+- [x] Fontfamilie validieren
+- [x] Font-Schnitt validieren
+- [x] Fontwerte normalisieren/Fallback bereitstellen
 
 Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur gewählt.
 
@@ -169,30 +169,30 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 
 #### A4 – IPSViewAssistant umstellen
 
-- [ ] lokale Font-Matrix aus `IPSViewTypography.php` entfernen bzw. auf zentrale Definition delegieren
-- [ ] Assistant-Auswahl vollständig aus zentralem Fontkatalog erzeugen
-- [ ] Bold/Italic nur anbieten, wenn vom zentralen Katalog erlaubt
-- [ ] lokale Font-Dateipfade/TTFs für Vorschau beibehalten
-- [ ] SVG-/Browser-Vorschau unverändert funktionsfähig halten
+- [x] lokale Font-Matrix aus `IPSViewTypography.php` entfernen bzw. auf zentrale Definition delegieren
+- [x] Assistant-Auswahl vollständig aus zentralem Fontkatalog erzeugen
+- [x] Bold/Italic nur anbieten, wenn vom zentralen Katalog erlaubt
+- [x] lokale Font-Dateipfade/TTFs für Vorschau beibehalten
+- [x] SVG-/Browser-Vorschau unverändert funktionsfähig halten
 
 #### A5 – Abwärtskompatibilität
 
-- [ ] vorhandene Assistant-Instanzen behalten ihre Fontauswahl
+- [x] vorhandene Assistant-Instanzen behalten ihre Fontauswahl (numerische Assistant-Font-IDs 0–8 unverändert)
 - [ ] vorhandene Module mit `IPSViewStyleHelper` bleiben lauffähig
 - [ ] keine unnötige Änderung bestehender Property-Namen oder IDs
-- [ ] sinnvolle Fallbacks für unbekannte alte Fontwerte
+- [x] sinnvolle Fallbacks für unbekannte alte Fontwerte im zentralen Katalog und Assistant beibehalten
 
 #### A6 – Tests und Freigabe
 
-- [ ] zentralen Fontkatalog testen
-- [ ] alle Fontfamilien testen
-- [ ] alle erlaubten Schnitte testen
-- [ ] nicht erlaubte Schnitte testen
-- [ ] Fallbacks testen
-- [ ] Assistant-Tests ausführen
+- [x] zentralen Fontkatalog testen
+- [x] alle Fontfamilien testen
+- [x] alle erlaubten Schnitte testen
+- [x] nicht erlaubte Schnitte testen
+- [x] Fallbacks testen
+- [x] Assistant-Tests ausführen
 - [ ] Helper-Tests ausführen
 - [ ] StylePHP prüfen
-- [ ] `PROJECT_STATUS.md` aktualisieren
+- [x] `PROJECT_STATUS.md` nach A1/A2/A4 aktualisieren
 
 **Freigabekriterium Paket A:** Helper und Assistant verwenden dieselbe Fontdefinition; bestehende Instanzen funktionieren weiter.
 
@@ -365,6 +365,16 @@ Das endgültige Schema wird erst in Paket B verbindlich festgelegt.
 
 ---
 
+## 5.1 Paket-A-Architekturentscheidungen
+
+- Der zentrale Fontkatalog ist ein eigenständiger `final class IPSViewFontCatalogHelper` und kein Trait im `IPSViewStyleHelper`.
+- Der Katalog enthält ausschließlich Metadaten und Validierungs-/Normalisierungslogik; TTF-Dateien verbleiben beim jeweiligen Consumer, derzeit im `IPSViewAssistant`.
+- Kanonische Family-Werte entsprechen den realen IPSView-Dokumentwerten (`RobotoMono`, `OpenSans`, `PTSans` usw.); Anzeigenamen bleiben lesbar (`Roboto Mono`, `Open Sans`, `PT Sans`).
+- Der `IPSViewAssistant` behält seine bestehenden numerischen Font-Modi 0–8 unverändert und mappt diese nur auf den zentralen Katalog.
+- Unbekannte/systemweite Fonts werden vom zentralen Katalog nicht fälschlich als native IPSView-Fonts validiert. Consumer können für solche Alt-/Custom-Werte ihre bestehende Fallback-Logik erhalten.
+
+---
+
 ## 6. Chat-/Projektübergabe
 
 Bei Beginn eines neuen Chats in diesem Projekt:
@@ -380,14 +390,17 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket A / A1:**
+**Paket A / A3:**
 
-Zuerst wird die bestehende Fontlogik aus `IPSViewAssistant/libs/IPSViewTypography.php` vollständig gegen den aktuellen `Symcon_ModuleHelper/dev` analysiert. Danach wird entschieden, ob der Fontkatalog:
+A1/A2 wurden mit einem eigenständigen statischen `IPSViewFontCatalogHelper` umgesetzt. Der Assistant verwendet diesen Katalog bereits lokal über seinen Helper-Consumer und behält nur seine Assistant-spezifischen numerischen Font-IDs sowie die TTF-/Preview-Zuordnung.
 
-- als eigener Helper/Trait,
-- als zentraler Contract innerhalb des `IPSViewStyleHelper`, oder
-- als eigenständige statische Definition mit gemeinsamer API
+Als Nächstes wird `src/IPSViewStyleHelper.php` integriert:
 
-implementiert wird.
+- `IPSViewFontCatalogHelper.php` als Dependency aufnehmen,
+- das freie Fontfamilien-Textfeld durch eine kataloggestützte Auswahl ersetzen,
+- den bestehenden Property-Namen `IPSViewStyleFontFamily` und gespeicherte Altwerte erhalten,
+- bekannte IPSView-Familien kanonisch normalisieren,
+- bisher zulässige benutzerdefinierte/systemweite Font-Strings nicht zerstören,
+- entscheiden, ob ein expliziter `FontStyle` bereits in Paket A zum HTML-Style-Contract gehört oder erst mit dem versionsfähigen Style-Profile-Contract in Paket B eingeführt wird.
 
-Bevorzugt wird eine Lösung, die auch außerhalb des `IPSViewStyleHelper` direkt vom `IPSViewAssistant` verwendet werden kann und keine unnötige Abhängigkeit von HTML-/Style-Rendering erzeugt.
+Danach folgen vollständige ModuleHelper-Tests, StylePHP und der Paket-A-Endtest.
