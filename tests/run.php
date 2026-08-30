@@ -18,6 +18,7 @@ $tests = [
     'visualization-theme.php',
     'ipsview-color-palette.php',
     'ipsview-font-catalog.php',
+    'ipsview-style-profile.php',
     'ipsview-style.php',
     'ipsview-style-font-catalog.php',
     'ipsview-style-layout.php',

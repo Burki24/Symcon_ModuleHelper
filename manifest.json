@@ -80,6 +80,14 @@
         }
       ]
     },
+    "IPSViewStyleProfileHelper": {
+      "file": "src/IPSViewStyleProfileHelper.php",
+      "version": "1.0.0",
+      "sha256": "bb89354387683ae6ad245705d8452815fab73a32834bc533b8f6db367b8ee762",
+      "dependencies": [
+        "IPSViewFontCatalogHelper"
+      ]
+    },
     "ParentConnectionHelper": {
       "file": "src/ParentConnectionHelper.php",
       "version": "1.0.0",

@@ -8,10 +8,10 @@
 
 ## Aktueller Stand
 
-**Datum:** 2026-08-30  
-**Phase:** Paket A – Zentraler Fontkatalog  
-**Status:** Paket A vollständig umgesetzt und geprüft; `Symcon_ModuleHelper/dev` ist freigabereif  
-**Nächster Schritt:** Paket A von `dev` nach `main` übernehmen und die automatische Versionierung/Consumer-Verteilung kontrollieren. Danach beginnt Paket B – Style Profile Contract V1.
+**Datum:** 2026-08-30
+**Phase:** Paket B – Style Profile Contract V1
+**Status:** Paket B vollständig implementiert; gezielte Syntax-, Contract-, Roundtrip- und Validierungstests sind lokal erfolgreich. Übernahme nach `Symcon_ModuleHelper/dev` und GitHub-CI stehen noch aus.
+**Nächster Schritt:** Paket B nach `dev` übernehmen, `Tests` und `Check Style` prüfen und erst nach grünem CI-Stand `dev → main` freigeben.
 
 ---
 
@@ -30,6 +30,8 @@
 - Auf `dev` wird mit normalen, thematisch sauberen Commits gearbeitet.
 - Erst ein vollständig getestetes Arbeitspaket wird von `dev` nach `main` übernommen.
 - Dadurch erzeugen Zwischenstände auf `dev` keine künstlichen Helper-Versionen und werden nicht an Consumer verteilt.
+- Nach einem erfolgreichen Release auf `main` wird `dev` künftig automatisch auf den veröffentlichten `main`-Stand fast-forwarded, sofern `dev` keine eigenen, noch nicht in `main` enthaltenen Commits besitzt.
+- Diese Rücksynchronisierung verwendet niemals Force-Push und bricht bei divergierenden Branches sicher ab.
 
 ### Maßgebliche Branches je Repository
 
@@ -192,7 +194,7 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 #### A5 – Abwärtskompatibilität
 
 - [x] vorhandene Assistant-Instanzen behalten ihre Fontauswahl (numerische Assistant-Font-IDs 0–8 unverändert)
-- [ ] vorhandene Module mit `IPSViewStyleHelper` im vollständigen Repository-/Consumer-Test bestätigen
+- [x] vorhandene Module mit `IPSViewStyleHelper` im vollständigen Repository-/Consumer-Test bestätigen
 - [x] bestehende `IPSViewStyleFontFamily`-Property unverändert beibehalten
 - [x] bestehende Style-Source-IDs 0–3 unverändert beibehalten
 - [x] bekannte frühere Font-Aliase ohne Konfigurationsmigration lesen
@@ -208,17 +210,18 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 - [x] Fallbacks testen
 - [x] Assistant-Tests für A4 ausführen
 - [x] gezielte A3-Integrationstests lokal ausführen
-- [ ] vollständige Helper-Tests auf dem übernommenen `dev`-Stand ausführen
-- [ ] offiziellen Symcon-StylePHP-Endstand prüfen
-- [ ] Assistant-Tests nach finalem Helper-Stand erneut ausführen
+- [x] vollständige Helper-Tests auf dem übernommenen `dev`-Stand ausführen
+- [x] offiziellen Symcon-StylePHP-Endstand prüfen
+- [x] Assistant-Tests nach finalem Helper-Stand erneut ausführen
 - [x] `PROJECT_STATUS.md` nach A3 aktualisieren
 
 **Freigabekriterium Paket A:** Helper und Assistant verwenden dieselbe Fontdefinition; bestehende Instanzen funktionieren weiter.
 
-**Paket A abgeschlossen:** Ja.  
-**Geprüfter `Symcon_ModuleHelper/dev`-Commit:** `62ccbffe83fb2f8f922cf4a20993e926b6e30704`  
-**CI:** `Tests` erfolgreich, `Check Style` erfolgreich.  
-**Freigabeaktion:** `dev → main`; danach automatische Metadaten-/Versionsaktualisierung und Consumer-Synchronisierung kontrollieren.
+**Paket A abgeschlossen:** Ja.
+**Veröffentlichter Stand:** `Symcon_ModuleHelper/main` v3.7.0.
+**Consumer-Synchronisierung:** erfolgreich; zentrale Fontauswahl ist in den Consumern sichtbar.
+**Branch-Stand nach Veröffentlichung:** `dev` enthält den vollständigen `main`-Stand und zusätzlich die neue Fast-Forward-only-Auto-Synchronisierung für zukünftige Releases.
+**CI:** `Tests` und `Check Style` erfolgreich.
 
 ---
 
@@ -226,24 +229,37 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 
 **Ziel:** Ein versionsfähiges, universelles Austauschformat für IPSView-Styles definieren.
 
-- [ ] Schema `burki24.ipsview-style` festlegen
-- [ ] `version = 1` definieren
-- [ ] Metadaten definieren (`name`, `description`, `createdBy`, `createdAt` nach Bedarf)
-- [ ] universelle Style-Felder festlegen
-- [ ] Farben definieren
-- [ ] Transparenzen definieren
-- [ ] Typografie definieren
-- [ ] Formen/Rahmen definieren
-- [ ] Schatten definieren
-- [ ] Effekte/Verlauf definieren
-- [ ] Assistant-spezifische Werte ausdrücklich ausschließen
-- [ ] zentralen Decoder/Validator implementieren
-- [ ] zentralen Encoder implementieren
-- [ ] Normalisierung und Wertebereiche implementieren
-- [ ] Zukunftskompatibilität für unbekannte Felder festlegen
-- [ ] Tests ergänzen
+- [x] Schema `burki24.ipsview-style` festlegen
+- [x] `version = 1` definieren
+- [x] Metadaten definieren: `name` Pflicht; `description`, `createdBy`, `createdAt` optional
+- [x] 46 universelle, portable Style-Quellfelder festlegen
+- [x] Farben als normalisierte `#RRGGBB`-Werte definieren
+- [x] Transparenzen/Deckkräfte als Prozentwerte mit zentralen Wertebereichen definieren
+- [x] Typografie mit `FontFamily`, `FontStyle`, `FontSize` und `FontScale` definieren
+- [x] Formen/Rahmen mit Radius, Rahmen- und Linienstärke definieren
+- [x] Schattenfarbe, Deckkräfte und Geometrie definieren
+- [x] `DisabledOpacity` und `GradientStrength` definieren
+- [x] Assistant-/Dokument-spezifische Werte ausdrücklich ausschließen
+- [x] zentralen Decoder/Validator in `IPSViewStyleProfileHelper` implementieren
+- [x] zentralen Encoder in `IPSViewStyleProfileHelper` implementieren
+- [x] Normalisierung und Wertebereiche implementieren
+- [x] unbekannte V1-Felder tolerant lesen und bei Normalisierung verwerfen; unbekannte Versionen ausdrücklich ablehnen
+- [x] Contract-, Roundtrip-, Font-, Wertebereichs-, Schema-/Versions- und Fehlerfalltests ergänzen
 
 **Nicht Teil des Style-Profils:** Hintergrundbilder, Zielseite, Seitenformat, Orientation, Scope, Control-Mapping, Media-IDs.
+
+**Verbindliche Entscheidungen für V1:**
+
+- Ein Profil ist immer ein **vollständiger Snapshot**, kein partielles Override.
+- Alle 46 Style-Felder sind Pflichtfelder; damit ist ein Profil ohne Consumer-Fallback reproduzierbar.
+- Abgeleitete Werte werden nicht gespeichert: `ColorScheme`, Soft-/Contrast-Farben, fertige Gradienten und fertige `box-shadow`-Strings entstehen beim Consumer.
+- Die Schatten-Basisfarbe heißt im Profil `ShadowColor`, weil `Shadow` im aufgelösten `IPSViewStyleHelper` bereits den fertigen CSS-Schatten bezeichnet.
+- `FontFamily` verwendet `system` oder einen kanonischen Wert aus `IPSViewFontCatalogHelper`.
+- `FontStyle` verwendet `regular`, `bold`, `italic` oder `boldItalic` und wird gegen die Fähigkeiten der gewählten Schrift validiert.
+- Der bisherige System-Fontstack wird beim Import auf den portablen Wert `system` normalisiert.
+- Unbekannte zusätzliche V1-Felder werden toleriert, aber nicht in den normalisierten Contract übernommen.
+- Eine unbekannte oder zukünftige `version` wird abgelehnt, damit kein inkompatibler Contract stillschweigend falsch interpretiert wird.
+
 
 ---
 
@@ -264,7 +280,7 @@ IPSVIEW_STYLE_SOURCE_PROFILE = 4;
 - [ ] Profil in `IPSViewResolvedStyle()` integrieren
 - [ ] sicheren Fallback definieren
 - [ ] Media-Update-Überwachung auf Profile erweitern
-- [ ] Tests ergänzen
+- [x] Contract-, Roundtrip-, Font-, Wertebereichs-, Schema-/Versions- und Fehlerfalltests ergänzen
 
 ---
 
@@ -287,7 +303,7 @@ Zusätzlich:
 - [ ] bestehende Assistant-Theme-IDs prüfen
 - [ ] Mapping/Migration sicherstellen
 - [ ] `IPSViewTheme.php` auf zentrale Presets umstellen
-- [ ] Tests ergänzen
+- [x] Contract-, Roundtrip-, Font-, Wertebereichs-, Schema-/Versions- und Fehlerfalltests ergänzen
 
 ---
 
@@ -414,12 +430,21 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket A freigeben**
+**Paket B auf `Symcon_ModuleHelper/dev` übernehmen und CI bestätigen**
 
-1. `Symcon_ModuleHelper/dev` nach `main` übernehmen.
-2. Automatische Metadaten-/Versionsaktualisierung auf `main` abwarten.
-3. GitHub Actions auf `main` vollständig prüfen.
-4. Automatische Helper-Synchronisierung zu den Consumern kontrollieren.
-5. Erst danach Paket B – `Style Profile Contract V1` – auf `Symcon_ModuleHelper/dev` beginnen.
+Geänderte/neu angelegte Dateien:
 
-Der für Paket A geprüfte `dev`-Stand endet derzeit bei Commit `62ccbffe83fb2f8f922cf4a20993e926b6e30704` (`TEST: Update IPSView style bundle dependencies`).
+- `src/IPSViewStyleProfileHelper.php`
+- `tests/ipsview-style-profile.php`
+- `tests/run.php`
+- `manifest.json`
+- `PROJECT_STATUS.md`
+
+Nach dem Commit auf `dev`:
+
+1. GitHub Actions `Tests` prüfen.
+2. GitHub Actions `Check Style` prüfen.
+3. Falls beide grün sind, Paket B als freigabereif markieren.
+4. `dev → main` übernehmen.
+5. Automatische Versionierung, Consumer-Synchronisierung und Main→Dev-Fast-Forward kontrollieren.
+6. Danach Paket C – Style-Profil als neue `IPSViewStyleHelper`-Quelle – beginnen.
