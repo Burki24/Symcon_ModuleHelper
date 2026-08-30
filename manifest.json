@@ -83,7 +83,7 @@
     "IPSViewStyleProfileHelper": {
       "file": "src/IPSViewStyleProfileHelper.php",
       "version": "1.0.0",
-      "sha256": "bb89354387683ae6ad245705d8452815fab73a32834bc533b8f6db367b8ee762",
+      "sha256": "306cf55073acffe90c4f3340ca7614203523912dac4690dc82e1440355764a35",
       "dependencies": [
         "IPSViewFontCatalogHelper"
       ]

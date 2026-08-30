@@ -399,11 +399,11 @@ final class IPSViewStyleProfileHelper
         if ($fontFamily === self::FONT_SYSTEM) {
             $lookup = strtolower(trim(preg_replace('/\s+/', ' ', $value) ?? ''));
             $style = match ($lookup) {
-                'regular', 'normal'        => IPSViewFontCatalogHelper::STYLE_REGULAR,
-                'bold'                     => IPSViewFontCatalogHelper::STYLE_BOLD,
-                'italic'                   => IPSViewFontCatalogHelper::STYLE_ITALIC,
+                'regular', 'normal'         => IPSViewFontCatalogHelper::STYLE_REGULAR,
+                'bold'                      => IPSViewFontCatalogHelper::STYLE_BOLD,
+                'italic'                    => IPSViewFontCatalogHelper::STYLE_ITALIC,
                 'bolditalic', 'bold italic' => IPSViewFontCatalogHelper::STYLE_BOLD_ITALIC,
-                default                    => null
+                default                     => null
             };
             if ($style === null) {
                 throw new InvalidArgumentException('IPSView style profile FontStyle is not supported.');

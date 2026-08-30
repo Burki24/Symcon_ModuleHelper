@@ -129,56 +129,56 @@ assertSameValue(IPSViewFontCatalogHelper::STYLE_BOLD, $dancingProfile['style']['
 $invalidDancing = $dancingStyle;
 $invalidDancing['FontStyle'] = 'italic';
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::create('Invalid dancing', $invalidDancing),
+    static fn () => IPSViewStyleProfileHelper::create('Invalid dancing', $invalidDancing),
     'Unavailable native font cuts must be rejected.'
 );
 
 $missingField = $style;
 unset($missingField['ShadowBlur']);
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::create('Missing field', $missingField),
+    static fn () => IPSViewStyleProfileHelper::create('Missing field', $missingField),
     'Style Profile V1 must reject incomplete snapshots.'
 );
 
 $invalidColor = $style;
 $invalidColor['Accent'] = 'red';
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::create('Invalid color', $invalidColor),
+    static fn () => IPSViewStyleProfileHelper::create('Invalid color', $invalidColor),
     'Colors outside #RRGGBB must be rejected.'
 );
 
 $invalidOpacity = $style;
 $invalidOpacity['ShadowOpacity'] = 101;
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::create('Invalid opacity', $invalidOpacity),
+    static fn () => IPSViewStyleProfileHelper::create('Invalid opacity', $invalidOpacity),
     'Opacity values outside 0..100 must be rejected.'
 );
 
 $invalidGeometry = $style;
 $invalidGeometry['ShadowSpread'] = -21;
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::create('Invalid geometry', $invalidGeometry),
+    static fn () => IPSViewStyleProfileHelper::create('Invalid geometry', $invalidGeometry),
     'Geometry values outside the central StyleHelper range must be rejected.'
 );
 
 $wrongSchema = $profile;
 $wrongSchema['schema'] = 'other.schema';
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::normalize($wrongSchema),
+    static fn () => IPSViewStyleProfileHelper::normalize($wrongSchema),
     'Unknown style profile schemas must be rejected.'
 );
 
 $futureVersion = $profile;
 $futureVersion['version'] = 2;
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::normalize($futureVersion),
+    static fn () => IPSViewStyleProfileHelper::normalize($futureVersion),
     'Unsupported future profile versions must be rejected explicitly.'
 );
 
 $invalidTimestamp = $profile;
 $invalidTimestamp['createdAt'] = '2026-08-30 09:30:00';
 $assertInvalid(
-    static fn() => IPSViewStyleProfileHelper::normalize($invalidTimestamp),
+    static fn () => IPSViewStyleProfileHelper::normalize($invalidTimestamp),
     'createdAt must use an RFC 3339 timestamp with timezone.'
 );
 
