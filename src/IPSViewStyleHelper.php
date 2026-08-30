@@ -373,7 +373,7 @@ trait IPSViewStyleHelper
                         'name'    => 'IPSViewStyleSource',
                         'caption' => $this->IPSViewStyleText('field.style_source'),
                         'options' => $this->IPSViewStyleSourceOptions(),
-                        'width' => '220px'
+                        'width'   => '220px'
                     ],
                     [
                         'type'    => 'SelectMedia',
@@ -1029,7 +1029,7 @@ trait IPSViewStyleHelper
             self::IPSVIEW_STYLE_SOURCE_PRESET_EARTHY => IPSViewStylePresetHelper::PRESET_EARTHY,
             self::IPSVIEW_STYLE_SOURCE_PRESET_WATER  => IPSViewStylePresetHelper::PRESET_WATER,
             self::IPSVIEW_STYLE_SOURCE_PRESET_SUNNY  => IPSViewStylePresetHelper::PRESET_SUNNY,
-            default                                   => null
+            default                                  => null
         };
     }
 

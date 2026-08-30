@@ -67,7 +67,7 @@
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
       "version": "1.6.1",
-      "sha256": "1c33d29604a3c148374b928cbd5829765e0d89e5fe5bc8d35ac4458412439b8e",
+      "sha256": "ce5b22498ef2b1e12373f90dcf9ab9f571aeca4216a06bf66709155de9a4004f",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
@@ -78,7 +78,7 @@
         {
           "file": "src/translations/IPSViewStyleHelper.json",
           "target": "translations/IPSViewStyleHelper.json",
-          "sha256": "3c9b73dfa157b1318795d86de5eb068777a7a61b06caaf9e6ea341178d91b7cf"
+          "sha256": "ab754f8e0e606ffa5614e73891893804186f23e7947e029e2b008943b22f35b6"
         }
       ]
     },

@@ -82,6 +82,10 @@
             "en": "Shared preset",
             "de": "Zentrale Vorgabe"
         },
+        "option.previous_selection": {
+            "en": "previous selection",
+            "de": "bisherige Auswahl"
+        },
         "option.system_font": {
             "en": "System default",
             "de": "Systemstandard"
@@ -297,10 +301,6 @@
         "field.gradient_strength": {
             "en": "Gradient strength",
             "de": "Verlaufsstärke"
-        },
-        "option.previous_selection": {
-            "en": "previous selection",
-            "de": "bisherige Auswahl"
         }
     }
 }
