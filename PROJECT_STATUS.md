@@ -10,8 +10,8 @@
 
 **Datum:** 2026-08-30  
 **Phase:** Paket A – Zentraler Fontkatalog  
-**Status:** A1/A2 und Assistant-Umstellung A4 lokal umgesetzt und getestet; A3 steht als nächster Integrationsschritt an  
-**Nächster Schritt:** `IPSViewStyleHelper` auf den zentralen `IPSViewFontCatalogHelper` umstellen und dabei die Abwärtskompatibilität bestehender `IPSViewStyleFontFamily`-Werte erhalten.
+**Status:** A1, A2 und A4 abgeschlossen; A3 ist der nächste Arbeitsschritt  
+**Nächster Schritt:** `IPSViewStyleHelper` auf den zentralen `IPSViewFontCatalogHelper` umstellen, ohne bestehende Source-IDs oder gespeicherte Fontwerte zu beschädigen.
 
 ---
 
@@ -20,13 +20,25 @@
 ### Branch- und Release-Modell
 
 - `dev` ist der Entwicklungs- und Integrationsbranch des `Symcon_ModuleHelper`.
-- `main` enthält ausschließlich freigegebene/verteilbare Stände.
+- `main` enthält ausschließlich freigegebene/verteilbare Stände des `Symcon_ModuleHelper`.
+- Für den `IPSViewAssistant` ist `dev-popup` der maßgebliche Entwicklungsbranch.
+- `IPSViewAssistant/dev-popup` setzt Symcon 9.1 oder neuer voraus.
+- Der `IPSViewAssistant` wird nicht vor Symcon 9.1 veröffentlicht; eine Rückportierung der aktuellen Pakete auf den 9.0-kompatiblen Assistant-Branch `dev` ist daher nicht vorgesehen.
 - Änderungen werden während der Entwicklung **nicht direkt auf `main`** vorgenommen.
 - Die automatische Helper-Versionierung bleibt ausschließlich auf `main`.
 - Die automatische Verteilung der Helper an Consumer-Repositories bleibt ausschließlich auf `main`.
 - Auf `dev` wird mit normalen, thematisch sauberen Commits gearbeitet.
 - Erst ein vollständig getestetes Arbeitspaket wird von `dev` nach `main` übernommen.
 - Dadurch erzeugen Zwischenstände auf `dev` keine künstlichen Helper-Versionen und werden nicht an Consumer verteilt.
+
+### Maßgebliche Branches je Repository
+
+| Repository | Arbeitsbranch | Zielplattform / Bedeutung |
+| --- | --- | --- |
+| `Symcon_ModuleHelper` | `dev` | Entwicklung und Integration; keine automatische Consumer-Verteilung |
+| `Symcon_ModuleHelper` | `main` | freigegebener, automatisch versionierter und verteilter Stand |
+| `IPSViewAssistant` | `dev-popup` | maßgeblicher Entwicklungsstand; Symcon 9.1+ |
+| `IPSViewAssistant` | `dev` | älterer Symcon-9.0-kompatibler Stand; für Pakete A–F nicht maßgeblich |
 
 ### Qualitätsregeln vor Freigabe
 
@@ -390,17 +402,16 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket A / A3:**
+**Paket A / A3 – `IPSViewStyleHelper` integrieren**
 
-A1/A2 wurden mit einem eigenständigen statischen `IPSViewFontCatalogHelper` umgesetzt. Der Assistant verwendet diesen Katalog bereits lokal über seinen Helper-Consumer und behält nur seine Assistant-spezifischen numerischen Font-IDs sowie die TTF-/Preview-Zuordnung.
+Der zentrale `IPSViewFontCatalogHelper` ist erstellt und der `IPSViewAssistant/dev-popup` verwendet ihn bereits. Als nächstes wird `src/IPSViewStyleHelper.php` im `Symcon_ModuleHelper/dev` umgestellt.
 
-Als Nächstes wird `src/IPSViewStyleHelper.php` integriert:
+Dabei gelten folgende Anforderungen:
 
-- `IPSViewFontCatalogHelper.php` als Dependency aufnehmen,
-- das freie Fontfamilien-Textfeld durch eine kataloggestützte Auswahl ersetzen,
-- den bestehenden Property-Namen `IPSViewStyleFontFamily` und gespeicherte Altwerte erhalten,
-- bekannte IPSView-Familien kanonisch normalisieren,
-- bisher zulässige benutzerdefinierte/systemweite Font-Strings nicht zerstören,
-- entscheiden, ob ein expliziter `FontStyle` bereits in Paket A zum HTML-Style-Contract gehört oder erst mit dem versionsfähigen Style-Profile-Contract in Paket B eingeführt wird.
-
-Danach folgen vollständige ModuleHelper-Tests, StylePHP und der Paket-A-Endtest.
+- bestehende Style-Source-IDs `0–3` bleiben unverändert,
+- `IPSViewStyleFontFamily` bleibt aus Kompatibilitätsgründen als bestehende Property erhalten,
+- das freie Font-Textfeld im Formular wird durch die zentrale Fontauswahl ersetzt,
+- bestehende gespeicherte Fontwerte werden normalisiert und weiterhin sicher gelesen,
+- unbekannte/veraltete Fontwerte erhalten einen sicheren Fallback,
+- Font-Schnitt-Unterstützung wird nur ergänzt, wenn sie ohne Bruch des aktuellen Style-Contracts möglich ist,
+- anschließend werden Helper- und Assistant-Tests sowie die abschließenden Paket-A-Prüfungen ausgeführt.
