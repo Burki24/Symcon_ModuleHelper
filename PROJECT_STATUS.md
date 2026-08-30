@@ -10,8 +10,8 @@
 
 **Datum:** 2026-08-30  
 **Phase:** Paket A – Zentraler Fontkatalog  
-**Status:** A1–A4 technisch umgesetzt; A3 ist zur Übernahme nach `Symcon_ModuleHelper/dev` vorbereitet  
-**Nächster Schritt:** A3-Dateien nach `dev` übernehmen und anschließend A5/A6 mit dem tatsächlichen Repository-Stand, vollständigen Helper-Tests und StylePHP abschließen.
+**Status:** Paket A vollständig umgesetzt und geprüft; `Symcon_ModuleHelper/dev` ist freigabereif  
+**Nächster Schritt:** Paket A von `dev` nach `main` übernehmen und die automatische Versionierung/Consumer-Verteilung kontrollieren. Danach beginnt Paket B – Style Profile Contract V1.
 
 ---
 
@@ -215,6 +215,11 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 
 **Freigabekriterium Paket A:** Helper und Assistant verwenden dieselbe Fontdefinition; bestehende Instanzen funktionieren weiter.
 
+**Paket A abgeschlossen:** Ja.  
+**Geprüfter `Symcon_ModuleHelper/dev`-Commit:** `62ccbffe83fb2f8f922cf4a20993e926b6e30704`  
+**CI:** `Tests` erfolgreich, `Check Style` erfolgreich.  
+**Freigabeaktion:** `dev → main`; danach automatische Metadaten-/Versionsaktualisierung und Consumer-Synchronisierung kontrollieren.
+
 ---
 
 ### Paket B – Style Profile Contract V1
@@ -409,29 +414,12 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket A / Übernahme A3 und Abschluss A5/A6**
+**Paket A freigeben**
 
-A3 ist als vollständiges Dateipaket vorbereitet. Nach der Übernahme in `Symcon_ModuleHelper/dev` wird der tatsächliche Repository-Stand erneut gelesen und Paket A abgeschlossen.
+1. `Symcon_ModuleHelper/dev` nach `main` übernehmen.
+2. Automatische Metadaten-/Versionsaktualisierung auf `main` abwarten.
+3. GitHub Actions auf `main` vollständig prüfen.
+4. Automatische Helper-Synchronisierung zu den Consumern kontrollieren.
+5. Erst danach Paket B – `Style Profile Contract V1` – auf `Symcon_ModuleHelper/dev` beginnen.
 
-A3 umfasst:
-
-- `IPSViewStyleHelper` verwendet `IPSViewFontCatalogHelper` als zentrale Fontquelle.
-- `IPSViewStyleFontFamily` bleibt als String-Property unverändert bestehen.
-- Das Formular verwendet statt eines freien Textfelds eine definierte Fontauswahl.
-- Der bisherige leere Wert bleibt `Systemstandard`.
-- Bekannte Aliase werden auf kanonische IPSView-Dokumentwerte normalisiert.
-- Sichere bisherige freie Fontwerte bleiben als Legacy-/Custom-Option erhalten.
-- Unsichere Werte fallen auf den bisherigen System-Fontstack zurück.
-- Style-Source-IDs `0–3` bleiben unverändert.
-- `FontStyle` wird in A3 nicht als neue Style-Property eingeführt; die universelle Semantik wird mit dem Style Profile Contract V1 in Paket B festgelegt.
-- `IPSViewStyleHelper` erhält im Manifest die Abhängigkeit `IPSViewFontCatalogHelper`.
-- Ein eigener Integrationstest deckt Auswahl, Aliase, Legacy-Werte, Fallback, Media-Import und unveränderte Source-IDs ab.
-
-Danach:
-
-1. vollständige `php tests/run.php`-Suite auf `Symcon_ModuleHelper/dev`,
-2. Manifest-/Translation-Prüfungen,
-3. offizieller Symcon StylePHP-Check,
-4. erneuter kompletter Test von `IPSViewAssistant/dev-popup`,
-5. Paket A als abgeschlossen markieren,
-6. erst danach Paket B beginnen.
+Der für Paket A geprüfte `dev`-Stand endet derzeit bei Commit `62ccbffe83fb2f8f922cf4a20993e926b6e30704` (`TEST: Update IPSView style bundle dependencies`).
