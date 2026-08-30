@@ -17,7 +17,7 @@ require_once __DIR__ . '/IPSViewFontCatalogHelper.php';
  * their components, but do not define module-specific colors, gradients,
  * typography, borders or shadows.
  *
- * @version 1.4.3
+ * @version 1.5.0
  */
 trait IPSViewStyleHelper
 {
