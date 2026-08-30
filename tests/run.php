@@ -23,6 +23,7 @@ $tests = [
     'ipsview-style-preset-source.php',
     'ipsview-style-profile-source.php',
     'ipsview-style.php',
+    'ipsview-style-custom-copy.php',
     'ipsview-style-font-catalog.php',
     'ipsview-style-layout.php',
     'http-response.php',
