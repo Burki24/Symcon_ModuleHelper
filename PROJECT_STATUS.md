@@ -9,9 +9,9 @@
 ## Aktueller Stand
 
 **Datum:** 2026-08-30
-**Phase:** Paket D – Presets zentralisieren
-**Status:** Pakete A–C sind veröffentlicht; `Symcon_ModuleHelper` steht auf v3.9.0 und `main`/`dev` sind synchron. Paket D ist lokal für ModuleHelper und IPSViewAssistant vollständig umgesetzt und getestet; GitHub-CI steht noch aus.
-**Nächster Schritt:** Zuerst `Symcon_ModuleHelper_Paket_D` nach `dev` übernehmen und CI prüfen; danach `IPSViewAssistant_Paket_D` nach `dev-popup` übernehmen und dessen CI prüfen.
+**Phase:** Paket D – Presets zentralisieren / Consumer-Korrektur
+**Status:** Paket D ist veröffentlicht; `Symcon_ModuleHelper` steht auf v3.10.0 und `main`/`dev` sind synchron. Beim Consumer-Sync wurde erkannt, dass OpenCalendar PR #86 wegen fehlender PHPDoc-Abdeckung im neuen `IPSViewStyleProfileHelper` nicht automatisch gemergt wurde. Zusätzlich werden die zentralen Presets nun als eigene gemeinsame Stilquelle im `IPSViewStyleHelper` auswählbar gemacht, ohne die bestehenden Source-IDs 0–4 oder deren Verhalten zu verändern.
+**Nächster Schritt:** Korrekturpaket auf `Symcon_ModuleHelper/dev` übernehmen, CI prüfen, anschließend `dev → main` veröffentlichen und kontrollieren, dass OpenCalendar PR #86 aktualisiert und automatisch gemergt wird.
 
 ---
 
@@ -316,9 +316,19 @@ Zusätzlich:
 - [x] zentrale Helper-Tests ergänzen
 - [x] vollständige IPSViewAssistant-Test-Suite lokal erfolgreich ausführen
 
-**Kompatibilitätsentscheidung:** Paket D verändert weder die numerischen Assistant-Theme-IDs noch die bisher sichtbaren Presetfarben. `Custom` bleibt ID 3. Die bestehenden `IPSViewStyleHelper`-Quellen Light/Dark werden in Paket D nicht semantisch umdefiniert; dadurch entstehen keine visuellen Regressionen bei bestehenden Consumern.
+**Kompatibilitätsentscheidung:** Paket D verändert weder die numerischen Assistant-Theme-IDs noch die bisher sichtbaren Presetfarben. `Custom` bleibt ID 3. Die bestehenden `IPSViewStyleHelper`-Quellen Custom/Media/Light/Dark/Profile behalten die IDs 0–4 und ihr bisheriges Verhalten. Für die acht zentralisierten Assistant-Presets wird zusätzlich die neue Quelle `IPSVIEW_STYLE_SOURCE_PRESET = 5` eingeführt; die konkrete Palette wird über `IPSViewStylePreset` ausgewählt.
 
-**Lokaler Stand:** Implementierung vollständig; GitHub-CI für beide Repositories steht noch aus.
+**Consumer-Korrektur nach Veröffentlichung:**
+
+- [x] Ursache für fehlende Profil-Auswahl in OpenCalendar ermittelt: Helper-Sync-PR #86 blieb wegen `tests/phpdocs.php` offen.
+- [x] fehlende PHPDoc für `IPSViewStyleProfileHelper::isValidJson()` ergänzen.
+- [x] öffentliche Methoden des nun mitgebündelten `IPSViewStylePresetHelper` vollständig mit PHPDoc versehen.
+- [x] `IPSViewStyleHelper` um die zusätzliche Quelle `PRESET = 5` erweitern.
+- [x] alle acht zentralen Presets im Konfigurationsformular auswählbar machen.
+- [x] bestehende Source-IDs 0–4 und die bisherigen Light-/Dark-Darstellungen unverändert lassen.
+- [x] neue Preset-Source-Tests sowie Bundle-Abhängigkeitstests ergänzen.
+
+**Veröffentlichter Stand vor Korrektur:** `Symcon_ModuleHelper` v3.10.0. Das Korrekturpaket wird zunächst ausschließlich auf `dev` geprüft.
 
 ---
 
@@ -445,11 +455,12 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket D verifizieren und veröffentlichen**
+**Paket-D-Consumer-Korrektur veröffentlichen**
 
-1. `Symcon_ModuleHelper_Paket_D.zip` auf `Symcon_ModuleHelper/dev` übernehmen.
+1. Korrekturpaket auf `Symcon_ModuleHelper/dev` übernehmen.
 2. `Tests` und `Check Style` prüfen.
-3. Bei grünem CI `dev → main` veröffentlichen und automatischen Consumer-Sync/Fast-Forward kontrollieren.
-4. `IPSViewAssistant_Paket_D.zip` auf `IPSViewAssistant/dev-popup` übernehmen.
-5. Assistant-Tests und Style-CI prüfen.
-6. Danach Paket E – Export/Import des Style Profile V1 – beginnen.
+3. Bei grünem CI `dev → main` veröffentlichen.
+4. Automatische Helper-Versionierung und Consumer-Synchronisierung kontrollieren.
+5. OpenCalendar PR #86 prüfen: neuer Helper-Bundle-Stand, `Tests` und `Check Style` müssen grün werden und Auto-Merge nach `dev` auslösen.
+6. In OpenCalendar kontrollieren, dass `Style-Profil` sowie die neue Quelle `Zentrale Vorgabe` mit allen acht Presets sichtbar sind.
+7. Danach Paket E – Export/Import des Style Profile V1 – beginnen.
