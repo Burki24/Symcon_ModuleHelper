@@ -10,8 +10,8 @@
 
 **Datum:** 2026-08-30  
 **Phase:** Paket A – Zentraler Fontkatalog  
-**Status:** A1, A2 und A4 abgeschlossen; A3 ist der nächste Arbeitsschritt  
-**Nächster Schritt:** `IPSViewStyleHelper` auf den zentralen `IPSViewFontCatalogHelper` umstellen, ohne bestehende Source-IDs oder gespeicherte Fontwerte zu beschädigen.
+**Status:** A1–A4 technisch umgesetzt; A3 ist zur Übernahme nach `Symcon_ModuleHelper/dev` vorbereitet  
+**Nächster Schritt:** A3-Dateien nach `dev` übernehmen und anschließend A5/A6 mit dem tatsächlichen Repository-Stand, vollständigen Helper-Tests und StylePHP abschließen.
 
 ---
 
@@ -173,11 +173,13 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 
 #### A3 – `IPSViewStyleHelper` auf zentralen Katalog umstellen
 
-- [ ] freies `FontFamily`-Textfeld durch eine definierte Auswahl ersetzen
-- [ ] Font-Schnitt in den zentralen Style aufnehmen, soweit der aktuelle Contract dies sauber zulässt
-- [ ] bestehende gespeicherte Werte weiterhin lesen
-- [ ] ungültige/veraltete Werte sicher behandeln
-- [ ] keine bestehenden Source-IDs verändern
+- [x] freies `FontFamily`-Textfeld durch eine definierte Auswahl aus `IPSViewFontCatalogHelper` ersetzen
+- [x] Font-Schnitt für Paket A bewusst **nicht** als neue `IPSViewStyleHelper`-Property einführen: Die Fähigkeiten sind zentral katalogisiert und werden im Assistant bereits genutzt; die universelle `FontStyle`-Semantik wird erst mit dem versionsfähigen Style-Contract in Paket B verbindlich definiert.
+- [x] bestehende gespeicherte Werte weiterhin lesen
+- [x] bekannte frühere Schreibweisen wie `Open Sans`, `PT Sans` oder `Roboto Mono` auf die kanonischen IPSView-Werte normalisieren
+- [x] sichere bisherige benutzerdefinierte Fontwerte als Kompatibilitätsoption erhalten
+- [x] ungültige/unsichere Werte auf den bisherigen System-Fontstack zurückfallen lassen
+- [x] keine bestehenden Property-Namen oder Source-IDs verändern
 
 #### A4 – IPSViewAssistant umstellen
 
@@ -190,9 +192,12 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 #### A5 – Abwärtskompatibilität
 
 - [x] vorhandene Assistant-Instanzen behalten ihre Fontauswahl (numerische Assistant-Font-IDs 0–8 unverändert)
-- [ ] vorhandene Module mit `IPSViewStyleHelper` bleiben lauffähig
-- [ ] keine unnötige Änderung bestehender Property-Namen oder IDs
-- [x] sinnvolle Fallbacks für unbekannte alte Fontwerte im zentralen Katalog und Assistant beibehalten
+- [ ] vorhandene Module mit `IPSViewStyleHelper` im vollständigen Repository-/Consumer-Test bestätigen
+- [x] bestehende `IPSViewStyleFontFamily`-Property unverändert beibehalten
+- [x] bestehende Style-Source-IDs 0–3 unverändert beibehalten
+- [x] bekannte frühere Font-Aliase ohne Konfigurationsmigration lesen
+- [x] sichere bisherige freie Fontwerte weiterhin lesen und im Formular anzeigen
+- [x] unsichere/veraltete Werte sicher auf den bisherigen System-Fontstack zurückführen
 
 #### A6 – Tests und Freigabe
 
@@ -201,10 +206,12 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 - [x] alle erlaubten Schnitte testen
 - [x] nicht erlaubte Schnitte testen
 - [x] Fallbacks testen
-- [x] Assistant-Tests ausführen
-- [ ] Helper-Tests ausführen
-- [ ] StylePHP prüfen
-- [x] `PROJECT_STATUS.md` nach A1/A2/A4 aktualisieren
+- [x] Assistant-Tests für A4 ausführen
+- [x] gezielte A3-Integrationstests lokal ausführen
+- [ ] vollständige Helper-Tests auf dem übernommenen `dev`-Stand ausführen
+- [ ] offiziellen Symcon-StylePHP-Endstand prüfen
+- [ ] Assistant-Tests nach finalem Helper-Stand erneut ausführen
+- [x] `PROJECT_STATUS.md` nach A3 aktualisieren
 
 **Freigabekriterium Paket A:** Helper und Assistant verwenden dieselbe Fontdefinition; bestehende Instanzen funktionieren weiter.
 
@@ -402,16 +409,29 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 
 ## 7. Unmittelbar nächster Arbeitsschritt
 
-**Paket A / A3 – `IPSViewStyleHelper` integrieren**
+**Paket A / Übernahme A3 und Abschluss A5/A6**
 
-Der zentrale `IPSViewFontCatalogHelper` ist erstellt und der `IPSViewAssistant/dev-popup` verwendet ihn bereits. Als nächstes wird `src/IPSViewStyleHelper.php` im `Symcon_ModuleHelper/dev` umgestellt.
+A3 ist als vollständiges Dateipaket vorbereitet. Nach der Übernahme in `Symcon_ModuleHelper/dev` wird der tatsächliche Repository-Stand erneut gelesen und Paket A abgeschlossen.
 
-Dabei gelten folgende Anforderungen:
+A3 umfasst:
 
-- bestehende Style-Source-IDs `0–3` bleiben unverändert,
-- `IPSViewStyleFontFamily` bleibt aus Kompatibilitätsgründen als bestehende Property erhalten,
-- das freie Font-Textfeld im Formular wird durch die zentrale Fontauswahl ersetzt,
-- bestehende gespeicherte Fontwerte werden normalisiert und weiterhin sicher gelesen,
-- unbekannte/veraltete Fontwerte erhalten einen sicheren Fallback,
-- Font-Schnitt-Unterstützung wird nur ergänzt, wenn sie ohne Bruch des aktuellen Style-Contracts möglich ist,
-- anschließend werden Helper- und Assistant-Tests sowie die abschließenden Paket-A-Prüfungen ausgeführt.
+- `IPSViewStyleHelper` verwendet `IPSViewFontCatalogHelper` als zentrale Fontquelle.
+- `IPSViewStyleFontFamily` bleibt als String-Property unverändert bestehen.
+- Das Formular verwendet statt eines freien Textfelds eine definierte Fontauswahl.
+- Der bisherige leere Wert bleibt `Systemstandard`.
+- Bekannte Aliase werden auf kanonische IPSView-Dokumentwerte normalisiert.
+- Sichere bisherige freie Fontwerte bleiben als Legacy-/Custom-Option erhalten.
+- Unsichere Werte fallen auf den bisherigen System-Fontstack zurück.
+- Style-Source-IDs `0–3` bleiben unverändert.
+- `FontStyle` wird in A3 nicht als neue Style-Property eingeführt; die universelle Semantik wird mit dem Style Profile Contract V1 in Paket B festgelegt.
+- `IPSViewStyleHelper` erhält im Manifest die Abhängigkeit `IPSViewFontCatalogHelper`.
+- Ein eigener Integrationstest deckt Auswahl, Aliase, Legacy-Werte, Fallback, Media-Import und unveränderte Source-IDs ab.
+
+Danach:
+
+1. vollständige `php tests/run.php`-Suite auf `Symcon_ModuleHelper/dev`,
+2. Manifest-/Translation-Prüfungen,
+3. offizieller Symcon StylePHP-Check,
+4. erneuter kompletter Test von `IPSViewAssistant/dev-popup`,
+5. Paket A als abgeschlossen markieren,
+6. erst danach Paket B beginnen.

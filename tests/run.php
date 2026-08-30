@@ -19,6 +19,7 @@ $tests = [
     'ipsview-color-palette.php',
     'ipsview-font-catalog.php',
     'ipsview-style.php',
+    'ipsview-style-font-catalog.php',
     'ipsview-style-layout.php',
     'http-response.php',
     'symcon-oauth.php',
