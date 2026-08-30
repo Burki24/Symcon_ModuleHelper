@@ -9,9 +9,9 @@
 ## Aktueller Stand
 
 **Datum:** 2026-08-30
-**Phase:** Paket D – Presets zentralisieren / Consumer-Korrektur
-**Status:** Paket D ist veröffentlicht; `Symcon_ModuleHelper` steht auf v3.10.0 und `main`/`dev` sind synchron. Beim Consumer-Sync wurde erkannt, dass OpenCalendar PR #86 wegen fehlender PHPDoc-Abdeckung im neuen `IPSViewStyleProfileHelper` nicht automatisch gemergt wurde. Zusätzlich werden die zentralen Presets nun als eigene gemeinsame Stilquelle im `IPSViewStyleHelper` auswählbar gemacht, ohne die bestehenden Source-IDs 0–4 oder deren Verhalten zu verändern.
-**Nächster Schritt:** Korrekturpaket auf `Symcon_ModuleHelper/dev` übernehmen, CI prüfen, anschließend `dev → main` veröffentlichen und kontrollieren, dass OpenCalendar PR #86 aktualisiert und automatisch gemergt wird.
+**Phase:** Paket D – Presets zentralisieren / UX-Korrektur
+**Status:** Paket D ist veröffentlicht und funktioniert in den Consumern. Die zusätzliche zweistufige Auswahl „Zentrale Vorgabe“ wird aus UX-Gründen durch direkte Preset-Einträge in der Stilquelle ersetzt; die bisherige Source-ID 5 bleibt nur für gespeicherte Konfigurationen kompatibel.
+**Nächster Schritt:** UX-Korrektur auf `Symcon_ModuleHelper/dev` übernehmen, CI prüfen und anschließend veröffentlichen; danach Paket E beginnen.
 
 ---
 

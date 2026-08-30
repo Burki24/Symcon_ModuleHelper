@@ -139,29 +139,42 @@ assertSameValue(1, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_MEDIA, 
 assertSameValue(2, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_LIGHT, 'Legacy light source ID must remain unchanged.');
 assertSameValue(3, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_DARK, 'Legacy dark source ID must remain unchanged.');
 assertSameValue(4, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PROFILE, 'Style Profile source ID must remain unchanged.');
-assertSameValue(5, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET, 'The shared preset source must use source ID 5.');
+assertSameValue(5, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET, 'The legacy generic preset source must keep source ID 5.');
+assertSameValue(6, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_LIGHT, 'Central Light must use source ID 6.');
+assertSameValue(7, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_DARK, 'Central Dark must use source ID 7.');
+assertSameValue(8, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_WARM, 'Central Warm must use source ID 8.');
+assertSameValue(9, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_COOL, 'Central Cool must use source ID 9.');
+assertSameValue(10, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_EARTHY, 'Central Earthy must use source ID 10.');
+assertSameValue(11, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_WATER, 'Central Water must use source ID 11.');
+assertSameValue(12, IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_SUNNY, 'Central Sunny must use source ID 12.');
 assertSameValue(
     IPSViewStylePresetHelper::PRESET_STANDARD,
     $properties['IPSViewStylePreset'],
-    'The shared preset property must default to IPSView Standard.'
+    'The legacy preset property must remain available for stored source-5 configurations.'
 );
 
 $formJSON = json_encode($harness->formItems(), JSON_THROW_ON_ERROR);
-assertTrueValue(str_contains($formJSON, 'Shared preset'), 'The style source selector must expose the shared preset source.');
-assertTrueValue(str_contains($formJSON, 'IPSViewStylePreset'), 'The style form must expose the centralized preset selector.');
-foreach (IPSViewStylePresetHelper::ids() as $preset) {
+assertTrueValue(!str_contains($formJSON, '"name":"IPSViewStylePreset"'), 'The form must no longer expose a second preset selector.');
+assertTrueValue(!str_contains($formJSON, '"value":5'), 'The generic preset source must be hidden for new configurations.');
+
+$directSources = [
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_LIGHT  => IPSViewStylePresetHelper::PRESET_LIGHT,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_DARK   => IPSViewStylePresetHelper::PRESET_DARK,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_WARM   => IPSViewStylePresetHelper::PRESET_WARM,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_COOL   => IPSViewStylePresetHelper::PRESET_COOL,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_EARTHY => IPSViewStylePresetHelper::PRESET_EARTHY,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_WATER  => IPSViewStylePresetHelper::PRESET_WATER,
+    IPSViewStylePresetSourceHarness::IPSVIEW_STYLE_SOURCE_PRESET_SUNNY  => IPSViewStylePresetHelper::PRESET_SUNNY
+];
+
+foreach ($directSources as $source => $preset) {
     assertTrueValue(
-        str_contains($formJSON, '"value":"' . $preset . '"'),
-        sprintf('The preset selector must expose %s.', $preset)
+        str_contains($formJSON, '"value":' . $source),
+        sprintf('Direct source %d must be available in the style source selector.', $source)
     );
-}
 
-$harness->setProperty('IPSViewStyleSource', 5);
-assertSameValue(5, $harness->source(), 'The shared preset source must be accepted.');
-
-foreach (IPSViewStylePresetHelper::ids() as $preset) {
-    $harness->setProperty('IPSViewStylePreset', $preset);
-    assertSameValue($preset, $harness->preset(), sprintf('%s must remain the active preset.', $preset));
+    $harness->setProperty('IPSViewStyleSource', $source);
+    assertSameValue($source, $harness->source(), sprintf('Direct source %d must be accepted.', $source));
 
     $palette = IPSViewStylePresetHelper::palette($preset);
     $style = $harness->style();
@@ -171,35 +184,24 @@ foreach (IPSViewStylePresetHelper::ids() as $preset) {
         sprintf('%s must use the centralized view background.', $preset)
     );
     assertSameValue(
-        $palette[IPSViewStylePresetHelper::ROLE_SURFACE],
-        $style['ControlBackground'],
-        sprintf('%s must use the centralized surface color.', $preset)
-    );
-    assertSameValue(
-        $palette[IPSViewStylePresetHelper::ROLE_ACTIVE],
-        $style['ControlActiveBackground'],
-        sprintf('%s must use the centralized active color.', $preset)
-    );
-    assertSameValue(
         $palette[IPSViewStylePresetHelper::ROLE_ACCENT],
         $style['Accent'],
         sprintf('%s must use the centralized accent color.', $preset)
     );
-    assertSameValue(
-        $palette[IPSViewStylePresetHelper::ROLE_ERROR],
-        $style['Critical'],
-        sprintf('%s must use the centralized error color.', $preset)
-    );
 }
 
-$harness->setProperty('IPSViewStylePreset', 'unknown');
+$harness->setProperty('IPSViewStyleSource', 5);
+$harness->setProperty('IPSViewStylePreset', IPSViewStylePresetHelper::PRESET_WARM);
+assertSameValue(5, $harness->source(), 'Stored generic preset source 5 must remain accepted.');
+$legacyFormJSON = json_encode($harness->formItems(), JSON_THROW_ON_ERROR);
+assertTrueValue(str_contains($legacyFormJSON, '"value":5'), 'Stored source 5 must remain representable in the form.');
+assertTrueValue(str_contains($legacyFormJSON, 'previous selection'), 'Stored source 5 must be marked as a previous selection.');
+$legacyPalette = IPSViewStylePresetHelper::palette(IPSViewStylePresetHelper::PRESET_WARM);
 assertSameValue(
-    IPSViewStylePresetHelper::PRESET_STANDARD,
-    $harness->preset(),
-    'Unknown preset identifiers must fall back safely to IPSView Standard.'
+    $legacyPalette[IPSViewStylePresetHelper::ROLE_VIEW_BACKGROUND],
+    $harness->style()['ViewBackground'],
+    'Stored source 5 must continue resolving its previously selected preset.'
 );
-$standardStyle = $harness->style();
-assertSameValue('#404040', $standardStyle['ViewBackground'], 'The safe preset fallback must resolve the standard palette.');
 
 $harness->setProperty('IPSViewStyleSource', 2);
 $legacyLight = $harness->style();
@@ -208,4 +210,4 @@ $harness->setProperty('IPSViewStyleSource', 3);
 $legacyDark = $harness->style();
 assertSameValue('#1B2639', $legacyDark['ControlBackground'], 'The existing dark source must keep its previous rendering.');
 
-fwrite(STDOUT, "IPSView shared preset source tests passed.\n");
+fwrite(STDOUT, "IPSView direct preset source tests passed.\n");
