@@ -186,7 +186,7 @@ trait IPSViewStyleHelper
         'option.dark_preset'                => 'Dark preset',
         'option.style_profile'              => 'Style profile',
         'option.shared_preset'              => 'Shared preset',
-        'option.previous_selection'          => 'previous selection',
+        'option.previous_selection'         => 'previous selection',
         'option.system_font'                => 'System default',
         'option.legacy_font'                => 'Legacy/custom',
         'preset.standard'                   => 'IPSView Standard',

@@ -67,7 +67,7 @@
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
       "version": "1.6.1",
-      "sha256": "ce5b22498ef2b1e12373f90dcf9ab9f571aeca4216a06bf66709155de9a4004f",
+      "sha256": "32239a3b8d0c60e68d00312756ee6664822b61172f9f18de9f7d9d9963c97a46",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
