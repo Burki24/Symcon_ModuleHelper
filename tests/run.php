@@ -17,12 +17,14 @@ $tests = [
     'ipsview-html-page.php',
     'visualization-theme.php',
     'ipsview-color-palette.php',
+    'ipsview-font-catalog.php',
     'ipsview-style.php',
+    'ipsview-style-font-catalog.php',
     'ipsview-style-layout.php',
     'http-response.php',
     'symcon-oauth.php',
     'variable-helper.php',
-    'date-helper.php',
+    'date-helper.php'
 ];
 
 foreach ($tests as $test) {
