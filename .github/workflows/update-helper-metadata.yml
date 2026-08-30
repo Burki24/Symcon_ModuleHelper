@@ -106,3 +106,29 @@ jobs:
           gh workflow run helper-sync.yml \
             --ref "${GITHUB_REF_NAME}" \
             -f helper=all
+
+      - name: Fast-forward dev to released main
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin --prune
+
+          main_sha=$(git rev-parse origin/main)
+          dev_sha=$(git rev-parse origin/dev)
+
+          if [[ "$dev_sha" == "$main_sha" ]]; then
+            echo "dev already matches main."
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "$dev_sha" "$main_sha"; then
+            echo "::error::Refusing to synchronize dev because it has commits that are not contained in main."
+            echo "main: $main_sha"
+            echo "dev:  $dev_sha"
+            exit 1
+          fi
+
+          git push origin "${main_sha}:refs/heads/dev"
+          echo "Fast-forwarded dev to ${main_sha}."
