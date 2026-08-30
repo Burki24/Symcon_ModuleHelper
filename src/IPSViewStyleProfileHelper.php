@@ -17,7 +17,7 @@ require_once __DIR__ . '/IPSViewFontCatalogHelper.php';
  * are intentionally not stored because consumers can reproduce them from the
  * canonical source fields.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 final class IPSViewStyleProfileHelper
 {

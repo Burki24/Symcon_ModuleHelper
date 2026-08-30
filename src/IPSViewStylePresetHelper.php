@@ -13,7 +13,7 @@ use InvalidArgumentException;
  * Consumers remain responsible for deciding how those roles are applied to
  * their document or UI model.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 final class IPSViewStylePresetHelper
 {
