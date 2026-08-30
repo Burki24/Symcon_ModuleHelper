@@ -8,6 +8,7 @@ use InvalidArgumentException;
 
 require_once __DIR__ . '/HelperTranslationHelper.php';
 require_once __DIR__ . '/IPSViewFontCatalogHelper.php';
+require_once __DIR__ . '/IPSViewStylePresetHelper.php';
 require_once __DIR__ . '/IPSViewStyleProfileHelper.php';
 
 /**
@@ -18,7 +19,7 @@ require_once __DIR__ . '/IPSViewStyleProfileHelper.php';
  * their components, but do not define module-specific colors, gradients,
  * typography, borders or shadows.
  *
- * @version 1.6.0
+ * @version 1.5.0
  */
 trait IPSViewStyleHelper
 {
@@ -29,6 +30,7 @@ trait IPSViewStyleHelper
     public const IPSVIEW_STYLE_SOURCE_LIGHT = 2;
     public const IPSVIEW_STYLE_SOURCE_DARK = 3;
     public const IPSVIEW_STYLE_SOURCE_PROFILE = 4;
+    public const IPSVIEW_STYLE_SOURCE_PRESET = 5;
 
     private const IPSVIEW_STYLE_SYSTEM_FONT_FAMILY = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -160,12 +162,14 @@ trait IPSViewStyleHelper
         'description.choose_source'         => 'Choose a shared IPSView style source. The same roles and effects are used by every consuming module.',
         'description.media_source'          => 'The media source imports the whitelisted standard style from an IPSView media object. Custom values below are used only for the custom source.',
         'description.profile_source'        => 'The style profile source loads a complete validated Style Profile V1 from a media object. Invalid profiles fall back safely to the light preset.',
+        'description.preset_source'         => 'The shared preset source applies one of the centralized IPSView Assistant color palettes without changing the existing legacy light and dark sources.',
         'section.universal_colors'          => 'Universal colors',
         'section.surface_transparency'      => 'Surface transparency',
         'section.typography_effects'        => 'Typography, borders and effects',
         'field.style_source'                => 'Style source',
         'field.media_object'                => 'IPSView media object',
         'field.profile_media_object'        => 'Style profile media object',
+        'field.style_preset'                => 'Shared preset',
         'field.transparent_background'      => 'Transparent background',
         'field.font_scale'                  => 'Font scale (%)',
         'option.custom_style'               => 'Custom style',
@@ -173,8 +177,17 @@ trait IPSViewStyleHelper
         'option.light_preset'               => 'Light preset',
         'option.dark_preset'                => 'Dark preset',
         'option.style_profile'              => 'Style profile',
+        'option.shared_preset'              => 'Shared preset',
         'option.system_font'                => 'System default',
         'option.legacy_font'                => 'Legacy/custom',
+        'preset.standard'                   => 'IPSView Standard',
+        'preset.light'                      => 'Light',
+        'preset.dark'                       => 'Dark',
+        'preset.warm'                       => 'Warm',
+        'preset.cool'                       => 'Cool',
+        'preset.earthy'                     => 'Earthy',
+        'preset.water'                      => 'Water',
+        'preset.sunny'                      => 'Sunny',
         'color.view_background'             => 'View background',
         'color.page_background'             => 'Page background',
         'color.label_background'            => 'Label background',
@@ -299,6 +312,7 @@ trait IPSViewStyleHelper
         $this->RegisterPropertyInteger('IPSViewStyleSource', self::IPSVIEW_STYLE_SOURCE_CUSTOM);
         $this->RegisterPropertyInteger('IPSViewStyleMediaID', 0);
         $this->RegisterPropertyInteger('IPSViewStyleProfileMediaID', 0);
+        $this->RegisterPropertyString('IPSViewStylePreset', IPSViewStylePresetHelper::PRESET_STANDARD);
         $this->RegisterPropertyBoolean('IPSViewStyleTransparentBackground', false);
         $this->RegisterPropertyInteger('IPSViewStyleFontScale', 100);
 
@@ -354,7 +368,8 @@ trait IPSViewStyleHelper
                             ['caption' => $this->IPSViewStyleText('option.ipsview_standard_style'), 'value' => self::IPSVIEW_STYLE_SOURCE_MEDIA],
                             ['caption' => $this->IPSViewStyleText('option.light_preset'), 'value' => self::IPSVIEW_STYLE_SOURCE_LIGHT],
                             ['caption' => $this->IPSViewStyleText('option.dark_preset'), 'value' => self::IPSVIEW_STYLE_SOURCE_DARK],
-                            ['caption' => $this->IPSViewStyleText('option.style_profile'), 'value' => self::IPSVIEW_STYLE_SOURCE_PROFILE]
+                            ['caption' => $this->IPSViewStyleText('option.style_profile'), 'value' => self::IPSVIEW_STYLE_SOURCE_PROFILE],
+                            ['caption' => $this->IPSViewStyleText('option.shared_preset'), 'value' => self::IPSVIEW_STYLE_SOURCE_PRESET]
                         ],
                         'width' => '220px'
                     ],
@@ -375,6 +390,13 @@ trait IPSViewStyleHelper
             [
                 'type'  => 'RowLayout',
                 'items' => [
+                    [
+                        'type'    => 'Select',
+                        'name'    => 'IPSViewStylePreset',
+                        'caption' => $this->IPSViewStyleText('field.style_preset'),
+                        'options' => $this->IPSViewStylePresetOptions(),
+                        'width'   => '220px'
+                    ],
                     [
                         'type'    => 'CheckBox',
                         'name'    => 'IPSViewStyleTransparentBackground',
@@ -399,6 +421,10 @@ trait IPSViewStyleHelper
             [
                 'type'    => 'Label',
                 'caption' => $this->IPSViewStyleText('description.profile_source')
+            ],
+            [
+                'type'    => 'Label',
+                'caption' => $this->IPSViewStyleText('description.preset_source')
             ],
             [
                 'type'    => 'Label',
@@ -652,7 +678,8 @@ trait IPSViewStyleHelper
             self::IPSVIEW_STYLE_SOURCE_MEDIA,
             self::IPSVIEW_STYLE_SOURCE_LIGHT,
             self::IPSVIEW_STYLE_SOURCE_DARK,
-            self::IPSVIEW_STYLE_SOURCE_PROFILE
+            self::IPSVIEW_STYLE_SOURCE_PROFILE,
+            self::IPSVIEW_STYLE_SOURCE_PRESET
         ], true) ? $source : self::IPSVIEW_STYLE_SOURCE_CUSTOM;
     }
 
@@ -666,6 +693,15 @@ trait IPSViewStyleHelper
     protected function IPSViewStyleProfileMediaID(): int
     {
         return max(0, $this->ReadPropertyInteger('IPSViewStyleProfileMediaID'));
+    }
+
+    /** Returns the selected centralized IPSView preset identifier. */
+    protected function IPSViewStylePreset(): string
+    {
+        return IPSViewStylePresetHelper::normalize(
+            $this->ReadPropertyString('IPSViewStylePreset'),
+            IPSViewStylePresetHelper::PRESET_STANDARD
+        ) ?? IPSViewStylePresetHelper::PRESET_STANDARD;
     }
 
     /**
@@ -721,6 +757,8 @@ trait IPSViewStyleHelper
         } elseif ($source === self::IPSVIEW_STYLE_SOURCE_PROFILE) {
             $profileStyle = $this->IPSViewStyleFromProfile($document ?? $this->ReadIPSViewStyleProfileMediaContent());
             $base = $profileStyle ?? self::IPSVIEW_STYLE_LIGHT_PRESET;
+        } elseif ($source === self::IPSVIEW_STYLE_SOURCE_PRESET) {
+            $base = $this->IPSViewStyleFromPreset($this->IPSViewStylePreset());
         } elseif ($source === self::IPSVIEW_STYLE_SOURCE_LIGHT) {
             $base = self::IPSVIEW_STYLE_LIGHT_PRESET;
         } elseif ($source === self::IPSVIEW_STYLE_SOURCE_DARK) {
@@ -939,6 +977,30 @@ trait IPSViewStyleHelper
         return $this->TranslateHelperText('IPSViewStyleHelper', $key, $fallback);
     }
 
+    /** @return list<array{caption:string,value:string}> */
+    private function IPSViewStylePresetOptions(): array
+    {
+        $translationKeys = [
+            IPSViewStylePresetHelper::PRESET_STANDARD => 'preset.standard',
+            IPSViewStylePresetHelper::PRESET_LIGHT    => 'preset.light',
+            IPSViewStylePresetHelper::PRESET_DARK     => 'preset.dark',
+            IPSViewStylePresetHelper::PRESET_WARM     => 'preset.warm',
+            IPSViewStylePresetHelper::PRESET_COOL     => 'preset.cool',
+            IPSViewStylePresetHelper::PRESET_EARTHY   => 'preset.earthy',
+            IPSViewStylePresetHelper::PRESET_WATER    => 'preset.water',
+            IPSViewStylePresetHelper::PRESET_SUNNY    => 'preset.sunny'
+        ];
+        $options = [];
+        foreach (IPSViewStylePresetHelper::ids() as $preset) {
+            $options[] = [
+                'caption' => $this->IPSViewStyleText($translationKeys[$preset]),
+                'value'   => $preset
+            ];
+        }
+
+        return $options;
+    }
+
     /** @return array<string,mixed> */
     private function IPSViewCustomStyle(): array
     {
@@ -972,6 +1034,53 @@ trait IPSViewStyleHelper
         $style['ShadowOffsetY'] = $this->IPSViewClampFloat($this->ReadPropertyFloat('IPSViewStyleShadowOffsetY'), -40.0, 40.0);
 
         return $style;
+    }
+
+    /** @return array<string,mixed> */
+    private function IPSViewStyleFromPreset(string $preset): array
+    {
+        $palette = IPSViewStylePresetHelper::palette($preset);
+        $shadowRGB = $this->IPSViewMixRGB(
+            $this->IPSViewCSSColorToRGB($palette[IPSViewStylePresetHelper::ROLE_VIEW_BACKGROUND]),
+            $this->IPSViewCSSColorToRGB('#000000'),
+            0.68
+        );
+        $shadowColor = $this->IPSViewRGBToCSS($shadowRGB);
+
+        return [
+            'ViewBackground'            => $palette[IPSViewStylePresetHelper::ROLE_VIEW_BACKGROUND],
+            'PageBackground'            => $palette[IPSViewStylePresetHelper::ROLE_PAGE_BACKGROUND],
+            'LabelBackground'           => $palette[IPSViewStylePresetHelper::ROLE_SURFACE],
+            'ControlBackground'         => $palette[IPSViewStylePresetHelper::ROLE_SURFACE],
+            'ControlActiveBackground'   => $palette[IPSViewStylePresetHelper::ROLE_ACTIVE],
+            'ControlInactiveBackground' => $palette[IPSViewStylePresetHelper::ROLE_INACTIVE],
+            'Text'                      => $palette[IPSViewStylePresetHelper::ROLE_PRIMARY_TEXT],
+            'TextActive'                => $palette[IPSViewStylePresetHelper::ROLE_PRIMARY_TEXT],
+            'TextInactive'              => $palette[IPSViewStylePresetHelper::ROLE_SECONDARY_TEXT],
+            'LabelText'                 => $palette[IPSViewStylePresetHelper::ROLE_PRIMARY_TEXT],
+            'Icon'                      => $palette[IPSViewStylePresetHelper::ROLE_PRIMARY_TEXT],
+            'Border'                    => $palette[IPSViewStylePresetHelper::ROLE_BORDER],
+            'Line'                      => $palette[IPSViewStylePresetHelper::ROLE_BORDER],
+            'PopupBackground'           => $palette[IPSViewStylePresetHelper::ROLE_PAGE_BACKGROUND],
+            'PopupBorder'               => $palette[IPSViewStylePresetHelper::ROLE_BORDER],
+            'PopupShadow'               => $this->IPSViewColorWithAlpha($shadowColor, 0.32),
+            'Accent'                    => $palette[IPSViewStylePresetHelper::ROLE_ACCENT],
+            'Information'               => $palette[IPSViewStylePresetHelper::ROLE_ACCENT],
+            'Positive'                  => $palette[IPSViewStylePresetHelper::ROLE_SUCCESS],
+            'Warning'                   => $palette[IPSViewStylePresetHelper::ROLE_WARNING],
+            'Critical'                  => $palette[IPSViewStylePresetHelper::ROLE_ERROR],
+            'FontFamily'                => self::IPSVIEW_STYLE_SYSTEM_FONT_FAMILY,
+            'FontStyle'                 => IPSViewFontCatalogHelper::STYLE_REGULAR,
+            'FontSize'                  => 16.0,
+            'BorderRadius'              => 8.0,
+            'BorderWidth'               => 1.0,
+            'LineWidth'                 => 1.0,
+            'ShadowColor'               => $this->IPSViewColorWithAlpha($shadowColor, 0.24),
+            'ShadowBlur'                => 18.0,
+            'ShadowSpread'              => 0.0,
+            'ShadowOffsetX'             => 0.0,
+            'ShadowOffsetY'             => 8.0
+        ];
     }
 
     /** @return array<string,mixed>|null */

@@ -193,6 +193,7 @@ final class IPSViewStylePresetHelper
         return $options;
     }
 
+    /** Returns the display label for a preset, or null when unsupported. */
     public static function label(string $preset): ?string
     {
         $preset = self::normalize($preset);
@@ -200,11 +201,13 @@ final class IPSViewStylePresetHelper
         return $preset === null ? null : self::PRESET_LABELS[$preset];
     }
 
+    /** Returns true when the preset identifier is supported. */
     public static function isValid(string $preset): bool
     {
         return self::normalize($preset) !== null;
     }
 
+    /** Returns the normalized preset identifier or the optional fallback. */
     public static function normalize(string $preset, ?string $fallback = null): ?string
     {
         $normalized = strtolower(trim($preset));

@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.10.0",
+  "repository_version": "3.9.0",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -67,29 +67,30 @@
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
       "version": "1.6.0",
-      "sha256": "72ea12d4da11ce1900ac5f73c34f1c30162749c733663ee7f65c65aa58a72ef3",
+      "sha256": "85129fe7d412e2f333fc2815627a886fb17425422cf964ad008b8cb058daa3d4",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
+        "IPSViewStylePresetHelper",
         "IPSViewStyleProfileHelper"
       ],
       "assets": [
         {
           "file": "src/translations/IPSViewStyleHelper.json",
           "target": "translations/IPSViewStyleHelper.json",
-          "sha256": "dc349224e886851df72af6a85ef8b763c3fb1cd077023293b016a2fd65e76de6"
+          "sha256": "1ec725d2823e347479f972766fcd94c2b6e1a44725d7c4d12fa90a56373fbceb"
         }
       ]
     },
     "IPSViewStylePresetHelper": {
       "file": "src/IPSViewStylePresetHelper.php",
       "version": "1.0.0",
-      "sha256": "81a8a2ec7cc2a1469fa7b987b3dd31b4bc11feff98da70795dbf74f3f1f5391f"
+      "sha256": "91e77803e9b293591686d7b9db5ab92fa56c8082eaccad6e38aaa887cf642019"
     },
     "IPSViewStyleProfileHelper": {
       "file": "src/IPSViewStyleProfileHelper.php",
       "version": "1.0.0",
-      "sha256": "306cf55073acffe90c4f3340ca7614203523912dac4690dc82e1440355764a35",
+      "sha256": "a3b62b0e17717c085b0e9f1bead5295c01a05ab1cac370b64ade38b051936cad",
       "dependencies": [
         "IPSViewFontCatalogHelper"
       ]
@@ -130,6 +131,6 @@
       "sha256": "81ca4cdeac42ac97cecdb73305e9f68597a6037b1d50b843df11900c96c48dbf"
     }
   },
-  "repository_build": 9787436,
-  "repository_date": 1788086642
+  "repository_build": 86052144,
+  "repository_date": 1788083695
 }

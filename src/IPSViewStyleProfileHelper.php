@@ -187,6 +187,7 @@ final class IPSViewStyleProfileHelper
         return true;
     }
 
+    /** Returns true when the JSON document is a valid Style Profile V1. */
     public static function isValidJson(string $json): bool
     {
         try {
