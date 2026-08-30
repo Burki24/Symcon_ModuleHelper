@@ -129,7 +129,6 @@ class ExampleModule extends IPSModuleStrict
     /** @param list<array<string,mixed>> $items */
     private function BeginItemTransfer(array $items): array
     {
-        // Kleine Metadaten: Token, PageCount, ItemCount und ExpiresAt.
         return $this->CreateChunkedJsonTransfer(self::TRANSFER_SCOPE, $items);
     }
 
@@ -258,7 +257,6 @@ class ExampleModule extends IPSModuleStrict
 | `GetParentID()` | Liefert die physisch verbundene Parent-Instanz-ID oder `0`, wenn keine Verbindung besteht. |
 | `HasParent()` | Prüft, ob eine Parent-ID gesetzt ist und die referenzierte Instanz noch existiert. |
 
-
 ## VisualizationAssetHelper
 
 `src/VisualizationAssetHelper.php` lädt Visualisierungsdateien relativ zum Verzeichnis der konkreten Symcon-Modulklasse. Dadurch kann ein vendorter Helper zuverlässig auf Dateien im jeweiligen `visualization`-Verzeichnis zugreifen, ohne einen festen Modulpfad zu kennen.
@@ -278,7 +276,7 @@ class ExampleModule extends IPSModuleStrict
 
     public function GetVisualizationHtml(): string
     {
-        return $this->VisualizationAsset('template.html');
+        return '<style>' . $this->VisualizationAsset('style.css') . '</style>';
     }
 }
 ```
@@ -423,7 +421,13 @@ Der statische Formular-Marker für `InsertIPSViewHTMLPageFormItems()` lautet:
 Configure optional IPSView HTML output.
 ```
 
-Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und `UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei einmal aufgebaut und anschließend getrennt mit `RenderVisualizationHTMLPage(false, ...)` für Symcon sowie `RenderVisualizationHTMLPage(true, ...)` für IPSView gerendert werden. Beim Deaktivieren werden vorhandene IPSView-Variablen automatisch im Konfigurationsformular als beibehalten erkannt. Erst die dortige bestätigte Löschaktion entfernt sie über `UnregisterVariable()`; ein einfaches Deaktivieren oder ein Modulupdate löscht keine Variablen.
+Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und
+`UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei
+einmal aufgebaut und anschließend getrennt für Symcon und IPSView gerendert
+werden. Beim Deaktivieren werden vorhandene IPSView-Variablen automatisch im
+Konfigurationsformular als beibehalten erkannt. Erst die dortige bestätigte
+Löschaktion entfernt sie über `UnregisterVariable()`; ein einfaches Deaktivieren
+oder ein Modulupdate löscht keine Variablen.
 
 ### Methoden
 
@@ -476,21 +480,31 @@ class ExampleModule extends IPSModuleStrict
 
 `src/HelperTranslationHelper.php` stellt helper-eigene Übersetzungen bereit. Sichtbare Beschriftungen und Hinweise eines zentralen Helpers werden damit bereits im Helper übersetzt; Consumer-Module benötigen dafür keine Einträge in ihrer eigenen `locale.json`.
 
-Die Übersetzungen liegen als versionierte JSON-Kataloge unter `src/translations/`. Der deutsche Katalog des `IPSViewStyleHelper` wird beim Vendor-Sync zusammen mit dem Helper und seiner Abhängigkeit verteilt:
+Die Übersetzungen liegen als versionierte JSON-Kataloge unter `src/translations/`.
+Der deutsche Katalog des `IPSViewStyleHelper` wird beim Vendor-Sync zusammen mit
+dem Helper und seinen Abhängigkeiten verteilt:
 
 ```text
 libs/helper/
 ├── HelperTranslationHelper.php
+├── IPSViewFontCatalogHelper.php
+├── IPSViewStylePresetHelper.php
+├── IPSViewStyleProfileHelper.php
 ├── IPSViewStyleHelper.php
 └── translations/
     └── IPSViewStyleHelper.json
 ```
 
-Die Systemsprache wird über `IPS_GetSystemLanguage()` ermittelt und auf den Sprachcode normalisiert. Nicht unterstützte Sprachen oder fehlende Einträge fallen zuverlässig auf Englisch beziehungsweise den im Helper definierten Ausgangstext zurück.
+Die Systemsprache wird über `IPS_GetSystemLanguage()` ermittelt und auf den
+Sprachcode normalisiert. Nicht unterstützte Sprachen oder fehlende Einträge
+fallen zuverlässig auf Englisch beziehungsweise den im Helper definierten
+Ausgangstext zurück.
 
 ### Automatische Übersetzung
 
-Helper mit sichtbaren Texten definieren ihre englischen Quellen in einer Konstanten, deren Name auf `_TRANSLATION_SOURCES` endet. Der Workflow `.github/workflows/helper-translations.yml` vergleicht diese Quellen mit den Katalogen und nutzt GitHub Models mit dem repository-eigenen `GITHUB_TOKEN`, um neue oder geänderte Texte nach Deutsch zu übersetzen. Bestehende geprüfte Übersetzungen werden nicht überschrieben. Der Bot erstellt einen Pull Request zur Kontrolle; erst nach dessen Merge verteilt der normale Helper-Sync den aktualisierten Helper-Bundle an die Consumer.
+Helper mit sichtbaren Texten definieren ihre englischen Quellen in einer Konstanten, deren Name auf `_TRANSLATION_SOURCES` endet. Der Workflow `.github/workflows/helper-translations.yml` vergleicht diese Quellen mit den Katalogen und nutzt GitHub Models mit dem repository-eigenen `GITHUB_TOKEN`, um neue oder geänderte Texte nach Deutsch zu übersetzen. Bestehende geprüfte Übersetzungen werden nicht überschrieben. Der Bot erstellt
+einen Pull Request zur Kontrolle; erst nach dessen Merge verteilt der normale
+Helper-Sync den aktualisierten Helper-Bundle an die Consumer.
 
 Die CI prüft zusätzlich:
 
@@ -507,185 +521,201 @@ Die CI prüft zusätzlich:
 | `ResolveHelperTranslationLanguage()` | Ermittelt die aktive Systemsprache. |
 | `NormalizeHelperTranslationLanguage()` | Normalisiert Locale-Werte wie `de_DE.UTF-8` zu `de`. |
 
-## IPSViewStyleHelper
+## IPSViewFontCatalogHelper
 
-`src/IPSViewStyleHelper.php` bildet ein universelles IPSView-Stilsystem für eigenständige HTML-Seiten ab. Alle vom Helper erzeugten Formulartexte werden zentral aus seinem Übersetzungskatalog geladen und benötigen keine Consumer-Lokalisierung. Der Helper besitzt alle gemeinsamen Farben, Schriften, Rahmen, Linien, Schatten, Opacity- und Verlaufswerte. Consumer ordnen ihren Komponenten nur noch semantische Rollen wie Akzent, Information, positiv, Warnung oder kritisch zu; eigene Farbwerte oder Verlaufsberechnungen gehören nicht mehr in die Module.
+`src/IPSViewFontCatalogHelper.php` ist der zentrale, modulunabhängige
+Schriftkatalog für IPSView. Er verwendet kanonische Familiennamen und kennt die
+verfügbaren Schriftschnitte jeder Familie. Dadurch müssen Consumer und
+IPSViewAssistant keine eigenen, voneinander abweichenden Fontlisten pflegen.
 
-Für benutzerdefinierte Stile werden Farbe und Deckkraft getrennt gepflegt. Einstellbar sind die Transparenz von View-, Seiten-, Label-, normalen/aktiven/inaktiven Steuerelement- und Popupflächen sowie Rahmen, Linien, Popup-Rahmen, Schatten und Popup-Schatten. Zwischenwerte werden als prozentuale CSS-Alphaangaben ausgegeben, damit die eingestellte Deckkraft im Client-Browser zuverlässig und proportional wirkt. Text-, Icon- und semantische Statusfarben bleiben bewusst deckend; weichere Statusflächen und Verläufe entstehen weiterhin zentral über die Verlaufsstärke.
+Unterstützt werden:
 
-Die vier direkt konfigurierbaren Schriftfarben – primär, aktiv, inaktiv und Label – werden unverändert an die Consumer ausgegeben. Der Helper ersetzt eine bewusst gewählte Schriftfarbe nicht automatisch durch Schwarz oder Weiß. Sekundäre und dezente Texte behalten die RGB-Werte der Primärschrift und unterscheiden sich ausschließlich durch eine zentral festgelegte Deckkraft von 72 beziehungsweise 52 Prozent. Automatisch berechnete Kontrastfarben werden nur für Text auf semantischen Akzent- und Statusflächen verwendet, für die keine eigene Schriftfarbe konfiguriert wird.
+- **Roboto** – Regular, Bold, Italic, Bold Italic
+- **Roboto Mono** – Regular, Bold, Italic, Bold Italic
+- **Open Sans** – Regular, Bold, Italic, Bold Italic
+- **PT Sans** – Regular, Bold, Italic, Bold Italic
+- **Dancing Script** – Regular, Bold
+- **Bebas Neue** – Regular
+- **Indie Flower** – Regular
+- **Segment7** – Regular
 
-Der Helper unterstützt vier Stilquellen:
-
-- **Benutzerdefinierter Stil** mit vollständig zentral registrierten Eigenschaften,
-- **IPSView-Standardstil** aus einem ausgewählten `.ipsView`-Medienobjekt,
-- **heller Standardstil**,
-- **dunkler Standardstil**.
-
-Beim IPSView-Standardstil wird ausschließlich eine feste Whitelist der globalen Style-Einstellungen gelesen. Dazu gehören unter anderem Seiten-, Label-, Steuerelement-, Text-, Icon-, Rahmen-, Linien- und Popupfarben sowie Standardschrift, Radien, Rahmenstärken und Schatten. Frei benannte View-Farben werden für die universellen Rollen positiv, Warnung und kritisch verwendet, wenn passende Namen wie `Grün`, `Gelb` und `Rot` vorhanden sind. Lizenz-, Verbindungs- oder sonstige View-Daten werden nicht übernommen.
-
-Für statische `form.json`-Dateien kann ein Label mit der Caption `Configure the shared IPSView style used by the standalone HTML page.` als Einfügemarker verwendet werden. `InsertIPSViewStyleFormItems()` sucht diesen Marker rekursiv, ersetzt ihn durch die zentral übersetzten Bedienelemente und entfernt dadurch den englischen Platzhalter vor der Ausgabe. Die aus Basisschriftgröße und Skalierung resultierende Dokument-Schriftgröße liefert `IPSViewStyleRootFontSize()` direkt als CSS-Wert.
-
-### Verwendung
-
-```php
-require_once __DIR__ . '/../libs/helper/IPSViewStyleHelper.php';
-
-use Burki24\SymconModuleHelper\IPSViewStyleHelper;
-
-class ExampleModule extends IPSModuleStrict
-{
-    use IPSViewStyleHelper;
-
-    public function Create(): void
-    {
-        parent::Create();
-
-        $this->RegisterIPSViewStyleProperties();
-    }
-
-    public function ApplyChanges(): void
-    {
-        parent::ApplyChanges();
-
-        $this->RegisterIPSViewStyleMediaMessages();
-    }
-
-    public function GetConfigurationForm(): string
-    {
-        $form = $this->LoadConfigurationForm();
-        $this->InsertIPSViewStyleFormItems($form['elements'], colorWidth: '220px');
-
-        return $this->EncodeConfigurationForm($form);
-    }
-
-    private function RenderIPSViewPage(): string
-    {
-        $rootFontSize = $this->IPSViewStyleRootFontSize();
-        $style = $this->IPSViewStyleCSSVariables();
-
-        return sprintf(
-            '<html style="font-size: %s;"><head><style>%s</style></head></html>',
-            $rootFontSize,
-            $style
-        );
-    }
-}
-```
-
-### Universelle CSS-Rollen
-
-Der Helper erzeugt unter anderem:
-
-```css
---ipsview-view-background
---ipsview-page-background
---ipsview-label-background
---ipsview-control-background
---ipsview-control-background-active
---ipsview-control-background-inactive
---ipsview-popup-background
-
---ipsview-view-background-opacity
---ipsview-page-background-opacity
---ipsview-label-background-opacity
---ipsview-control-background-opacity
---ipsview-control-background-active-opacity
---ipsview-control-background-inactive-opacity
---ipsview-popup-background-opacity
---ipsview-border-opacity
---ipsview-line-opacity
---ipsview-popup-border-opacity
---ipsview-shadow-opacity
---ipsview-popup-shadow-opacity
-
---ipsview-text
---ipsview-text-active
---ipsview-text-inactive
---ipsview-text-label
---ipsview-text-secondary
---ipsview-text-faint
---ipsview-icon
---ipsview-border
---ipsview-line
-
---ipsview-accent
---ipsview-information
---ipsview-positive
---ipsview-warning
---ipsview-critical
-
---ipsview-gradient-accent
---ipsview-gradient-information
---ipsview-gradient-positive
---ipsview-gradient-warning
---ipsview-gradient-critical
-
---ipsview-font-family
---ipsview-font-size
---ipsview-font-scale
---ipsview-radius
---ipsview-border-width
---ipsview-line-width
---ipsview-disabled-opacity
---ipsview-shadow
---ipsview-popup-shadow
-```
-
-Zusätzlich erzeugt der Helper einen verbindlichen Satz kanonischer `--ipsview-role-*`-Tokens. Neue und bereinigte Consumer verwenden ausschließlich diese Rollen; die bisherigen `--ipsview-*`-Tokens bleiben als kompatible technische Basis erhalten.
-
-| Rolle | Verbindliche Bedeutung |
-| --- | --- |
-| `--ipsview-role-view-background` | Äußerer HTML-/View-Hintergrund. Nur diese Rolle wird durch „Transparenter Hintergrund“ transparent. |
-| `--ipsview-role-page-background` | Zusammenhängende Seitenfläche innerhalb der View. |
-| `--ipsview-role-label-background` | Hintergrund eigenständiger Beschriftungs- und Abschnittslabel. |
-| `--ipsview-role-control-background` | Normale Buttons, Karten, Eingaben und andere bedienbare Flächen. |
-| `--ipsview-role-control-active-background` | Ausgewählte, aktive oder hervorgehobene Bedienelemente. |
-| `--ipsview-role-control-inactive-background` | Deaktivierte oder nicht verfügbare Bedienelemente. |
-| `--ipsview-role-popup-background` | Dialoge, Popups und modale Eingaben. |
-| `--ipsview-role-text-primary` | Normaler Inhalt, Überschriften und Werte. |
-| `--ipsview-role-text-active` | Text ausgewählter oder aktiver Bedienelemente. |
-| `--ipsview-role-text-inactive` | Text deaktivierter oder nicht verfügbarer Bedienelemente. |
-| `--ipsview-role-text-label` | Feldnamen, Abschnittslabel, Tabellen-/Diagrammbeschriftungen und Eyebrows. |
-| `--ipsview-role-text-secondary` | Beschreibungen, Metadaten und ergänzende Informationen. |
-| `--ipsview-role-text-faint` | Tertiäre Hinweise, Zeitstempel, Achsentexte und sehr zurückhaltende Informationen. |
-| `--ipsview-role-icon` | Neutrale, nicht statusgebundene Icons. Status-Icons verwenden die jeweilige Statusrolle. |
-| `--ipsview-role-accent` | Auswahl, Fokus und allgemeine Hervorhebung. |
-| `--ipsview-role-information` | Neutraler Informationszustand. |
-| `--ipsview-role-positive` | Sicherer, erfolgreicher oder ordnungsgemäßer Zustand. |
-| `--ipsview-role-warning` | Warnung oder verzögerter Zustand. |
-| `--ipsview-role-critical` | Alarm, Fehler oder kritischer Zustand. |
-| `--ipsview-role-border` | Außenrahmen von Flächen und Steuerelementen. |
-| `--ipsview-role-line` | Trennlinien, Tabellenlinien und Diagrammraster. |
-
-Aus Primärtext dürfen keine eigenen Sekundär- oder Faint-Farben per `currentColor`, Alpha-Mischung oder hart codiertem Farbwert abgeleitet werden. Dadurch wirkt jede Farbeinstellung in allen Modulen auf dieselbe semantische Elementgruppe.
-
-Für die Migration bestehender Consumer werden zusätzlich die bisherigen Alias-Tokens wie `--ipsview-surface`, `--ipsview-success` und `--ipsview-danger` ausgegeben.
+Historische Schreibweisen wie `Open Sans`, `Roboto Mono` oder `PT Sans` werden auf
+die kanonischen Werte normalisiert. TTF-Dateien gehören bewusst nicht in den
+zentralen Helper; der IPSViewAssistant hält seine lokalen Fontdateien weiterhin
+selbst für die Vorschau vor.
 
 ### Methoden
 
 | Methode | Aufgabe |
 | --- | --- |
-| `RegisterIPSViewStyleProperties()` | Registriert Stilquelle, Medienobjekt, Hintergrundmodus, Skalierung, universelle Farben, getrennte Flächen-/Rahmen-/Schatten-Deckkraft, Typografie, Rahmen, Schatten, inaktive Opacity und Verlaufsstärke. |
-| `IPSViewStyleFormItems()` | Liefert die vollständige modulunabhängige Instanzkonfiguration für alle Stilquellen. |
+| `catalog()` | Liefert den vollständigen Schriftkatalog. |
+| `families()` | Liefert alle kanonischen Fontfamilien. |
+| `options()` | Liefert Select-Optionen mit Beschriftung und kanonischem Wert. |
+| `capabilities()` / `styles()` | Liefert die verfügbaren Schriftschnitte einer Familie. |
+| `normalizeFamily()` / `normalizeStyle()` | Normalisiert bekannte Familien- und Schnitt-Aliase. |
+| `isValidFamily()` / `isValidStyle()` | Prüft kanonische Familie beziehungsweise Schriftschnitt. |
+
+## IPSViewStyleProfileHelper
+
+`src/IPSViewStyleProfileHelper.php` definiert das portable Austauschformat
+**Style Profile V1**. Ein Profil trägt das Schema `burki24.ipsview-style`, die
+Version `1`, einen Namen und einen vollständigen Snapshot der universellen
+Stilwerte. Teilprofile sind bewusst nicht vorgesehen: Ein gültiges Profil ist
+ohne Consumer-Fallback reproduzierbar.
+
+Der V1-Contract umfasst 46 Basiswerte für Farben, Deckkräfte, Typografie,
+Rahmen/Formen, Schatten und Effekte. Abgeleitete Werte wie Kontrastfarben,
+Soft-Farben, CSS-Gradienten oder fertige `box-shadow`-Strings werden nicht
+gespeichert, weil sie aus den Basiswerten reproduzierbar erzeugt werden. Nicht
+portabel und deshalb ausgeschlossen sind insbesondere Hintergrundbilder,
+Zielseiten-/Ausrichtungsinformationen, Scope, Control-Mappings und Symcon-Media-IDs.
+
+`FontFamily` verwendet `system` oder eine kanonische Familie aus
+`IPSViewFontCatalogHelper`; `FontStyle` wird gegen die Fähigkeiten der gewählten
+Schrift validiert. Zusätzliche unbekannte V1-Felder werden beim Lesen toleriert
+und bei der Normalisierung verworfen. Unbekannte zukünftige Profilversionen
+werden abgelehnt, statt stillschweigend falsch interpretiert zu werden.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `contract()` | Liefert die Contract-Beschreibung von Style Profile V1. |
+| `styleFields()` | Liefert die 46 universellen Stilfelder. |
+| `create()` | Erzeugt ein normalisiertes vollständiges Profil. |
+| `decode()` / `encode()` | Liest beziehungsweise schreibt das kanonische JSON-Format. |
+| `normalize()` / `normalizeStyle()` | Normalisiert Profil und Stilwerte einschließlich Wertebereichen und Fonts. |
+| `isValid()` / `isValidJson()` | Prüft Array- beziehungsweise JSON-Profile ohne Exception nach außen. |
+
+## IPSViewStylePresetHelper
+
+`src/IPSViewStylePresetHelper.php` hält die gemeinsam verwendeten
+IPSView-Farbpaletten. Der Helper ist die zentrale Quelle für alle
+vordefinierten Themes; Consumer und IPSViewAssistant verwenden dieselben
+Rollen und Werte.
+
+Enthalten sind **IPSView Standard**, **Hell**, **Dunkel**, **Warm**, **Kühl**,
+**Erdig**, **Wasser** und **Sonnig**. `Custom` bleibt ein Editor-/Consumer-Modus
+und ist kein Preset. Die numerischen Theme-IDs des IPSViewAssistant werden nicht
+in den zentralen Contract übernommen.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `ids()` | Liefert alle zentralen Preset-IDs. |
+| `presets()` | Liefert alle Preset-Definitionen. |
+| `palette()` | Liefert die Rollen/Farben eines einzelnen Presets. |
+| `label()` | Liefert die lesbare Bezeichnung eines Presets. |
+| `isValid()` | Prüft eine Preset-ID. |
+
+## IPSViewStyleHelper
+
+`src/IPSViewStyleHelper.php` bildet das universelle IPSView-Stilsystem für
+eigenständige HTML-Seiten ab. Alle vom Helper erzeugten Formulartexte werden
+zentral aus seinem Übersetzungskatalog geladen und benötigen keine
+Consumer-Lokalisierung. Der Helper besitzt die gemeinsamen Farben, Schriften,
+Rahmen, Linien, Schatten, Deckkräfte und Verlaufswerte. Consumer ordnen ihren
+Komponenten nur noch semantische Rollen wie Akzent, Information, positiv,
+Warnung oder kritisch zu.
+
+Für benutzerdefinierte Stile werden Farbe und Deckkraft getrennt gepflegt.
+Schriftfamilie, **Schriftschnitt**, Basisschriftgröße und Skalierung gehören
+ebenso zum gemeinsamen Stil wie Radien, Rahmen-/Linienstärken und
+Schattenparameter.
+
+### Stilquellen
+
+Die Stilquelle wird direkt in einem einzigen Auswahlfeld gewählt:
+
+- **Benutzerdefinierter Stil** – alle Werte sind frei editierbar.
+- **IPSView-Standardstil** – liest eine Whitelist globaler Werte aus einem
+  ausgewählten `.ipsView`-Medienobjekt.
+- **Helle Vorgabe** und **Dunkle Vorgabe** – kompatible bestehende
+  Standardquellen.
+- **Stilprofil** – lädt ein vollständig validiertes Style Profile V1 aus einem
+  Medienobjekt.
+- **Hell**, **Dunkel**, **Warm**, **Kühl**, **Erdig**, **Wasser** und
+  **Sonnig** – direkte zentrale Vorgaben aus `IPSViewStylePresetHelper`.
+
+Die zwischenzeitlich verwendete generische Preset-Source-ID `5` bleibt intern
+ausschließlich zur Kompatibilität bereits gespeicherter Konfigurationen erhalten
+und wird neuen Konfigurationen nicht mehr als zweistufige Auswahl angeboten.
+
+Bei allen nicht benutzerdefinierten Quellen zeigt das Formular die
+**tatsächlich wirksamen Stilwerte** an. Farben, Deckkräfte, Typografie, Rahmen,
+Schatten und Effekte werden schreibgeschützt dargestellt; die zuvor
+gespeicherten Custom-Werte bleiben dadurch beim Ausprobieren einer Vorgabe
+unangetastet.
+
+Über **In benutzerdefinierten Stil übernehmen** lassen sich die aktuell
+wirksamen Werte vollständig in die Custom-Properties kopieren. Die Stilquelle
+wechselt anschließend auf **Benutzerdefinierter Stil**, sodass das Preset oder
+Profil als Ausgangspunkt frei individualisiert werden kann. Kopiert werden
+Farben, Deckkräfte, Schriftfamilie, Schriftschnitt, Basisschriftgröße,
+Schriftskalierung, Radien, Rahmen-/Linienstärken, Schattenparameter,
+Inaktivitäts-Opacity und Verlaufsstärke. **Transparenter Hintergrund** bleibt
+bewusst eine globale Einstellung und wird dabei nicht überschrieben.
+
+Nicht zur aktiven Quelle gehörende Medienfelder werden im Formular
+ausgeblendet. Das Profil-Medienobjekt erscheint nur bei **Stilprofil**, das
+`.ipsView`-Medienobjekt nur beim **IPSView-Standardstil**.
+
+Beim IPSView-Standardstil wird ausschließlich eine feste Whitelist der globalen
+Style-Einstellungen gelesen. Lizenz-, Verbindungs- oder sonstige View-Daten
+werden nicht übernommen. Für statische `form.json`-Dateien kann weiterhin das
+Label `Configure the shared IPSView style used by the standalone HTML page.` als
+Einfügemarker verwendet werden.
+
+### Universelle CSS-Rollen
+
+Neben den technischen `--ipsview-*`-Tokens erzeugt der Helper verbindliche
+`--ipsview-role-*`-Rollen für View-/Seiten-/Label-/Control-/Popup-Hintergründe,
+Text, Icons, Rahmen, Linien, Akzent, Information, positiven, warnenden und
+kritischen Status. Typografie wird unter anderem über
+
+```css
+--ipsview-font-family
+--ipsview-font-size
+--ipsview-font-style
+--ipsview-font-weight
+--ipsview-font-scale
+```
+
+bereitgestellt. Die bisherigen Alias-Tokens wie `--ipsview-surface`,
+`--ipsview-success` und `--ipsview-danger` bleiben aus Kompatibilitätsgründen
+erhalten.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `RegisterIPSViewStyleProperties()` | Registriert Stilquellen, Medienobjekte, globale Optionen und sämtliche Custom-Stilwerte. |
+| `IPSViewStyleFormItems()` | Liefert die dynamische modulunabhängige Konfiguration einschließlich aktiver schreibgeschützter Stilvorschau und Übernahme-Button. |
 | `InsertIPSViewStyleFormItems()` | Ersetzt einen auch verschachtelt abgelegten Formular-Marker durch die vollständigen Stilbedienelemente. |
-| `IPSViewStyleRootFontSize()` | Liefert die aus Basisschriftgröße und Skalierung berechnete Root-Schriftgröße für eigenständige HTML-Seiten. |
+| `IPSViewStyleRootFontSize()` | Liefert die aus Basisschriftgröße und Skalierung berechnete Root-Schriftgröße. |
 | `IPSViewStyleSource()` | Liefert die normalisierte aktive Stilquelle. |
-| `IPSViewStyleMediaID()` | Liefert die ausgewählte Medienobjekt-ID oder `0`. |
-| `RegisterIPSViewStyleMediaMessages()` | Registriert Aktualisierungen des ausgewählten IPSView-Medienobjekts. |
+| `IPSViewStyleMediaID()` | Liefert die ausgewählte `.ipsView`-Medienobjekt-ID oder `0`. |
+| `IPSViewStyleProfileMediaID()` | Liefert die ausgewählte Style-Profile-Medienobjekt-ID oder `0`. |
+| `IPSViewStylePreset()` | Liefert ausschließlich für die kompatible historische Preset-Quelle die gespeicherte Preset-ID. |
+| `RegisterIPSViewStyleMediaMessages()` | Registriert Aktualisierungen der aktuell aktiven medienbasierten Stilquelle. |
 | `IsIPSViewStyleMediaUpdate()` | Erkennt eine Aktualisierung der aktiven IPSView-Stilquelle. |
+| `ReadIPSViewStyleMediaContent()` | Liest den Inhalt des ausgewählten `.ipsView`-Medienobjekts. |
+| `ReadIPSViewStyleProfileMediaContent()` | Liest den Inhalt des ausgewählten Style-Profile-Medienobjekts. |
 | `IPSViewResolvedStyle()` | Liefert die vollständig aufgelösten universellen Stilwerte. |
 | `IPSViewStyleCSSVariables()` | Rendert die aufgelösten Werte als gemeinsame `--ipsview-*`-CSS-Variablen. |
 
 ## IPSViewColorPaletteHelper
 
-`src/IPSViewColorPaletteHelper.php` bleibt vorerst als kompatibler Vorgänger für bereits migrierte Consumer erhalten. Neue Integrationen sollen `IPSViewStyleHelper` verwenden. Der ältere Helper verwaltet nur neun Farben und besitzt weder den IPSView-Standardstil noch die gemeinsamen Typografie-, Rahmen-, Schatten-, Opacity- und Verlaufswerte.
+`src/IPSViewColorPaletteHelper.php` bleibt vorerst als kompatibler Vorgänger für bereits migrierte Consumer erhalten. Neue Integrationen sollen `IPSViewStyleHelper` verwenden. Der ältere Helper verwaltet nur neun Farben und besitzt weder Style Profile, zentrale Presets noch die gemeinsamen Typografie-, Rahmen-, Schatten-, Opacity- und Verlaufswerte.
 
 ## HttpResponseHelper
 
 `src/HttpResponseHelper.php` stellt kleine, wiederverwendbare HTTP-Antworten für Symcon-Module mit WebHooks, OAuth-Callbacks oder eigenen HTTP-Endpunkten bereit. Der Helper setzt den HTTP-Status und sicherheitsorientierte Standard-Header, ohne von einem konkreten Modul oder Dienst abhängig zu sein.
 
-Neben Klartext-Antworten unterstützt der Helper sicher maskierte HTML-Text-Antworten für Callback-Seiten. Freies HTML oder JSON bleiben bewusst außerhalb des Helpers, bis dafür ein gemeinsamer Anwendungsfall besteht.
+Neben Klartext-Antworten unterstützt der Helper sicher maskierte
+HTML-Text-Antworten für Callback-Seiten. Freies HTML oder JSON bleiben bewusst
+außerhalb des Helpers, bis dafür ein gemeinsamer Anwendungsfall besteht.
 
 ### Verwendung
 
@@ -721,9 +751,15 @@ class ExampleModule extends IPSModuleStrict
 
 `src/SymconOAuthHelper.php` kapselt den wiederverwendbaren OAuth-Ablauf für Anbieter, die zentral beim Symcon-OAuth-Dienst registriert sind. Der Helper erzeugt die lizenzbezogene Autorisierungs-URL, tauscht weitergeleitete Autorisierungscodes gegen Tokens und erneuert Access-Tokens über ein gespeichertes Refresh-Token.
 
-Client-ID und Client-Secret des Anbieters bleiben auf dem Symcon-OAuth-Backend und werden weder im Modul noch in Benutzerinstanzen gespeichert. Der Helper verwendet ausschließlich die feste Basis `https://oauth.ipmagic.de` und validiert Identifier, Transportantwort, HTTP-Status, JSON-Struktur, Bearer-Token und Refresh-Token.
+Client-ID und Client-Secret des Anbieters bleiben auf dem Symcon-OAuth-Backend
+und werden weder im Modul noch in Benutzerinstanzen gespeichert. Der Helper
+verwendet ausschließlich die feste Basis `https://oauth.ipmagic.de` und
+validiert Identifier, Transportantwort, HTTP-Status, JSON-Struktur,
+Bearer-Token und Refresh-Token.
 
-Der HTTP-Transport wird als Callable injiziert. Dadurch bleibt der Helper unabhängig von konkreten HTTP-Clients und kann den im Consumer bereits vorhandenen, für `oauth.ipmagic.de` abgesicherten Transport wiederverwenden.
+Der HTTP-Transport wird als Callable injiziert. Dadurch bleibt der Helper
+unabhängig von konkreten HTTP-Clients und kann den im Consumer bereits
+vorhandenen, für `oauth.ipmagic.de` abgesicherten Transport wiederverwenden.
 
 ### Verwendung
 
@@ -759,16 +795,17 @@ $renewedTokens = $oauth->refreshAccessToken($tokens['refreshToken']);
 | `exchangeAuthorizationCode()` | Tauscht einen weitergeleiteten Autorisierungscode gegen normalisierte Access- und Refresh-Tokens. |
 | `refreshAccessToken()` | Erneuert den Access-Token und behält den bisherigen Refresh-Token, wenn der Anbieter ihn nicht rotiert. |
 
-
 ## VariableHelper
 
-`src/VariableHelper.php` kapselt den wiederverwendbaren Zugriff auf Variablen unterhalb von Symcon-Objekten. Ohne explizite Parent-ID löst der Helper Variablen wie bisher relativ zur aktuellen `InstanceID` auf. Optional kann eine andere Parent-ID angegeben werden, beispielsweise um Variablen einer verbundenen oder referenzierten Instanz auszulesen.
+`src/VariableHelper.php` kapselt den wiederverwendbaren Zugriff auf Variablen
+unterhalb von Symcon-Objekten. Ohne explizite Parent-ID löst der Helper Variablen
+wie bisher relativ zur aktuellen `InstanceID` auf. Optional kann eine andere
+Parent-ID angegeben werden, beispielsweise um Variablen einer verbundenen oder
+referenzierten Instanz auszulesen.
 
-Ein Lookup liefert nur dann eine positive ID zurück, wenn der gefundene Ident tatsächlich zu einer vorhandenen Symcon-Variable gehört. Fehlende Idents, ungültige IDs und andere Objekttypen werden einheitlich auf `0` normalisiert.
-
-Ab Version 1.2.0 kann der Helper Werte zusätzlich direkt über den Ident lesen. Der rohe Zugriff bewahrt den nativen Symcon-Variablentyp. Typspezifische Leser liefern bei fehlenden oder inkompatiblen Werten einen definierbaren Standardwert; dabei werden keine Strings implizit in Zahlen konvertiert. Der Float-Leser akzeptiert bewusst Integer und Float als numerische Werte, und der Boolean-Leser unterstützt neben nativen Boolean-Werten auch numerische Zustände mit `0 = false` und `!= 0 = true`.
-
-Dadurch müssen Module direkte `IPS_GetObjectIDByIdent()`-, `IPS_VariableExists()`- und wiederkehrende `GetValue()`-/Typprüfungen nicht mehrfach selbst absichern. Der Helper bleibt bewusst auf Variablenzugriffe beschränkt; allgemeine String- oder JSON-Konvertierungen gehören nicht zu seiner Verantwortung.
+Ein Lookup liefert nur dann eine positive ID zurück, wenn der gefundene Ident
+tatsächlich zu einer vorhandenen Symcon-Variable gehört. Fehlende Idents,
+ungültige IDs und andere Objekttypen werden einheitlich auf `0` normalisiert.
 
 ### Verwendung
 
@@ -803,18 +840,21 @@ class ExampleModule extends IPSModuleStrict
 | Methode | Aufgabe |
 | --- | --- |
 | `GetVariableIDByIdent()` | Liefert die ID einer Variablen unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID; andernfalls `0`. |
-| `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident unterhalb der aktuellen Modulinstanz oder einer optional angegebenen Parent-ID existiert. |
-| `GetVariableValueByIdent()` | Liest den Rohwert einer Variablen typunverändert; fehlt die Variable, wird der angegebene Standardwert geliefert. |
-| `GetBooleanVariableValueByIdent()` | Liest Boolean-Werte sowie numerische 0/Nicht-0-Zustände; inkompatible Werte liefern den Standardwert. |
-| `GetFloatVariableValueByIdent()` | Liest Integer- oder Float-Werte und normalisiert sie auf Float; andere Typen liefern den Standardwert. |
-| `GetIntegerVariableValueByIdent()` | Liest ausschließlich native Integer-Werte; andere Typen liefern den Standardwert. |
-| `GetStringVariableValueByIdent()` | Liest ausschließlich native String-Werte; andere Typen liefern den Standardwert. |
+| `VariableExists()` | Prüft, ob eine Variable mit dem angegebenen Ident vorhanden ist. |
+| `GetVariableValueByIdent()` | Liest den Rohwert einer Variablen typunverändert. |
+| `GetBooleanVariableValueByIdent()` | Liest Boolean-Werte sowie numerische 0/Nicht-0-Zustände. |
+| `GetFloatVariableValueByIdent()` | Liest Integer- oder Float-Werte und normalisiert sie auf Float. |
+| `GetIntegerVariableValueByIdent()` | Liest ausschließlich native Integer-Werte. |
+| `GetStringVariableValueByIdent()` | Liest ausschließlich native String-Werte. |
 
 ## DateHelper
 
 `src/DateHelper.php` formatiert Datumswerte aus APIs oder Konfigurationsquellen einheitlich. Der Helper verwendet standardmäßig die deutsche Datumsdarstellung `d.m.Y`, erlaubt aber auch ein frei wählbares `DateTime`-Ausgabeformat.
 
-Nicht interpretierbare Datumsstrings werden unverändert zurückgegeben. Leere oder Nicht-String-Werte ergeben einen leeren String. Damit eignet sich der Helper besonders für externe Daten, bei denen ein ungültiger oder unbekannter Originalwert nicht stillschweigend verloren gehen soll.
+Nicht interpretierbare Datumsstrings werden unverändert zurückgegeben. Leere
+oder Nicht-String-Werte ergeben einen leeren String. Damit eignet sich der Helper
+besonders für externe Daten, bei denen ein ungültiger oder unbekannter
+Originalwert nicht stillschweigend verloren gehen soll.
 
 ### Verwendung
 
@@ -849,7 +889,10 @@ class ExampleModule extends IPSModuleStrict
 
 `src/PersistentJsonCacheHelper.php` stellt einen persistenten, modul-internen JSON-Cache auf Basis von Symcon-Attributen bereit.
 
-Symcon-Attribute sind persistent und ausschließlich für die interne Verwaltung durch ein Modul vorgesehen. Damit eignen sie sich für strukturierte API-Daten, Metadaten und andere Cache-Inhalte, die nicht als Statusvariable im Objektbaum sichtbar sein sollen.
+Symcon-Attribute sind persistent und ausschließlich für die interne Verwaltung
+durch ein Modul vorgesehen. Damit eignen sie sich für strukturierte API-Daten,
+Metadaten und andere Cache-Inhalte, die nicht als Statusvariable im Objektbaum
+sichtbar sein sollen.
 
 ### Verwendung
 
@@ -907,8 +950,11 @@ libs/
     ├── HelperTranslationHelper.php
     ├── HttpResponseHelper.php
     ├── IPSViewColorPaletteHelper.php
+    ├── IPSViewFontCatalogHelper.php
     ├── IPSViewHTMLPageHelper.php
     ├── IPSViewStyleHelper.php
+    ├── IPSViewStylePresetHelper.php
+    ├── IPSViewStyleProfileHelper.php
     ├── translations/
     │   ├── IPSViewHTMLPageHelper.json
     │   └── IPSViewStyleHelper.json
@@ -921,6 +967,13 @@ libs/
 ```
 
 Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder Downloads zur Laufzeit sind nicht erforderlich.
+
+## Dokumentationsregel
+
+Ändert ein Arbeitspaket sichtbare Konfiguration, öffentliche Helper-API oder
+Anwenderfunktionen, gehört die zugehörige README zum selben Arbeitspaket. Vor
+der Auslieferung werden deshalb neben Tests und StylePHP auch die betroffenen
+README-Abschnitte gegen den tatsächlich ausgelieferten Stand geprüft.
 
 ## Tests
 
