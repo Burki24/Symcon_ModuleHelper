@@ -81,6 +81,11 @@
         }
       ]
     },
+    "IPSViewStylePresetHelper": {
+      "file": "src/IPSViewStylePresetHelper.php",
+      "version": "1.0.0",
+      "sha256": "81a8a2ec7cc2a1469fa7b987b3dd31b4bc11feff98da70795dbf74f3f1f5391f"
+    },
     "IPSViewStyleProfileHelper": {
       "file": "src/IPSViewStyleProfileHelper.php",
       "version": "1.0.0",

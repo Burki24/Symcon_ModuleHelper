@@ -45,6 +45,23 @@ expected_style_files = {
 if not expected_style_files.issubset(style_files):
     raise SystemExit(f"Missing style bundle files: {sorted(expected_style_files - set(style_files))}")
 
+
+preset_files, preset_entries = MODULE.bundle_files(
+    manifest,
+    "IPSViewStylePresetHelper",
+    "libs/helper/IPSViewStylePresetHelper.php",
+)
+
+if set(preset_entries) != {"IPSViewStylePresetHelper"}:
+    raise SystemExit(f"Unexpected top-level preset manifest entries: {sorted(preset_entries)}")
+
+preset_entry = preset_entries["IPSViewStylePresetHelper"]
+if preset_entry.get("dependencies", []) != []:
+    raise SystemExit(f"Unexpected preset dependencies: {preset_entry.get('dependencies', [])}")
+
+if "libs/helper/IPSViewStylePresetHelper.php" not in preset_files:
+    raise SystemExit("Missing IPSViewStylePresetHelper from its consumer bundle.")
+
 page_files, page_entries = MODULE.bundle_files(
     manifest,
     "IPSViewHTMLPageHelper",
