@@ -31,6 +31,7 @@ style_dependencies = style_entry.get("dependencies", [])
 if [entry.get("name") for entry in style_dependencies] != [
     "HelperTranslationHelper",
     "IPSViewFontCatalogHelper",
+    "IPSViewStyleProfileHelper",
 ]:
     raise SystemExit(f"Unexpected style dependencies: {style_dependencies}")
 
@@ -38,6 +39,7 @@ expected_style_files = {
     "libs/helper/IPSViewStyleHelper.php",
     "libs/helper/HelperTranslationHelper.php",
     "libs/helper/IPSViewFontCatalogHelper.php",
+    "libs/helper/IPSViewStyleProfileHelper.php",
     "libs/helper/translations/IPSViewStyleHelper.json",
 }
 if not expected_style_files.issubset(style_files):

@@ -9,9 +9,9 @@
 ## Aktueller Stand
 
 **Datum:** 2026-08-30
-**Phase:** Paket B – Style Profile Contract V1
-**Status:** Paket B vollständig implementiert; gezielte Syntax-, Contract-, Roundtrip- und Validierungstests sind lokal erfolgreich. Übernahme nach `Symcon_ModuleHelper/dev` und GitHub-CI stehen noch aus.
-**Nächster Schritt:** Paket B nach `dev` übernehmen, `Tests` und `Check Style` prüfen und erst nach grünem CI-Stand `dev → main` freigeben.
+**Phase:** Paket C – Style-Profil als neue `IPSViewStyleHelper`-Quelle
+**Status:** Paket B ist als `Symcon_ModuleHelper` v3.8.0 veröffentlicht; Consumer-Sync und automatischer `main → dev`-Fast-Forward sind bestätigt. Paket C ist lokal vollständig implementiert und getestet; Übernahme nach `dev` und GitHub-CI stehen noch aus.
+**Nächster Schritt:** Paket C nach `dev` übernehmen, `Tests` und `Check Style` prüfen und erst nach grünem CI-Stand `dev → main` freigeben.
 
 ---
 
@@ -260,6 +260,8 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 - Unbekannte zusätzliche V1-Felder werden toleriert, aber nicht in den normalisierten Contract übernommen.
 - Eine unbekannte oder zukünftige `version` wird abgelehnt, damit kein inkompatibler Contract stillschweigend falsch interpretiert wird.
 
+**Paket B veröffentlicht:** Ja, als `Symcon_ModuleHelper` v3.8.0. `main` und `dev` wurden durch die neue Release-Automatik erfolgreich auf denselben Stand gebracht.
+
 
 ---
 
@@ -267,184 +269,28 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 
 **Ziel:** Zentrale Helper-Consumer können exportierte Style-Profile verwenden.
 
-Bestehende IDs bleiben unverändert. Vorgesehene Ergänzung:
+Bestehende IDs bleiben unverändert. Ergänzung:
 
 ```php
 IPSVIEW_STYLE_SOURCE_PROFILE = 4;
 ```
 
-- [ ] neue Source-ID ergänzen
-- [ ] Form-Auswahl ergänzen
-- [ ] Style-Profil als Symcon-Medium auswählbar machen
-- [ ] Profil lesen und validieren
-- [ ] Profil in `IPSViewResolvedStyle()` integrieren
-- [ ] sicheren Fallback definieren
-- [ ] Media-Update-Überwachung auf Profile erweitern
-- [x] Contract-, Roundtrip-, Font-, Wertebereichs-, Schema-/Versions- und Fehlerfalltests ergänzen
+- [x] neue Source-ID `PROFILE = 4` ergänzen; IDs 0–3 unverändert lassen
+- [x] Form-Auswahl um „Style profile“ ergänzen
+- [x] separates `IPSViewStyleProfileMediaID` als Symcon-Medienauswahl ergänzen
+- [x] Profil ausschließlich über `IPSViewStyleProfileHelper` lesen und validieren
+- [x] Profil in `IPSViewResolvedStyle()` integrieren
+- [x] Farben und die 12 Deckkraftwerte korrekt zu CSS-Farben zusammenführen
+- [x] `FontFamily`, `FontStyle`, `FontSize` und `FontScale` aus dem Profil übernehmen
+- [x] `DisabledOpacity` und `GradientStrength` aus dem Profil übernehmen
+- [x] `FontStyle` zusätzlich als `--ipsview-font-style` und `--ipsview-font-weight` ausgeben
+- [x] ungültige, leere oder inkompatible Profile sicher auf das Light-Preset zurückfallen lassen
+- [x] Raw-JSON und Base64-JSON für Profiltests/Medienpayloads unterstützen
+- [x] Media-Update-Überwachung auf die jeweils aktive medienbasierte Quelle erweitern
+- [x] Wechsel zwischen IPSView-Medium und Stilprofil-Medium sauber ab-/anmelden
+- [x] `IPSViewStyleProfileHelper` als Dependency des `IPSViewStyleHelper` deklarieren
+- [x] Helper-Sync-Bundle-Test um die neue Dependency erweitern
+- [x] Paket-C-Tests für Source-ID, Formular, Profilauflösung, Fallback, FontStyle/FontScale und Media-Updates ergänzen
 
----
+**Kompatibilitätsentscheidung:** Die bestehenden Properties und Source-IDs 0–3 bleiben unverändert. `IPSViewStyleFontScale`, `IPSViewStyleDisabledOpacity` und `IPSViewStyleGradientStrength` verhalten sich für Custom/Media/Light/Dark weiterhin wie bisher; nur die vollständige Profilquelle verwendet die im Profil gespeicherten Werte.
 
-### Paket D – Presets zentralisieren
-
-**Ziel:** Universelle Presetwerte nicht mehr parallel im Assistant und Helper pflegen.
-
-Zu prüfen/zentralisieren:
-
-- [ ] Light
-- [ ] Dark
-- [ ] Warm
-- [ ] Cool
-- [ ] Earthy
-- [ ] Water
-- [ ] Sunny
-
-Zusätzlich:
-
-- [ ] bestehende Assistant-Theme-IDs prüfen
-- [ ] Mapping/Migration sicherstellen
-- [ ] `IPSViewTheme.php` auf zentrale Presets umstellen
-- [x] Contract-, Roundtrip-, Font-, Wertebereichs-, Schema-/Versions- und Fehlerfalltests ergänzen
-
----
-
-### Paket E – Export und Import im IPSViewAssistant
-
-**Ziel:** Der Assistant wird Editor/Erzeuger des zentralen Style-Profile-Formats.
-
-#### Export
-
-- [ ] aktuellen Assistant-Style vollständig auflösen
-- [ ] keine internen numerischen Assistant-Theme-IDs exportieren
-- [ ] zentrales Style Profile V1 erzeugen
-- [ ] Profilname/Beschreibung unterstützen
-- [ ] JSON-Export anbieten
-- [ ] optional direkt als Symcon-Medium speichern
-
-#### Import
-
-- [ ] JSON-Profil laden
-- [ ] Symcon-Medium laden
-- [ ] zentralen Validator verwenden
-- [ ] Werte wieder auf Assistant-Editor verteilen
-- [ ] importiertes Profil bearbeiten können
-- [ ] erneuten Export ermöglichen
-- [ ] Roundtrip-Test durchführen
-
----
-
-### Paket F – Integration, Consumer und Dokumentation
-
-**Ziel:** Konzept außerhalb des Assistant praktisch verifizieren.
-
-- [ ] ersten realen Consumer auswählen
-- [ ] Style-Profil dort als Quelle testen
-- [ ] Farben vergleichen
-- [ ] Fonts vergleichen
-- [ ] Transparenzen vergleichen
-- [ ] Popup/Rahmen/Schatten vergleichen
-- [ ] responsives Verhalten prüfen
-- [ ] End-to-End-Test Assistant → Export → Consumer → Import durchführen
-- [ ] README/Dokumentation `Symcon_ModuleHelper` ergänzen
-- [ ] README/Dokumentation `IPSViewAssistant` ergänzen
-
----
-
-## 5. Architekturentscheidungen
-
-### Zentral gehört in den `Symcon_ModuleHelper`
-
-- Fontfamilien
-- verfügbare Font-Schnitte/Fähigkeiten
-- Fontvalidierung
-- universelle Farben
-- Transparenzen
-- Typografie-Contract
-- Rahmen/Rundungen
-- Schatten
-- Verlauf/Effekte
-- universelle Presets
-- Style-Profile-Schema
-- Style-Profile-Validierung
-- Style-Profile-Encoding/Decoding
-
-### Im IPSViewAssistant verbleibt
-
-- Editor-Workflow
-- Vorschau
-- Original-TTF-Dateien für Browser-/SVG-Vorschau
-- Hintergrundbild-Verarbeitung
-- Zuordnung eines Styles auf Controls/Seiten
-- Assistant-spezifische UI und Anwendungslogik
-
-### Style-Profil-Prinzip
-
-Der Assistant darf nicht sein internes Datenmodell exportieren. Exportiert werden aufgelöste universelle Werte gemäß zentralem Contract.
-
-Beispielprinzip:
-
-```json
-{
-  "schema": "burki24.ipsview-style",
-  "version": 1,
-  "name": "Mein Hausdesign",
-  "style": {
-    "ViewBackground": "#F4F5F7",
-    "Text": "#202124",
-    "Accent": "#55CBB5",
-    "FontFamily": "Open Sans",
-    "FontStyle": "Bold",
-    "FontSize": 16,
-    "BorderRadius": 8,
-    "ShadowBlur": 18,
-    "GradientStrength": 0
-  }
-}
-```
-
-Das endgültige Schema wird erst in Paket B verbindlich festgelegt.
-
----
-
-## 5.1 Paket-A-Architekturentscheidungen
-
-- Der zentrale Fontkatalog ist ein eigenständiger `final class IPSViewFontCatalogHelper` und kein Trait im `IPSViewStyleHelper`.
-- Der Katalog enthält ausschließlich Metadaten und Validierungs-/Normalisierungslogik; TTF-Dateien verbleiben beim jeweiligen Consumer, derzeit im `IPSViewAssistant`.
-- Kanonische Family-Werte entsprechen den realen IPSView-Dokumentwerten (`RobotoMono`, `OpenSans`, `PTSans` usw.); Anzeigenamen bleiben lesbar (`Roboto Mono`, `Open Sans`, `PT Sans`).
-- Der `IPSViewAssistant` behält seine bestehenden numerischen Font-Modi 0–8 unverändert und mappt diese nur auf den zentralen Katalog.
-- Unbekannte/systemweite Fonts werden vom zentralen Katalog nicht fälschlich als native IPSView-Fonts validiert. Consumer können für solche Alt-/Custom-Werte ihre bestehende Fallback-Logik erhalten.
-
----
-
-## 6. Chat-/Projektübergabe
-
-Bei Beginn eines neuen Chats in diesem Projekt:
-
-1. `Symcon_ModuleHelper/dev/PROJECT_STATUS.md` lesen.
-2. Den dort angegebenen **aktuellen Paketstand** als maßgeblich verwenden.
-3. Danach den tatsächlichen Stand der betroffenen Dateien auf `dev` prüfen.
-4. Bereits erledigte Schritte nicht erneut beginnen.
-5. Bei Abweichungen zwischen Chat-Erinnerung und Repository gilt der aktuelle Repository-Stand auf `dev`.
-6. Nach Abschluss eines Teilschritts diese Datei aktualisieren.
-
----
-
-## 7. Unmittelbar nächster Arbeitsschritt
-
-**Paket B auf `Symcon_ModuleHelper/dev` übernehmen und CI bestätigen**
-
-Geänderte/neu angelegte Dateien:
-
-- `src/IPSViewStyleProfileHelper.php`
-- `tests/ipsview-style-profile.php`
-- `tests/run.php`
-- `manifest.json`
-- `PROJECT_STATUS.md`
-
-Nach dem Commit auf `dev`:
-
-1. GitHub Actions `Tests` prüfen.
-2. GitHub Actions `Check Style` prüfen.
-3. Falls beide grün sind, Paket B als freigabereif markieren.
-4. `dev → main` übernehmen.
-5. Automatische Versionierung, Consumer-Synchronisierung und Main→Dev-Fast-Forward kontrollieren.
-6. Danach Paket C – Style-Profil als neue `IPSViewStyleHelper`-Quelle – beginnen.
