@@ -20,7 +20,7 @@ require_once __DIR__ . '/IPSViewStylePresetHelper.php';
  * colors and unknown future properties. Unknown top-level IPSView color fields are transported in
  * a dedicated extension section instead of being discarded.
  *
- * @version 1.0.1
+ * @version 1.0.2
  */
 final class IPSViewControlThemeHelper
 {
@@ -374,7 +374,6 @@ final class IPSViewControlThemeHelper
 
     /** @var list<string> */
     private const LEGACY_FIELDS = [
-        'ColorView',
         'DialogButtonTextColor'
     ];
 
@@ -503,24 +502,19 @@ final class IPSViewControlThemeHelper
     }
 
     /**
-     * Resolves the portable Style Profile field for one native color in the context of a document.
+     * Resolves the portable Style Profile field for one native color.
      *
-     * IPSView 6.1 documents may contain both ColorView and ColorPage. Newer 6.5 documents no
-     * longer expose ColorView; in those documents ColorPage acts as the View background.
+     * The document argument is retained for API compatibility and future format-specific rules.
+     * Native field semantics are currently stable: ColorView is the View background and ColorPage
+     * is the page background. Missing fields never change the meaning of fields that are present.
      */
     public static function styleFieldForDocument(array|object $document, string $field): ?string
     {
+        unset($document);
+
         $definition = self::definition($field);
-        if ($definition === null) {
-            return null;
-        }
 
-        $document = is_array($document) ? $document : get_object_vars($document);
-        if ($field === 'ColorPage' && !array_key_exists('ColorView', $document)) {
-            return 'ViewBackground';
-        }
-
-        return $definition['styleField'];
+        return $definition['styleField'] ?? null;
     }
 
     /** Resolves the semantic preset role for one native color in the context of a document. */
@@ -535,7 +529,7 @@ final class IPSViewControlThemeHelper
     }
 
     /**
-     * Returns the complete document-aware native property mapping grouped by semantic preset role.
+     * Returns the complete native property mapping grouped by semantic preset role.
      *
      * @return array<string,list<string>>
      */
