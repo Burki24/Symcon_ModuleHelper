@@ -20,6 +20,7 @@ $tests = [
     'ipsview-font-catalog.php',
     'ipsview-style-profile.php',
     'ipsview-style-presets.php',
+    'ipsview-control-theme.php',
     'ipsview-style-preset-source.php',
     'ipsview-style-profile-source.php',
     'ipsview-style.php',
