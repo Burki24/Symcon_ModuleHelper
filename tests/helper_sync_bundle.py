@@ -64,6 +64,31 @@ if preset_entry.get("dependencies", []) != []:
 if "libs/helper/IPSViewStylePresetHelper.php" not in preset_files:
     raise SystemExit("Missing IPSViewStylePresetHelper from its consumer bundle.")
 
+
+control_files, control_entries = MODULE.bundle_files(
+    manifest,
+    "IPSViewControlThemeHelper",
+    "libs/helper/IPSViewControlThemeHelper.php",
+)
+
+if set(control_entries) != {"IPSViewControlThemeHelper"}:
+    raise SystemExit(f"Unexpected top-level control-theme manifest entries: {sorted(control_entries)}")
+
+control_entry = control_entries["IPSViewControlThemeHelper"]
+control_dependencies = control_entry.get("dependencies", [])
+if [entry.get("name") for entry in control_dependencies] != ["IPSViewStylePresetHelper"]:
+    raise SystemExit(f"Unexpected control-theme dependencies: {control_dependencies}")
+
+expected_control_files = {
+    "libs/helper/IPSViewControlThemeHelper.php",
+    "libs/helper/IPSViewStylePresetHelper.php",
+}
+if not expected_control_files.issubset(control_files):
+    raise SystemExit(
+        f"Missing control-theme bundle files: {sorted(expected_control_files - set(control_files))}"
+    )
+
+
 page_files, page_entries = MODULE.bundle_files(
     manifest,
     "IPSViewHTMLPageHelper",
