@@ -175,6 +175,19 @@ def validate_consumer_branch_config(
         )
 
 
+def helper_sync_branch(base_branch: str, helper: str, version: str) -> str:
+    helper_slug = re.sub(r'(?<!^)(?=[A-Z])', '-', helper).lower()
+    legacy_branch = f"helper-sync/{helper_slug}-v{version}"
+    if base_branch == "dev":
+        return legacy_branch
+
+    branch_slug = re.sub(r"[^a-z0-9]+", "-", base_branch.lower()).strip("-")
+    if not branch_slug:
+        raise RuntimeError("Helper sync target branch cannot be converted to a safe branch slug.")
+
+    return f"helper-sync/{branch_slug}/{helper_slug}-v{version}"
+
+
 def dependency_order(manifest: dict[str, Any], helper: str) -> list[str]:
     helpers = manifest["helpers"]
     ordered: list[str] = []
@@ -657,7 +670,7 @@ def sync(
         print(f"{repo}: {helper} bundle already matches v{source_meta['version']}.")
         return
 
-    branch = f"helper-sync/{re.sub(r'(?<!^)(?=[A-Z])', '-', helper).lower()}-v{source_meta['version']}"
+    branch = helper_sync_branch(base_branch, helper, str(source_meta["version"]))
     target_manifest = load_json_content(repo, "libs/helper/manifest.json", base_branch) or {
         "schema": 1,
         "source_repository": "Burki24/Symcon_ModuleHelper",
