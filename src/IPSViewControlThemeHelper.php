@@ -20,7 +20,7 @@ require_once __DIR__ . '/IPSViewStylePresetHelper.php';
  * colors and unknown future properties. Unknown top-level IPSView color fields are transported in
  * a dedicated extension section instead of being discarded.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 final class IPSViewControlThemeHelper
 {
@@ -374,6 +374,7 @@ final class IPSViewControlThemeHelper
 
     /** @var list<string> */
     private const LEGACY_FIELDS = [
+        'ColorView',
         'DialogButtonTextColor'
     ];
 
@@ -499,6 +500,60 @@ final class IPSViewControlThemeHelper
         }
 
         return $fields;
+    }
+
+    /**
+     * Resolves the portable Style Profile field for one native color in the context of a document.
+     *
+     * IPSView 6.1 documents may contain both ColorView and ColorPage. Newer 6.5 documents no
+     * longer expose ColorView; in those documents ColorPage acts as the View background.
+     */
+    public static function styleFieldForDocument(array|object $document, string $field): ?string
+    {
+        $definition = self::definition($field);
+        if ($definition === null) {
+            return null;
+        }
+
+        $document = is_array($document) ? $document : get_object_vars($document);
+        if ($field === 'ColorPage' && !array_key_exists('ColorView', $document)) {
+            return 'ViewBackground';
+        }
+
+        return $definition['styleField'];
+    }
+
+    /** Resolves the semantic preset role for one native color in the context of a document. */
+    public static function presetRoleForDocument(array|object $document, string $field): ?string
+    {
+        $styleField = self::styleFieldForDocument($document, $field);
+        if ($styleField === null) {
+            return null;
+        }
+
+        return self::STYLE_FIELD_PRESET_ROLES[$styleField];
+    }
+
+    /**
+     * Returns the complete document-aware native property mapping grouped by semantic preset role.
+     *
+     * @return array<string,list<string>>
+     */
+    public static function presetRoleMappingForDocument(array|object $document): array
+    {
+        $mapping = [];
+
+        foreach (self::fields() as $field) {
+            $presetRole = self::presetRoleForDocument($document, $field);
+            if ($presetRole === null) {
+                continue;
+            }
+
+            $mapping[$presetRole] ??= [];
+            $mapping[$presetRole][] = $field;
+        }
+
+        return $mapping;
     }
 
     /**
