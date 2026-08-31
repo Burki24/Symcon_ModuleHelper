@@ -45,8 +45,8 @@
     },
     "IPSViewControlThemeHelper": {
       "file": "src/IPSViewControlThemeHelper.php",
-      "version": "1.0.0",
-      "sha256": "886f5d3bbeb3edb7c4cd34f44187e0fa61f826da4a6b555eaa0e44712e8a0e4a",
+      "version": "1.0.1",
+      "sha256": "953839f21968a6fe9ecaa3684ca887b2789dc7b5b96d32562d253dc56823febc",
       "dependencies": [
         "IPSViewStylePresetHelper"
       ]

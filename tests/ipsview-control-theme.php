@@ -130,6 +130,52 @@ assertFalseValue(
     $catalog['DialogButtonTextColorEnabled']['legacy'],
     'The newer enabled dialog button text field must not be marked as legacy.'
 );
+assertTrueValue(
+    $catalog['ColorView']['legacy'],
+    'ColorView must be marked as a legacy native field because current IPSView 6.5 templates omit it.'
+);
+
+$legacyViewDocument = new stdClass();
+$legacyViewDocument->ColorView = (object) IPSViewControlThemeHelper::createColor('#212121');
+$legacyViewDocument->ColorPage = (object) IPSViewControlThemeHelper::createColor('#000000', 0);
+assertSameValue(
+    'ViewBackground',
+    IPSViewControlThemeHelper::styleFieldForDocument($legacyViewDocument, 'ColorView'),
+    'Legacy ColorView must remain the View background when it exists.'
+);
+assertSameValue(
+    'PageBackground',
+    IPSViewControlThemeHelper::styleFieldForDocument($legacyViewDocument, 'ColorPage'),
+    'Legacy documents with ColorView must keep ColorPage as the page background.'
+);
+assertSameValue(
+    IPSViewStylePresetHelper::ROLE_PAGE_BACKGROUND,
+    IPSViewControlThemeHelper::presetRoleForDocument($legacyViewDocument, 'ColorPage'),
+    'Legacy ColorPage must resolve to the page-background preset role.'
+);
+
+$currentViewDocument = new stdClass();
+$currentViewDocument->ColorPage = (object) IPSViewControlThemeHelper::createColor('#404040');
+assertSameValue(
+    'ViewBackground',
+    IPSViewControlThemeHelper::styleFieldForDocument($currentViewDocument, 'ColorPage'),
+    'Current documents without ColorView must treat ColorPage as the View background.'
+);
+assertSameValue(
+    IPSViewStylePresetHelper::ROLE_VIEW_BACKGROUND,
+    IPSViewControlThemeHelper::presetRoleForDocument($currentViewDocument, 'ColorPage'),
+    'Current ColorPage must resolve to the View-background preset role.'
+);
+$currentRoleMapping = IPSViewControlThemeHelper::presetRoleMappingForDocument($currentViewDocument);
+assertTrueValue(
+    in_array('ColorPage', $currentRoleMapping[IPSViewStylePresetHelper::ROLE_VIEW_BACKGROUND], true),
+    'Current document mapping must expose ColorPage through the View-background role.'
+);
+assertFalseValue(
+    in_array('ColorPage', $currentRoleMapping[IPSViewStylePresetHelper::ROLE_PAGE_BACKGROUND], true),
+    'Current document mapping must not expose ColorPage through the page-background role.'
+);
+
 assertSameValue(
     IPSViewStylePresetHelper::ROLE_ACCENT,
     $catalog['SliderTrackColorActive']['presetRole'],
