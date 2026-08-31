@@ -23,6 +23,7 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `WolfWSR`
 - `OpenHotWaterCirculationControl`
 - `OpenShutterButtonControl`
+- `IPSViewAssistant`
 
 ## 2. Symcon_ModuleHelper konfigurieren
 
@@ -44,21 +45,22 @@ Wert: der vollständige Inhalt der erzeugten `.pem`-Datei einschließlich BEGIN/
 
 `manifest.json` enthält für jeden Helper die Upstream-Version und den SHA-256-Hash. Ab Schema 2 können zusätzlich Helper-Abhängigkeiten und zugehörige Assets wie Übersetzungskataloge deklariert werden.
 
-Jedes Consumer-Repository beschreibt in `.helper-sync.json`, welche Helper es verwendet und wohin diese kopiert werden.
+Jedes Consumer-Repository beschreibt in `.helper-sync.json`, welche Helper es verwendet und wohin diese kopiert werden. Der maßgebliche Zielbranch wird zentral pro Consumer in `.github/helper-consumers.json` über `branch` festgelegt. Eine zusätzliche Angabe `base_branch` in `.helper-sync.json` ist optional; wenn sie vorhanden ist, muss sie exakt mit dem zentral konfigurierten Zielbranch übereinstimmen. Bei einem Widerspruch bricht der Sync für diesen Consumer ab.
 
 Bei einer Änderung unter `src/` oder an `manifest.json`:
 
 1. prüft der zentrale Workflow das Manifest,
-2. liest die Subscription der Consumer aus deren `dev`-Branch,
+2. liest die Subscription der Consumer aus dem jeweils in `.github/helper-consumers.json` konfigurierten Zielbranch,
 3. überspringt nicht abonnierte oder bereits aktuelle Helper,
 4. erzeugt für veraltete Helper einen Branch `helper-sync/...`,
 5. schreibt das vollständige Helper-Bundle einschließlich Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md` in einem Commit,
 6. dokumentiert transitive Abhängigkeiten innerhalb des abonnierten Helper-Eintrags, sodass `.helper-sync.json` ausschließlich die bewusst abonnierten Helper enthält,
-7. eröffnet einen Pull Request gegen `dev`,
-8. prüft Bot-Autor, `helper-sync/`-Branch, Zielbranch und den tatsächlichen Dateiumfang,
-9. aktiviert bei einem reinen Helper-PR automatisch Squash-Auto-Merge.
+7. eröffnet einen Pull Request gegen den zentral konfigurierten Zielbranch,
+8. prüft bei vorhandenem `base_branch` in `.helper-sync.json`, dass dieser mit dem zentralen Zielbranch übereinstimmt,
+9. prüft Bot-Autor, `helper-sync/`-Branch, Zielbranch und den tatsächlichen Dateiumfang,
+10. aktiviert bei einem reinen Helper-PR automatisch Squash-Auto-Merge.
 
-GitHub führt den PR erst zusammen, wenn alle durch Branch Protection oder Rulesets vorgeschriebenen Bedingungen erfüllt sind. Der Sync umgeht keine Prüfungen und führt keinen direkten Merge aus. Sobald eine nicht zum erzeugten Helper-Bundle gehörende Datei im PR auftaucht, wird Auto-Merge verweigert.
+GitHub führt den PR bei konfigurierten Branch-Protection-Regeln oder Rulesets erst zusammen, wenn die vorgeschriebenen Bedingungen erfüllt sind. Kann Auto-Merge nicht aktiviert werden, weil GitHub den PR bereits als `clean` meldet oder keine Branch-Protection-Regel vorhanden ist, darf der Sync nur den zuvor vollständig validierten Helper-PR direkt zusammenführen. Dabei werden Bot-Autor, Ziel- und Quellbranch, erwarteter Head-SHA, Merge-Methode und tatsächlicher Dateiumfang erneut geprüft. Sobald eine nicht zum erzeugten Helper-Bundle gehörende Datei im PR auftaucht, wird Auto-Merge beziehungsweise der direkte Fallback-Merge verweigert.
 
 ### Erforderliche Consumer-Einstellungen
 
@@ -66,7 +68,7 @@ In jedem Consumer-Repository:
 
 1. **Settings → General → Pull Requests → Allow auto-merge** aktivieren.
 2. **Allow squash merging** aktiviert lassen.
-3. Für den Zielbranch `dev` eine Branch Protection Rule oder ein Ruleset mit den gewünschten **Required status checks** einrichten.
+3. Für den in `.github/helper-consumers.json` konfigurierten Zielbranch (derzeit bei allen Consumern `dev`) eine Branch Protection Rule oder ein Ruleset mit den gewünschten **Required status checks** einrichten.
 4. Optional **Automatically delete head branches** aktivieren, damit der `helper-sync/...`-Branch nach dem Merge entfernt wird.
 
 Die globale Vorgabe steht in `.github/helper-consumers.json`:
@@ -78,7 +80,7 @@ Die globale Vorgabe steht in `.github/helper-consumers.json`:
 }
 ```
 
-Ein einzelner Consumer kann Auto-Merge mit `"auto_merge": false` deaktivieren oder über `"merge_method"` eine andere im Repository erlaubte Methode wählen.
+Ein einzelner Consumer kann Auto-Merge mit `"auto_merge": false` deaktivieren oder über `"merge_method"` eine andere im Repository erlaubte Methode wählen. Der Eintrag `branch` im selben Consumer-Objekt ist die zentrale Branch-Vorgabe für Subscription, Helper-Branch-Basis und Pull-Request-Ziel.
 
 ## 4. Manueller Lauf
 

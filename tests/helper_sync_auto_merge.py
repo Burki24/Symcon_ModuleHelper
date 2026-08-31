@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the guarded auto-merge contract for generated helper pull requests."""
+"""Verify guarded helper synchronization and auto-merge contracts."""
 
 from __future__ import annotations
 
@@ -44,6 +44,68 @@ def pull_request(
             "repo": {"full_name": REPOSITORY},
         },
     }
+
+
+MODULE.validate_consumer_branch_config(REPOSITORY, BASE_BRANCH, {})
+MODULE.validate_consumer_branch_config(
+    REPOSITORY,
+    BASE_BRANCH,
+    {"base_branch": BASE_BRANCH},
+)
+
+try:
+    MODULE.validate_consumer_branch_config(
+        REPOSITORY,
+        BASE_BRANCH,
+        {"base_branch": "dev-popup"},
+    )
+except RuntimeError as error:
+    if "does not match centrally configured target branch 'dev'" not in str(error):
+        raise
+else:
+    raise SystemExit("Helper sync accepted a conflicting consumer base_branch.")
+
+try:
+    MODULE.validate_consumer_branch_config(
+        REPOSITORY,
+        BASE_BRANCH,
+        {"base_branch": ""},
+    )
+except RuntimeError as error:
+    if "must be a non-empty string" not in str(error):
+        raise
+else:
+    raise SystemExit("Helper sync accepted an empty consumer base_branch.")
+
+
+original_load_json_content = MODULE.load_json_content
+original_bundle_files = MODULE.bundle_files
+MODULE.load_json_content = lambda _repo, _path, _ref: {
+    "source_repository": "Burki24/Symcon_ModuleHelper",
+    "base_branch": "dev-popup",
+    "helpers": {"DateHelper": {"target": "libs/helper/DateHelper.php"}},
+}
+MODULE.bundle_files = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+    AssertionError("Branch mismatch must stop before building the helper bundle.")
+)
+try:
+    MODULE.sync(
+        REPOSITORY,
+        BASE_BRANCH,
+        "DateHelper",
+        {"version": "1.0.2", "sha256": "unused"},
+        {"helpers": {}},
+        False,
+        "SQUASH",
+    )
+except RuntimeError as error:
+    if "does not match centrally configured target branch 'dev'" not in str(error):
+        raise
+else:
+    raise SystemExit("Helper sync did not stop on a conflicting consumer base_branch.")
+finally:
+    MODULE.load_json_content = original_load_json_content
+    MODULE.bundle_files = original_bundle_files
 
 
 node_id = MODULE.validate_auto_merge_candidate(
@@ -314,4 +376,4 @@ auto_merge = consumer_config.get("auto_merge", {})
 if auto_merge != {"enabled": True, "merge_method": "SQUASH"}:
     raise SystemExit(f"Unexpected global auto-merge configuration: {auto_merge}")
 
-print("Guarded helper pull request auto-merge verified.")
+print("Guarded helper synchronization and pull request auto-merge verified.")

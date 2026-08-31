@@ -155,6 +155,26 @@ def load_json_content(repo: str, path: str, ref: str) -> dict[str, Any] | None:
     return decoded
 
 
+def validate_consumer_branch_config(
+    repo: str,
+    base_branch: str,
+    config: dict[str, Any],
+) -> None:
+    if "base_branch" not in config:
+        return
+
+    configured_base_branch = config["base_branch"]
+    if not isinstance(configured_base_branch, str) or not configured_base_branch:
+        raise RuntimeError(
+            f"{repo}: .helper-sync.json base_branch must be a non-empty string when configured."
+        )
+    if configured_base_branch != base_branch:
+        raise RuntimeError(
+            f"{repo}: .helper-sync.json base_branch '{configured_base_branch}' does not match "
+            f"centrally configured target branch '{base_branch}'."
+        )
+
+
 def dependency_order(manifest: dict[str, Any], helper: str) -> list[str]:
     helpers = manifest["helpers"]
     ordered: list[str] = []
@@ -616,6 +636,7 @@ def sync(
     if config is None:
         print(f"Skipping {repo}: no .helper-sync.json on {base_branch}.")
         return
+    validate_consumer_branch_config(repo, base_branch, config)
     if config.get("source_repository") != "Burki24/Symcon_ModuleHelper":
         print(f"Skipping {repo}: unexpected source repository.")
         return
