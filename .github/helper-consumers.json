@@ -14,6 +14,11 @@
       "branch": "dev"
     },
     {
+      "repository": "Burki24/OpenCalendar",
+      "branch": "dev_9.1",
+      "auto_merge": false
+    },
+    {
       "repository": "Burki24/WolfWSR",
       "branch": "dev"
     },

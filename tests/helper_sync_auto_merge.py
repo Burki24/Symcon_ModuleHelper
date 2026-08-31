@@ -17,7 +17,9 @@ SPEC.loader.exec_module(MODULE)
 
 REPOSITORY = "Burki24/LMNB"
 BASE_BRANCH = "dev"
+PARALLEL_BRANCH = "dev_9.1"
 HEAD_BRANCH = "helper-sync/date-helper-v1.0.2"
+PARALLEL_HEAD_BRANCH = "helper-sync/dev-9-1/date-helper-v1.0.2"
 EXPECTED_HEAD_SHA = "0123456789abcdef0123456789abcdef01234567"
 EXPECTED_FILES = {
     "libs/helper/DateHelper.php",
@@ -44,6 +46,18 @@ def pull_request(
             "repo": {"full_name": REPOSITORY},
         },
     }
+
+
+if MODULE.helper_sync_branch(BASE_BRANCH, "DateHelper", "1.0.2") != HEAD_BRANCH:
+    raise SystemExit("The legacy dev helper-sync branch name changed unexpectedly.")
+if MODULE.helper_sync_branch(PARALLEL_BRANCH, "DateHelper", "1.0.2") != PARALLEL_HEAD_BRANCH:
+    raise SystemExit("A parallel target branch did not receive an isolated helper-sync branch path.")
+if MODULE.helper_sync_branch("release/9.1", "DateHelper", "1.0.2") != (
+    "helper-sync/release-9-1/date-helper-v1.0.2"
+):
+    raise SystemExit("Target branch names are not normalized safely for helper-sync branches.")
+if HEAD_BRANCH == PARALLEL_HEAD_BRANCH:
+    raise SystemExit("Parallel target branches would collide on the same helper-sync branch.")
 
 
 MODULE.validate_consumer_branch_config(REPOSITORY, BASE_BRANCH, {})
@@ -106,6 +120,75 @@ else:
 finally:
     MODULE.load_json_content = original_load_json_content
     MODULE.bundle_files = original_bundle_files
+
+
+parallel_calls: dict[str, object] = {}
+original_content = MODULE.content
+original_create_sync_commit = MODULE.create_sync_commit
+original_open_pull_request = MODULE.open_pull_request
+MODULE.load_json_content = lambda _repo, path, _ref: (
+    {
+        "source_repository": "Burki24/Symcon_ModuleHelper",
+        "base_branch": PARALLEL_BRANCH,
+        "readme_language": "en",
+        "helpers": {"DateHelper": {"target": "libs/helper/DateHelper.php"}},
+    }
+    if path == ".helper-sync.json"
+    else {"schema": 1, "source_repository": "Burki24/Symcon_ModuleHelper", "helpers": {}}
+)
+MODULE.bundle_files = lambda *_args, **_kwargs: (
+    {"libs/helper/DateHelper.php": b"helper"},
+    {"DateHelper": {"version": "1.0.2", "sha256": "digest", "path": "libs/helper/DateHelper.php"}},
+)
+MODULE.content = lambda *_args, **_kwargs: None
+
+def fake_create_sync_commit(
+    repo: str,
+    base_branch: str,
+    branch: str,
+    files: dict[str, bytes],
+    message: str,
+) -> str:
+    parallel_calls["commit"] = (repo, base_branch, branch, set(files), message)
+    return EXPECTED_HEAD_SHA
+
+
+def fake_open_pull_request(
+    repo: str,
+    base_branch: str,
+    branch: str,
+    helper: str,
+    version: str,
+    digest: str,
+) -> dict[str, object]:
+    parallel_calls["pr"] = (repo, base_branch, branch, helper, version, digest)
+    return pull_request()
+
+MODULE.create_sync_commit = fake_create_sync_commit
+MODULE.open_pull_request = fake_open_pull_request
+try:
+    MODULE.sync(
+        REPOSITORY,
+        PARALLEL_BRANCH,
+        "DateHelper",
+        {"version": "1.0.2", "sha256": "digest"},
+        {"helpers": {}},
+        False,
+        "SQUASH",
+    )
+finally:
+    MODULE.load_json_content = original_load_json_content
+    MODULE.bundle_files = original_bundle_files
+    MODULE.content = original_content
+    MODULE.create_sync_commit = original_create_sync_commit
+    MODULE.open_pull_request = original_open_pull_request
+
+commit_call = parallel_calls.get("commit")
+pr_call = parallel_calls.get("pr")
+if not isinstance(commit_call, tuple) or commit_call[2] != PARALLEL_HEAD_BRANCH:
+    raise SystemExit(f"Parallel helper commit used an unexpected branch: {commit_call}")
+if not isinstance(pr_call, tuple) or pr_call[1:3] != (PARALLEL_BRANCH, PARALLEL_HEAD_BRANCH):
+    raise SystemExit(f"Parallel helper PR used unexpected base/head branches: {pr_call}")
 
 
 node_id = MODULE.validate_auto_merge_candidate(
@@ -375,5 +458,18 @@ consumer_config = json.loads((ROOT / ".github/helper-consumers.json").read_text(
 auto_merge = consumer_config.get("auto_merge", {})
 if auto_merge != {"enabled": True, "merge_method": "SQUASH"}:
     raise SystemExit(f"Unexpected global auto-merge configuration: {auto_merge}")
+
+open_calendar_consumers = [
+    consumer
+    for consumer in consumer_config.get("consumers", [])
+    if consumer.get("repository") == "Burki24/OpenCalendar"
+]
+open_calendar_by_branch = {str(consumer.get("branch")): consumer for consumer in open_calendar_consumers}
+if set(open_calendar_by_branch) != {"dev", "dev_9.1"}:
+    raise SystemExit(f"Unexpected OpenCalendar helper-sync targets: {sorted(open_calendar_by_branch)}")
+if open_calendar_by_branch["dev"].get("auto_merge", True) is not True:
+    raise SystemExit("The established OpenCalendar dev helper sync must keep global auto-merge behavior.")
+if open_calendar_by_branch["dev_9.1"].get("auto_merge") is not False:
+    raise SystemExit("OpenCalendar dev_9.1 helper sync must require manual review during migration.")
 
 print("Guarded helper synchronization and pull request auto-merge verified.")
