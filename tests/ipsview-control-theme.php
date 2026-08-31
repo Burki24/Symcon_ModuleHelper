@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Burki24\SymconModuleHelper\IPSViewControlThemeHelper;
-use Burki24\SymconModuleHelper\IPSViewStyleProfileHelper;
 use Burki24\SymconModuleHelper\IPSViewStylePresetHelper;
+use Burki24\SymconModuleHelper\IPSViewStyleProfileHelper;
 
 require_once __DIR__ . '/../src/IPSViewControlThemeHelper.php';
 require_once __DIR__ . '/../src/IPSViewStyleProfileHelper.php';
@@ -18,7 +18,6 @@ assertSameValue(15, count($families), 'The native IPSView catalogue must expose 
 assertSameValue(17, count($families[IPSViewControlThemeHelper::FAMILY_BASE]), 'Base family size changed unexpectedly.');
 assertSameValue(12, count($families[IPSViewControlThemeHelper::FAMILY_FLOW]), 'Flow family size changed unexpectedly.');
 assertSameValue(10, count($families[IPSViewControlThemeHelper::FAMILY_CALENDAR]), 'Calendar family size changed unexpectedly.');
-
 
 $brownson2023Fields = [
     'ColorText',
