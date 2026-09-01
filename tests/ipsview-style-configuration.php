@@ -47,6 +47,12 @@ final class IPSViewStyleConfigurationHelperHarness
         return $this->IPSViewStyleNativeTheme();
     }
 
+    /** @return array<string,string|float> */
+    public function resolvedStyle(?string $document = null): array
+    {
+        return $this->IPSViewResolvedStyle($document);
+    }
+
     /** @return array<string,string> */
     public function overrideProperties(): array
     {
@@ -238,6 +244,57 @@ if (($nativeTheme['colors']['ShadowColor']['R'] ?? null) !== 0
     || ($nativeTheme['colors']['ShadowColor']['G'] ?? null) !== 0
     || ($nativeTheme['colors']['ShadowColor']['B'] ?? null) !== 0) {
     throw new RuntimeException('The shared CSS shadow color was not bridged to the native IPSView ShadowColor field.');
+}
+
+$harness->setProperty('IPSViewStyleSource', IPSViewStyleConfigurationHelperHarness::IPSVIEW_STYLE_SOURCE_MEDIA);
+$mediaWithoutView = json_encode(
+    [
+        'ColorPage' => [
+            'A'       => 255,
+            'R'       => 0,
+            'G'       => 255,
+            'B'       => 255,
+            'Type'    => 0,
+            'Pattern' => '12'
+        ]
+    ],
+    JSON_THROW_ON_ERROR
+);
+$mediaStyle = $harness->resolvedStyle($mediaWithoutView);
+if (($mediaStyle['ViewBackground'] ?? null) !== '#404040') {
+    throw new RuntimeException('A current IPSView without ColorView must retain the native #404040 View background.');
+}
+if (($mediaStyle['PageBackground'] ?? null) !== '#00FFFF') {
+    throw new RuntimeException('ColorPage must remain the independent IPSView page background.');
+}
+
+$mediaWithSeparateView = json_encode(
+    [
+        'ColorView' => [
+            'A'       => 255,
+            'R'       => 255,
+            'G'       => 0,
+            'B'       => 255,
+            'Type'    => 0,
+            'Pattern' => '12'
+        ],
+        'ColorPage' => [
+            'A'       => 255,
+            'R'       => 0,
+            'G'       => 255,
+            'B'       => 255,
+            'Type'    => 0,
+            'Pattern' => '12'
+        ]
+    ],
+    JSON_THROW_ON_ERROR
+);
+$mediaStyle = $harness->resolvedStyle($mediaWithSeparateView);
+if (($mediaStyle['ViewBackground'] ?? null) !== '#FF00FF') {
+    throw new RuntimeException('ColorView must be imported as the independent IPSView View background.');
+}
+if (($mediaStyle['PageBackground'] ?? null) !== '#00FFFF') {
+    throw new RuntimeException('ColorPage must not be reinterpreted when ColorView is present.');
 }
 
 $harness->setProperty('IPSViewStyleSource', IPSViewStyleConfigurationHelperHarness::IPSVIEW_STYLE_SOURCE_DARK);
