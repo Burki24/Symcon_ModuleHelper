@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Burki24\SymconModuleHelper\IPSViewStyleConfigurationHelper;
-use Burki24\SymconModuleHelper\IPSViewStyleHelper;
 
 require_once __DIR__ . '/../src/IPSViewStyleConfigurationHelper.php';
 
@@ -241,7 +240,7 @@ if (($nativeTheme['colors']['ShadowColor']['R'] ?? null) !== 0
     throw new RuntimeException('The shared CSS shadow color was not bridged to the native IPSView ShadowColor field.');
 }
 
-$harness->setProperty('IPSViewStyleSource', IPSViewStyleHelper::IPSVIEW_STYLE_SOURCE_DARK);
+$harness->setProperty('IPSViewStyleSource', IPSViewStyleConfigurationHelperHarness::IPSVIEW_STYLE_SOURCE_DARK);
 if ($harness->overrides() !== []) {
     throw new RuntimeException('Native overrides must only modify the editable custom style source.');
 }
