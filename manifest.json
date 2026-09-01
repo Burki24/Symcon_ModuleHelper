@@ -72,6 +72,22 @@
         }
       ]
     },
+    "IPSViewStyleConfigurationHelper": {
+      "file": "src/IPSViewStyleConfigurationHelper.php",
+      "version": "1.0.1",
+      "sha256": "5f4f556428f9286c7ec0812b91674cb8383c9622e5051e54302e14e29889ee7c",
+      "dependencies": [
+        "IPSViewControlThemeHelper",
+        "IPSViewStyleHelper"
+      ],
+      "assets": [
+        {
+          "file": "src/translations/IPSViewStyleConfigurationHelper.json",
+          "target": "translations/IPSViewStyleConfigurationHelper.json",
+          "sha256": "190731da20645645fa66be658c849a3e0030911caf4395afa0ceb6495925dce9"
+        }
+      ]
+    },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
       "version": "1.6.4",
