@@ -14,6 +14,7 @@ $tests = [
     'parent-connection.php',
     'visualization-asset.php',
     'helper-translation.php',
+    'json-style.php',
     'ipsview-html-page.php',
     'visualization-theme.php',
     'ipsview-color-palette.php',
