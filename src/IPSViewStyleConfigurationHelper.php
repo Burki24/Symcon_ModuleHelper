@@ -19,7 +19,7 @@ require_once __DIR__ . '/IPSViewControlThemeHelper.php';
  * collapsed advanced section exposes all known native IPSView color fields grouped by family.
  * Disabled native overrides always inherit their current semantic base color.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait IPSViewStyleConfigurationHelper
 {
@@ -194,13 +194,7 @@ trait IPSViewStyleConfigurationHelper
         $styleColors = [];
 
         foreach (IPSViewControlThemeHelper::requiredStyleFields() as $styleField) {
-            if (!array_key_exists($styleField, $style)) {
-                throw new InvalidArgumentException(
-                    'Resolved IPSView style is missing native source field ' . $styleField . '.'
-                );
-            }
-
-            $styleColors[$styleField] = $this->IPSViewStyleConfigurationColorToHex($style[$styleField]);
+            $styleColors[$styleField] = $this->IPSViewStyleNativeSourceColor($style, $styleField);
         }
 
         return IPSViewControlThemeHelper::fromStyleColors(
@@ -267,7 +261,9 @@ trait IPSViewStyleConfigurationHelper
             }
 
             $styleField = $definition['styleField'];
-            $baseColor = $this->IPSViewStyleConfigurationColorToInt($style[$styleField] ?? '#000000');
+            $baseColor = $this->IPSViewStyleConfigurationColorToInt(
+                $this->IPSViewStyleNativeSourceColor($style, $styleField)
+            );
             $row = $stored[$field] ?? [];
             $override = $editable && $this->IPSViewStyleNativeBoolean($row['Override'] ?? false);
             $color = $override
@@ -344,6 +340,29 @@ trait IPSViewStyleConfigurationHelper
         }
 
         return array_values(array_filter($decoded, 'is_array'));
+    }
+
+    /** @param array<string,string|float> $style */
+    private function IPSViewStyleNativeSourceColor(array $style, string $styleField): string
+    {
+        if (array_key_exists($styleField, $style)) {
+            return $this->IPSViewStyleConfigurationColorToHex($style[$styleField]);
+        }
+
+        if ($styleField === 'ShadowColor' && is_string($style['Shadow'] ?? null)) {
+            $shadow = trim($style['Shadow']);
+            if (preg_match(
+                '/(#[0-9A-Fa-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*[0-9.]+)?\s*\))\s*$/i',
+                $shadow,
+                $matches
+            ) === 1) {
+                return $this->IPSViewStyleConfigurationColorToHex($matches[1]);
+            }
+        }
+
+        throw new InvalidArgumentException(
+            'Resolved IPSView style is missing native source field ' . $styleField . '.'
+        );
     }
 
     private function IPSViewStyleNativeStyleFieldCaption(string $styleField): string

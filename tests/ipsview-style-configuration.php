@@ -235,6 +235,11 @@ if (($nativeTheme['colors']['SwitchTrackColorActive']['R'] ?? null) !== 0x12
     || ($nativeTheme['colors']['SwitchTrackColorActive']['B'] ?? null) !== 0x56) {
     throw new RuntimeException('The native IPSView theme does not contain the enabled Switch override.');
 }
+if (($nativeTheme['colors']['ShadowColor']['R'] ?? null) !== 0
+    || ($nativeTheme['colors']['ShadowColor']['G'] ?? null) !== 0
+    || ($nativeTheme['colors']['ShadowColor']['B'] ?? null) !== 0) {
+    throw new RuntimeException('The shared CSS shadow color was not bridged to the native IPSView ShadowColor field.');
+}
 
 $harness->setProperty('IPSViewStyleSource', IPSViewStyleHelper::IPSVIEW_STYLE_SOURCE_DARK);
 if ($harness->overrides() !== []) {
