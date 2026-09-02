@@ -487,11 +487,14 @@ dem Helper und seinen Abhängigkeiten verteilt:
 ```text
 libs/helper/
 ├── HelperTranslationHelper.php
+├── IPSViewControlThemeHelper.php
 ├── IPSViewFontCatalogHelper.php
+├── IPSViewStyleConfigurationHelper.php
 ├── IPSViewStylePresetHelper.php
 ├── IPSViewStyleProfileHelper.php
 ├── IPSViewStyleHelper.php
 └── translations/
+    ├── IPSViewStyleConfigurationHelper.json
     └── IPSViewStyleHelper.json
 ```
 
@@ -609,6 +612,49 @@ in den zentralen Contract übernommen.
 | `label()` | Liefert die lesbare Bezeichnung eines Presets. |
 | `isValid()` | Prüft eine Preset-ID. |
 
+## IPSViewControlThemeHelper
+
+`src/IPSViewControlThemeHelper.php` ist der kanonische Übersetzer zwischen den
+semantischen Style-Profile-Farben und den konkreten nativen IPSView-Farbfeldern.
+Der Katalog umfasst derzeit **109 bekannte Farbfelder in 15 Familien**: Basis,
+Assoziationen, Tabs, Schalter, Slider, Fortschrittsbalken, Kreisregler, Flow,
+Gauge, Schatten/Raster, Dialoge, Charts, Zeitpläne, Events und Kalender.
+
+Jedes bekannte native Feld ist genau einem semantischen Style-Feld und – soweit
+eindeutig – einer Preset-Rolle zugeordnet. Dadurch bleibt das portable
+`Style Profile V1` klein, während eine vollständige IPSView-Farbbelegung daraus
+reproduzierbar erzeugt werden kann. Individuelle native Overrides ersetzen nur
+das jeweilige Feld; unbekannte zukünftige IPSView-Farbfelder und frei benannte
+Farben werden verlustfrei getrennt transportiert.
+
+Native IPSView-Farbobjekte werden nicht auf RGB reduziert. Der Helper erhält
+Alpha, Typ, Pattern, `IsEmpty`, Name sowie optionale zweite Farbkanäle
+`A2/R2/G2/B2` für Verläufe. `ColorView` und `ColorPage` besitzen ausdrücklich
+getrennte Semantik: **`ColorView` ist der View-Hintergrund, `ColorPage` der
+Seitenhintergrund.** Fehlt `ColorView`, ändert das niemals die Bedeutung von
+`ColorPage`.
+
+Beim Anwenden auf bestehende Dokumente verändert `apply()` standardmäßig nur
+bereits vorhandene native Felder. Mit `createMissing=true` können beim Erzeugen
+einer neuen vollständigen View auch fehlende bekannte Felder angelegt werden.
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `fields()` / `families()` | Liefert die 109 bekannten Felder beziehungsweise die 15 Familien in kanonischer Reihenfolge. |
+| `catalog()` / `definition()` | Liefert Mapping-Metadaten für alle beziehungsweise ein einzelnes natives Feld. |
+| `fieldsForFamily()` | Liefert alle nativen Felder einer Familie. |
+| `fieldsForStyleField()` | Liefert alle nativen Felder, die von einem semantischen Style-Feld abgeleitet werden. |
+| `fieldsForPresetRole()` | Liefert alle nativen Felder einer Preset-Rolle. |
+| `styleFieldForDocument()` / `presetRoleForDocument()` | Löst die stabile semantische Bedeutung eines nativen Feldes auf. |
+| `fromStyleColors()` | Erzeugt aus den semantischen Farben und optionalen Overrides ein vollständiges natives Theme. |
+| `createColor()` / `normalizeColor()` | Erzeugt beziehungsweise normalisiert native IPSView-Farbobjekte einschließlich Alpha und optionalem zweiten Farbkanal. |
+| `extract()` | Liest bekannte, unbekannte und frei benannte Farben aus einem IPSView-Dokument. |
+| `normalizeTheme()` / `decode()` / `encode()` | Validiert und serialisiert den kanonischen nativen Theme-Transport. |
+| `apply()` | Überträgt ein natives Theme kontrolliert auf ein IPSView-Dokument. |
+| `colorToHex()` / `alphaPercent()` | Liefert RGB beziehungsweise Alpha eines normalisierten nativen Farbobjekts. |
+
 ## IPSViewStyleHelper
 
 `src/IPSViewStyleHelper.php` bildet das universelle IPSView-Stilsystem für
@@ -705,9 +751,83 @@ erhalten.
 | `IPSViewResolvedStyle()` | Liefert die vollständig aufgelösten universellen Stilwerte. |
 | `IPSViewStyleCSSVariables()` | Rendert die aufgelösten Werte als gemeinsame `--ipsview-*`-CSS-Variablen. |
 
+## IPSViewStyleConfigurationHelper
+
+`src/IPSViewStyleConfigurationHelper.php` erweitert `IPSViewStyleHelper` um die
+vollständige native IPSView-Farbkonfiguration. Der Helper übernimmt bewusst
+dieselben Basis-Properties und dieselben zentralen Methoden wie
+`IPSViewStyleHelper`; bestehende Consumer-Konfigurationen müssen deshalb beim
+Umstieg **nicht umbenannt oder neu initialisiert** werden.
+
+Zusätzlich registriert der Helper 15 JSON-Properties – eine pro nativer
+Farbfamilie – und ergänzt die gemeinsame Konfigurationsmaske um den eingeklappten
+Bereich **Erweiterte IPSView-Farben**. Dort werden alle 109 nativen Felder mit
+ihrem semantischen Ursprung angezeigt. Im benutzerdefinierten Stil gilt:
+
+- Ohne Override erbt jedes native Feld immer die aktuell wirksame semantische
+  Grundfarbe.
+- Ein Override betrifft ausschließlich das ausgewählte native IPSView-Feld.
+- Wird ein Override wieder deaktiviert, ist die Abweichung nicht mehr wirksam und
+  das native Feld folgt wieder der abgeleiteten Grundfarbe.
+- Nicht benutzerdefinierte Stilquellen zeigen die aufgelösten nativen Farben
+  schreibgeschützt an.
+
+Für `.ipsView`-Medienquellen korrigiert der ConfigurationHelper zusätzlich die
+verifizierte View-/Page-Semantik: `ColorView` bleibt unabhängig von `ColorPage`.
+Wenn `ColorView` im Dokument fehlt, wird für den View-Hintergrund der IPSView-
+Standard **`#404040`** verwendet; `ColorPage` bleibt ausschließlich der
+Seitenhintergrund.
+
+Neue Module, die die gemeinsame IPSView-Stilmaske vollständig anbieten sollen,
+verwenden daher bevorzugt `IPSViewStyleConfigurationHelper`. Consumer, die nur
+die semantischen CSS-Rollen benötigen und bewusst keine nativen Einzel-Overrides
+anbieten, können weiterhin direkt `IPSViewStyleHelper` einsetzen.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
+require_once __DIR__ . '/../libs/helper/IPSViewStyleConfigurationHelper.php';
+
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+use Burki24\SymconModuleHelper\IPSViewStyleConfigurationHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ConfigurationFormHelper;
+    use IPSViewStyleConfigurationHelper;
+
+    public function Create(): void
+    {
+        parent::Create();
+        $this->RegisterIPSViewStyleProperties();
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $this->InsertIPSViewStyleFormItems($form['elements']);
+
+        return $this->EncodeConfigurationForm($form);
+    }
+}
+```
+
+### Zusätzliche Methoden
+
+Die geerbten Methoden von `IPSViewStyleHelper` bleiben unverändert verfügbar.
+Der ConfigurationHelper ergänzt folgende native APIs:
+
+| Methode | Aufgabe |
+| --- | --- |
+| `IPSViewStyleNativeColorOverrides()` | Liefert ausschließlich aktivierte native Overrides des benutzerdefinierten Stils. |
+| `IPSViewStyleNativeTheme()` | Erzeugt das vollständige bekannte native Theme aus dem aktuell wirksamen Stil. |
+| `ApplyIPSViewStyleNativeTheme()` | Überträgt das aufgelöste native Theme kontrolliert auf ein IPSView-Dokument. |
+| `IPSViewStyleNativeOverrideProperties()` | Liefert die Zuordnung der 15 Familien zu ihren gespeicherten JSON-Properties. |
+
 ## IPSViewColorPaletteHelper
 
-`src/IPSViewColorPaletteHelper.php` bleibt vorerst als kompatibler Vorgänger für bereits migrierte Consumer erhalten. Neue Integrationen sollen `IPSViewStyleHelper` verwenden. Der ältere Helper verwaltet nur neun Farben und besitzt weder Style Profile, zentrale Presets noch die gemeinsamen Typografie-, Rahmen-, Schatten-, Opacity- und Verlaufswerte.
+`src/IPSViewColorPaletteHelper.php` bleibt vorerst als kompatibler Vorgänger für bereits migrierte Consumer erhalten. Neue Integrationen mit vollständiger IPSView-Konfigurationsmaske sollen `IPSViewStyleConfigurationHelper` verwenden; rein semantische Consumer können weiterhin direkt `IPSViewStyleHelper` einsetzen. Der ältere Helper verwaltet nur neun Farben und besitzt weder Style Profile, zentrale Presets noch die gemeinsamen Typografie-, Rahmen-, Schatten-, Opacity- und Verlaufswerte.
 
 ## HttpResponseHelper
 
@@ -950,13 +1070,16 @@ libs/
     ├── HelperTranslationHelper.php
     ├── HttpResponseHelper.php
     ├── IPSViewColorPaletteHelper.php
+    ├── IPSViewControlThemeHelper.php
     ├── IPSViewFontCatalogHelper.php
     ├── IPSViewHTMLPageHelper.php
+    ├── IPSViewStyleConfigurationHelper.php
     ├── IPSViewStyleHelper.php
     ├── IPSViewStylePresetHelper.php
     ├── IPSViewStyleProfileHelper.php
     ├── translations/
     │   ├── IPSViewHTMLPageHelper.json
+    │   ├── IPSViewStyleConfigurationHelper.json
     │   └── IPSViewStyleHelper.json
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
@@ -970,10 +1093,13 @@ Damit bleibt die Symcon-Library vollständig eigenständig. Git-Submodules oder 
 
 ## Dokumentationsregel
 
-Ändert ein Arbeitspaket sichtbare Konfiguration, öffentliche Helper-API oder
-Anwenderfunktionen, gehört die zugehörige README zum selben Arbeitspaket. Vor
-der Auslieferung werden deshalb neben Tests und StylePHP auch die betroffenen
-README-Abschnitte gegen den tatsächlich ausgelieferten Stand geprüft.
+Ändert ein Arbeitspaket sichtbare Konfiguration, öffentliche oder protected
+Helper-API oder Anwenderfunktionen, gehört die zugehörige README zum selben
+Arbeitspaket. Öffentliche und protected Helper-Methoden müssen außerdem einen
+direkten PHPDoc-Block besitzen; Parameter und Rückgabewert werden dort vollständig
+dokumentiert. Vor der Auslieferung werden deshalb neben Tests und StylePHP auch
+die betroffenen README-Abschnitte und PHPDocs gegen den tatsächlich ausgelieferten
+Stand geprüft.
 
 ## Tests
 
@@ -981,7 +1107,7 @@ README-Abschnitte gegen den tatsächlich ausgelieferten Stand geprüft.
 php tests/run.php
 ```
 
-Der zentrale Runner führt alle Helper-Testgruppen aus; gemeinsame Testfunktionen liegen in `tests/bootstrap.php`, während jeder Helper eine eigene Testdatei besitzt.
+Der zentrale Runner führt alle Helper-Testgruppen aus; gemeinsame Testfunktionen liegen in `tests/bootstrap.php`, während jeder Helper eine eigene Testdatei besitzt. `tests/ipsview-documentation.php` schützt zusätzlich die README-Verträge und die vollständigen PHPDoc-Signaturen der nativen IPSView-Helper.
 
 GitHub Actions prüft zusätzlich die PHP-Syntax und den vollständigen Testlauf mit PHP 8.5 sowie den Symcon-PHP-Stil über `symcon/action-style@v3`.
 
