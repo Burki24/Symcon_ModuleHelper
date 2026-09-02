@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.13.3",
+  "repository_version": "3.13.4",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -45,8 +45,8 @@
     },
     "IPSViewControlThemeHelper": {
       "file": "src/IPSViewControlThemeHelper.php",
-      "version": "1.0.2",
-      "sha256": "099e3e32d0840d13a6ca95277b31fdaa7378137db3d88ba96c3617582df3eae0",
+      "version": "1.0.3",
+      "sha256": "7be5f3300ebf0562f818b050a53cfa67d7631a30e3d62f1ab41525501604fac6",
       "dependencies": [
         "IPSViewStylePresetHelper"
       ]
@@ -74,8 +74,8 @@
     },
     "IPSViewStyleConfigurationHelper": {
       "file": "src/IPSViewStyleConfigurationHelper.php",
-      "version": "1.0.4",
-      "sha256": "53c2f02f693696fd3a3f3201a6cc3c337a00142fe5f94ec243a6407c579a8d70",
+      "version": "1.0.5",
+      "sha256": "b422a23edfa3fc848fb4dd5d92b79c3c71673fd397e90d5e22bf8e2fe82c7c53",
       "dependencies": [
         "IPSViewControlThemeHelper",
         "IPSViewStyleHelper"
@@ -155,6 +155,6 @@
       "sha256": "81ca4cdeac42ac97cecdb73305e9f68597a6037b1d50b843df11900c96c48dbf"
     }
   },
-  "repository_build": 78696690,
-  "repository_date": 1788242788
+  "repository_build": 254567215,
+  "repository_date": 1788330790
 }

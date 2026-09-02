@@ -20,7 +20,7 @@ require_once __DIR__ . '/IPSViewStylePresetHelper.php';
  * colors and unknown future properties. Unknown top-level IPSView color fields are transported in
  * a dedicated extension section instead of being discarded.
  *
- * @version 1.0.2
+ * @version 1.0.3
  */
 final class IPSViewControlThemeHelper
 {
