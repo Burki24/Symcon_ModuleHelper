@@ -202,7 +202,7 @@ try {
     assertTrueValue(str_contains($exception->getMessage(), 'selector'), 'Invalid selector errors must explain the invalid argument.');
 }
 
-$previousNumericLocale = setlocale(LC_NUMERIC, 0);
+$previousNumericLocale = setlocale(LC_NUMERIC, null);
 $commaNumericLocale = setlocale(LC_NUMERIC, 'de_DE.UTF-8', 'de_DE', 'German_Germany.1252', 'German');
 if ($commaNumericLocale !== false) {
     assertTrueValue(
