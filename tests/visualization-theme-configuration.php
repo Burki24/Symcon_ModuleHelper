@@ -84,9 +84,15 @@ assertSameValue('Eigene Kachelfarben verwenden', $formItems[1]['caption'], 'The 
 assertFalseValue($formItems[2]['items'][0]['enabled'], 'Custom color controls must be disabled in native mode.');
 
 $themeConfigurationHarness->set('VisualizationThemeUseCustomColors', true);
+$defaultCustomCSS = $themeConfigurationHarness->css();
+assertFalseValue(str_contains($defaultCustomCSS, '--symc-text: #202124;'), 'Default text colors must continue to follow the native Symcon token.');
+assertFalseValue(str_contains($defaultCustomCSS, '--symc-background: #FFFFFF;'), 'Default backgrounds must continue to follow the native Symcon token.');
+assertFalseValue(str_contains($defaultCustomCSS, '--symc-accent: #55CBB5;'), 'Default accents must continue to follow the native Symcon token.');
+
 $themeConfigurationHarness->set('VisualizationThemeHeadingColor', 0x123456);
 $customCSS = $themeConfigurationHarness->css(['--symc-accent' => '#abcdef', 'invalid' => '#000000']);
 assertTrueValue(str_contains($customCSS, '--symc-heading: #123456;'), 'Configured heading colors must be emitted.');
+assertFalseValue(str_contains($customCSS, '--symc-text: #202124;'), 'Unchanged colors must not be emitted beside changed colors.');
 assertTrueValue(str_contains($customCSS, '--symc-accent: #ABCDEF;'), 'Explicit valid overrides must win and normalize.');
 assertFalseValue(str_contains($customCSS, 'invalid: #000000'), 'Invalid token names must be ignored.');
 assertTrueValue($themeConfigurationHarness->formItems()[2]['items'][0]['enabled'], 'Custom color controls must be enabled in custom mode.');
