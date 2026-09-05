@@ -172,7 +172,7 @@ try:
         PARALLEL_BRANCH,
         "DateHelper",
         {"version": "1.0.2", "sha256": "digest"},
-        {"helpers": {}},
+        {"helpers": {"DateHelper": {"dependencies": []}}},
         False,
         "SQUASH",
     )

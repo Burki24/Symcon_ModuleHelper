@@ -636,6 +636,44 @@ def bundle_files(
     return files, {helper: primary_entry}
 
 
+def synchronization_roots(
+    manifest: dict[str, Any],
+    selected_helpers: list[str],
+    subscriptions: dict[str, Any],
+) -> list[str]:
+    """Return subscribed update roots without overlapping dependency bundles."""
+    selected = {name for name in selected_helpers if name in subscriptions}
+    covered: set[str] = set()
+    for helper in selected:
+        covered.update(set(dependency_order(manifest, helper)[:-1]) & selected)
+    return sorted(selected - covered)
+
+
+def consumer_bundle_files(
+    manifest: dict[str, Any],
+    helper: str,
+    subscriptions: dict[str, Any],
+) -> tuple[dict[str, bytes], dict[str, dict[str, Any]]]:
+    """Build one bundle and refresh every explicitly subscribed dependency entry."""
+    files: dict[str, bytes] = {}
+    entries: dict[str, dict[str, Any]] = {}
+    subscribed_bundle_helpers = [
+        name for name in dependency_order(manifest, helper) if name in subscriptions
+    ]
+
+    for name in subscribed_bundle_helpers:
+        target_path = str(subscriptions[name]["target"])
+        helper_files, helper_entries = bundle_files(manifest, name, target_path)
+        for path, raw in helper_files.items():
+            existing = files.get(path)
+            if existing is not None and existing != raw:
+                raise RuntimeError(f"Conflicting helper bundle target: {path}")
+            files[path] = raw
+        entries.update(helper_entries)
+
+    return files, entries
+
+
 def sync(
     repo: str,
     base_branch: str,
@@ -644,6 +682,7 @@ def sync(
     manifest: dict[str, Any],
     auto_merge: bool,
     merge_method: str,
+    selected_helpers: list[str] | None = None,
 ) -> None:
     config = load_json_content(repo, ".helper-sync.json", base_branch)
     if config is None:
@@ -658,19 +697,13 @@ def sync(
         print(f"Skipping {repo}: {helper} is not subscribed.")
         return
 
-    target_path = str(subscriptions[helper]["target"])
-    source_files, target_entries = bundle_files(manifest, helper, target_path)
-    up_to_date = True
-    for path, raw in source_files.items():
-        current = content(repo, path, base_branch)
-        if current is None or hashlib.sha256(current[0]).hexdigest() != hashlib.sha256(raw).hexdigest():
-            up_to_date = False
-            break
-    if up_to_date:
-        print(f"{repo}: {helper} bundle already matches v{source_meta['version']}.")
-        return
+    if selected_helpers is not None:
+        roots = synchronization_roots(manifest, selected_helpers, subscriptions)
+        if helper not in roots:
+            print(f"Skipping {repo}: {helper} is covered by a subscribed dependent bundle.")
+            return
 
-    branch = helper_sync_branch(base_branch, helper, str(source_meta["version"]))
+    source_files, target_entries = consumer_bundle_files(manifest, helper, subscriptions)
     target_manifest = load_json_content(repo, "libs/helper/manifest.json", base_branch) or {
         "schema": 1,
         "source_repository": "Burki24/Symcon_ModuleHelper",
@@ -688,6 +721,18 @@ def sync(
         json.dumps(target_manifest, indent=4, ensure_ascii=False) + "\n"
     ).encode("utf-8")
     files["libs/helper/README.md"] = readme(target_manifest, str(config.get("readme_language", "en")))
+
+    up_to_date = True
+    for path, raw in files.items():
+        current = content(repo, path, base_branch)
+        if current is None or hashlib.sha256(current[0]).hexdigest() != hashlib.sha256(raw).hexdigest():
+            up_to_date = False
+            break
+    if up_to_date:
+        print(f"{repo}: {helper} bundle already matches v{source_meta['version']}.")
+        return
+
+    branch = helper_sync_branch(base_branch, helper, str(source_meta["version"]))
 
     commit_prefix = f"CHORE: Update {helper} to v{source_meta['version']}"
     expected_head_sha = create_sync_commit(repo, base_branch, branch, files, commit_prefix)
@@ -733,6 +778,7 @@ def main() -> None:
                 manifest,
                 auto_merge,
                 merge_method,
+                helpers,
             )
 
 

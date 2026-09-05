@@ -154,4 +154,34 @@ subscriptions = {"IPSViewStyleHelper", "IPSViewHTMLPageHelper"}
 if subscriptions != set(style_entries) | set(page_entries):
     raise SystemExit("Consumer subscriptions and top-level manifest entries must remain identical.")
 
+overlapping_subscriptions = {
+    "IPSViewStyleConfigurationHelper": {
+        "target": "libs/helper/IPSViewStyleConfigurationHelper.php"
+    },
+    "IPSViewStyleHelper": {"target": "libs/helper/IPSViewStyleHelper.php"},
+}
+overlapping_selection = ["IPSViewStyleConfigurationHelper", "IPSViewStyleHelper"]
+if MODULE.synchronization_roots(
+    manifest, overlapping_selection, overlapping_subscriptions
+) != ["IPSViewStyleConfigurationHelper"]:
+    raise SystemExit("Overlapping helper subscriptions would still create multiple pull requests.")
+
+combined_files, combined_entries = MODULE.consumer_bundle_files(
+    manifest,
+    "IPSViewStyleConfigurationHelper",
+    overlapping_subscriptions,
+)
+if set(combined_entries) != {
+    "IPSViewStyleConfigurationHelper",
+    "IPSViewStyleHelper",
+}:
+    raise SystemExit(
+        f"Subscribed dependency manifest entries were not refreshed together: {sorted(combined_entries)}"
+    )
+if not {
+    "libs/helper/IPSViewStyleConfigurationHelper.php",
+    "libs/helper/IPSViewStyleHelper.php",
+}.issubset(combined_files):
+    raise SystemExit("The combined consumer bundle is missing subscribed helper files.")
+
 print("Helper dependency bundle manifests verified.")
