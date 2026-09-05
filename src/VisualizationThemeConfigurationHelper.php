@@ -16,7 +16,7 @@ require_once __DIR__ . '/VisualizationThemeHelper.php';
  * the properties and insert the form items only when their tile should expose
  * the shared customization UI.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait VisualizationThemeConfigurationHelper
 {
@@ -109,7 +109,7 @@ trait VisualizationThemeConfigurationHelper
                 'type'    => 'Label',
                 'caption' => $this->VisualizationThemeText(
                     'description.native',
-                    'The tile follows the native Symcon content, card and accent colors. Enable custom colors only for deliberate module-specific overrides.'
+                    'The tile follows the native Symcon content, card and accent colors. When custom colors are enabled, only values changed from their defaults are fixed; all unchanged roles continue to follow Symcon.'
                 )
             ],
             [
@@ -183,6 +183,10 @@ trait VisualizationThemeConfigurationHelper
         $overrides = [];
         foreach (self::VISUALIZATION_THEME_COLORS as $definition) {
             $value = max(0, min(0xFFFFFF, $this->ReadPropertyInteger($definition['property'])));
+            if ($value === $definition['default']) {
+                continue;
+            }
+
             $overrides[$definition['token']] = sprintf('#%06X', $value);
         }
 

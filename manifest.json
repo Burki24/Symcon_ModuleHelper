@@ -156,8 +156,8 @@
     },
     "VisualizationThemeConfigurationHelper": {
       "file": "src/VisualizationThemeConfigurationHelper.php",
-      "version": "1.0.0",
-      "sha256": "b895fe15ed6ed3bfdfd27fe184430beba97f56a4acbf8be45e833f198bb3df24",
+      "version": "1.0.1",
+      "sha256": "117b0f8f8a4d9c829115eabf15cf957d5c9e26cedf2954c996cbb1a36e115f01",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationThemeHelper"
@@ -166,7 +166,7 @@
         {
           "file": "src/translations/VisualizationThemeConfigurationHelper.json",
           "target": "translations/VisualizationThemeConfigurationHelper.json",
-          "sha256": "7ee412445d704db8d6696cb90d247aa620b70888f38ba1b4fa00102b909b9e94"
+          "sha256": "d6bdb94af8fe86647f2350be25b6bed1aee481bc6866bf205a7537e2d5b533bc"
         }
       ]
     }

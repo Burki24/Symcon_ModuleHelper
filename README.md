@@ -478,7 +478,7 @@ class ExampleModule extends IPSModuleStrict
 
 ## VisualizationThemeConfigurationHelper
 
-`src/VisualizationThemeConfigurationHelper.php` ergänzt den nativen HTML-SDK-Stil optional um eine in allen Modulen identische Bearbeitungsmaske. Standardmäßig bleiben Symcons dynamische Inhalts-, Kachel- und Akzentfarben einschließlich Light-/Dark-Umschaltung aktiv. Erst die Option **Eigene Kachelfarben verwenden** überschreibt die semantischen Rollen für Text, Überschriften, Unterüberschriften, Hintergrund, Akzent sowie Information, Erfolg, Warnung und Gefahr.
+`src/VisualizationThemeConfigurationHelper.php` ergänzt den nativen HTML-SDK-Stil optional um eine in allen Modulen identische Bearbeitungsmaske. Standardmäßig bleiben Symcons dynamische Inhalts-, Kachel- und Akzentfarben einschließlich Light-/Dark-Umschaltung aktiv. Die Option **Eigene Kachelfarben verwenden** wertet die semantischen Rollen für Text, Überschriften, Unterüberschriften, Hintergrund, Akzent sowie Information, Erfolg, Warnung und Gefahr einzeln aus. Nur Werte, die von ihrem jeweiligen Helper-Standard abweichen, werden als feste CSS-Overrides ausgegeben; alle unveränderten Rollen folgen weiterhin dem nativen Symcon-Schema. Das Zurücksetzen einer Farbe auf ihren Standard entfernt damit automatisch auch deren Override.
 
 Der Helper besitzt seine deutschen und englischen Formulartexte selbst. Consumer müssen daher weder Beschriftungen duplizieren noch eigene `locale.json`-Einträge für diese Maske pflegen.
 

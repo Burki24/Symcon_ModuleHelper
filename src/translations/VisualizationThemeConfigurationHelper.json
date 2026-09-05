@@ -2,8 +2,8 @@
     "schema": 1,
     "translations": {
         "description.native": {
-            "en": "The tile follows the native Symcon content, card and accent colors. Enable custom colors only for deliberate module-specific overrides.",
-            "de": "Die Kachel folgt den nativen Symcon-Farben für Inhalt, Karte und Akzent. Aktivieren Sie eigene Farben nur für bewusst abweichende Moduleinstellungen."
+            "en": "The tile follows the native Symcon content, card and accent colors. When custom colors are enabled, only values changed from their defaults are fixed; all unchanged roles continue to follow Symcon.",
+            "de": "Die Kachel folgt den nativen Symcon-Farben für Inhalt, Karte und Akzent. Bei aktivierten eigenen Farben werden nur vom Standard abweichende Werte festgelegt; alle unveränderten Rollen folgen weiterhin Symcon."
         },
         "field.custom_colors": {
             "en": "Use custom tile colors",
