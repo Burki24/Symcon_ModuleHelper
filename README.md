@@ -476,6 +476,54 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
 
+## VisualizationThemeConfigurationHelper
+
+`src/VisualizationThemeConfigurationHelper.php` ergänzt den nativen HTML-SDK-Stil optional um eine in allen Modulen identische Bearbeitungsmaske. Standardmäßig bleiben Symcons dynamische Inhalts-, Kachel- und Akzentfarben einschließlich Light-/Dark-Umschaltung aktiv. Erst die Option **Eigene Kachelfarben verwenden** überschreibt die semantischen Rollen für Text, Überschriften, Unterüberschriften, Hintergrund, Akzent sowie Information, Erfolg, Warnung und Gefahr.
+
+Der Helper besitzt seine deutschen und englischen Formulartexte selbst. Consumer müssen daher weder Beschriftungen duplizieren noch eigene `locale.json`-Einträge für diese Maske pflegen.
+
+```php
+require_once __DIR__ . '/../libs/helper/VisualizationThemeConfigurationHelper.php';
+
+use Burki24\SymconModuleHelper\VisualizationThemeConfigurationHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use VisualizationThemeConfigurationHelper;
+
+    public function Create(): void
+    {
+        parent::Create();
+        $this->RegisterVisualizationThemeProperties();
+    }
+
+    public function GetConfigurationForm(): string
+    {
+        $form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        $this->InsertVisualizationThemeFormItems($form['elements']);
+
+        return json_encode($form);
+    }
+}
+```
+
+Das statische Formular enthält am gewünschten Einfügepunkt lediglich folgenden Marker:
+
+```json
+{
+  "type": "Label",
+  "caption": "Configure the shared Symcon tile theme used by the HTML-SDK visualization."
+}
+```
+
+| Methode | Aufgabe |
+| --- | --- |
+| `RegisterVisualizationThemeProperties()` | Registriert den Opt-in-Schalter und die neun gemeinsamen Farbeingenschaften. |
+| `VisualizationThemeFormItems()` | Liefert die vollständige, übersetzte Konfigurationsmaske. |
+| `InsertVisualizationThemeFormItems()` | Ersetzt den Marker rekursiv durch die gemeinsame Maske. |
+| `VisualizationThemeCSS()` | Liefert den nativen Basisstil und – falls aktiviert – die konfigurierten Overrides. |
+| `VisualizationThemeColorOverrides()` | Liefert die aktiven semantischen Overrides als CSS-Token-Map. |
+
 ## HelperTranslationHelper
 
 `src/HelperTranslationHelper.php` stellt helper-eigene Übersetzungen bereit. Sichtbare Beschriftungen und Hinweise eines zentralen Helpers werden damit bereits im Helper übersetzt; Consumer-Module benötigen dafür keine Einträge in ihrer eigenen `locale.json`.

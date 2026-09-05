@@ -65,6 +65,41 @@ if "libs/helper/IPSViewStylePresetHelper.php" not in preset_files:
     raise SystemExit("Missing IPSViewStylePresetHelper from its consumer bundle.")
 
 
+visualization_theme_files, visualization_theme_entries = MODULE.bundle_files(
+    manifest,
+    "VisualizationThemeConfigurationHelper",
+    "libs/helper/VisualizationThemeConfigurationHelper.php",
+)
+
+if set(visualization_theme_entries) != {"VisualizationThemeConfigurationHelper"}:
+    raise SystemExit(
+        "Unexpected top-level visualization-theme manifest entries: "
+        f"{sorted(visualization_theme_entries)}"
+    )
+
+visualization_theme_entry = visualization_theme_entries["VisualizationThemeConfigurationHelper"]
+visualization_theme_dependencies = visualization_theme_entry.get("dependencies", [])
+if [entry.get("name") for entry in visualization_theme_dependencies] != [
+    "HelperTranslationHelper",
+    "VisualizationThemeHelper",
+]:
+    raise SystemExit(
+        f"Unexpected visualization-theme dependencies: {visualization_theme_dependencies}"
+    )
+
+expected_visualization_theme_files = {
+    "libs/helper/VisualizationThemeConfigurationHelper.php",
+    "libs/helper/HelperTranslationHelper.php",
+    "libs/helper/VisualizationThemeHelper.php",
+    "libs/helper/translations/VisualizationThemeConfigurationHelper.json",
+}
+if not expected_visualization_theme_files.issubset(visualization_theme_files):
+    raise SystemExit(
+        "Missing visualization-theme bundle files: "
+        f"{sorted(expected_visualization_theme_files - set(visualization_theme_files))}"
+    )
+
+
 control_files, control_entries = MODULE.bundle_files(
     manifest,
     "IPSViewControlThemeHelper",
