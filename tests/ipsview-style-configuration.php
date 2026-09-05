@@ -301,6 +301,16 @@ $harness->setProperty('IPSViewStyleSource', IPSViewStyleConfigurationHelperHarne
 if ($harness->overrides() !== []) {
     throw new RuntimeException('Native overrides must only modify the editable custom style source.');
 }
+$darkStyle = $harness->resolvedStyle();
+if (($darkStyle['ShadowColor'] ?? null) !== 'rgba(0, 0, 0, 0.320)') {
+    throw new RuntimeException('The resolved dark style must preserve its semantic ShadowColor source field.');
+}
+$darkNativeTheme = $harness->nativeTheme();
+if (($darkNativeTheme['colors']['ShadowColor']['R'] ?? null) !== 0
+    || ($darkNativeTheme['colors']['ShadowColor']['G'] ?? null) !== 0
+    || ($darkNativeTheme['colors']['ShadowColor']['B'] ?? null) !== 0) {
+    throw new RuntimeException('The dark preset form must derive the native ShadowColor without parsing its box shadow.');
+}
 
 $harness->setTranslationLanguage('de');
 $germanPanel = findStyleConfigurationItem($harness->formItems(), 'IPSViewStyleNativeColorsPanel');
