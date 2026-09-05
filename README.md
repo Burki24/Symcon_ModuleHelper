@@ -766,7 +766,12 @@ Einfügemarker verwendet werden.
 Neben den technischen `--ipsview-*`-Tokens erzeugt der Helper verbindliche
 `--ipsview-role-*`-Rollen für View-/Seiten-/Label-/Control-/Popup-Hintergründe,
 Text, Icons, Rahmen, Linien, Akzent, Information, positiven, warnenden und
-kritischen Status. Typografie wird unter anderem über
+kritischen Status. Sekundäre und schwach hervorgehobene Texte behalten die
+Farbtemperatur des Primärtexts, solange sie zur Seitenfläche einen sinnvollen
+Hell-/Dunkelkontrast besitzen. Liegen Text und Fläche im gleichen
+Helligkeitsbereich, verwendet der Helper für diese beiden abgeleiteten Rollen
+automatisch Schwarz oder Weiß; ausdrücklich konfigurierte Primär-, Aktiv- und
+Labeltexte bleiben dabei unverändert. Typografie wird unter anderem über
 
 ```css
 --ipsview-font-family

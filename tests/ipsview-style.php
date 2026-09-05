@@ -352,6 +352,20 @@ assertTrueValue(str_contains($selectedTextCSS, '--ipsview-text-label: #D0D0D0;')
 assertTrueValue(str_contains($selectedTextCSS, '--ipsview-text-secondary: rgba(255, 255, 255, 72%);'), 'CSS must derive secondary text through alpha without changing its RGB color.');
 assertTrueValue(str_contains($selectedTextCSS, '--ipsview-text-faint: rgba(255, 255, 255, 52%);'), 'CSS must derive faint text through alpha without changing its RGB color.');
 
+$harness->setProperty('IPSViewStyleTextColor', 0x101010);
+$harness->setProperty('IPSViewStylePageBackgroundColor', 0x102030);
+$darkSurfaceStyle = $harness->style();
+assertSameValue('#101010', $darkSurfaceStyle['Text'], 'Primary text must remain an explicit user or source value.');
+assertSameValue('rgba(255, 255, 255, 0.720)', $darkSurfaceStyle['TextSecondary'], 'Secondary text must use a readable base on a dark page surface.');
+assertSameValue('rgba(255, 255, 255, 0.520)', $darkSurfaceStyle['TextFaint'], 'Faint text must use a readable base on a dark page surface.');
+
+$harness->setProperty('IPSViewStyleTextColor', 0xF8F8F8);
+$harness->setProperty('IPSViewStylePageBackgroundColor', 0xF0F2F5);
+$lightSurfaceStyle = $harness->style();
+assertSameValue('#F8F8F8', $lightSurfaceStyle['Text'], 'Primary text must remain unchanged on a light page surface.');
+assertSameValue('rgba(0, 0, 0, 0.720)', $lightSurfaceStyle['TextSecondary'], 'Secondary text must use a readable base on a light page surface.');
+assertSameValue('rgba(0, 0, 0, 0.520)', $lightSurfaceStyle['TextFaint'], 'Faint text must use a readable base on a light page surface.');
+
 $ipsViewDocument = [
     'DefaultFontFamily'           => 'Roboto',
     'DefaultFontSize'             => 11,
