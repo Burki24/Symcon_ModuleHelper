@@ -14,7 +14,7 @@ use InvalidArgumentException;
  * pages. Module-specific layouts, gradients and disabled-control opacity
  * deliberately remain outside this helper.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait IPSViewColorPaletteHelper
 {
@@ -331,7 +331,13 @@ trait IPSViewColorPaletteHelper
             return sprintf('#%02X%02X%02X', $red, $green, $blue);
         }
 
-        return sprintf('rgba(%d, %d, %d, %.3f)', $red, $green, $blue, $alpha);
+        return sprintf(
+            'rgba(%d, %d, %d, %s)',
+            $red,
+            $green,
+            $blue,
+            number_format($alpha, 3, '.', '')
+        );
     }
 
     /** @param array{red:float,green:float,blue:float} $color */

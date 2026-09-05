@@ -40,8 +40,8 @@
     },
     "IPSViewColorPaletteHelper": {
       "file": "src/IPSViewColorPaletteHelper.php",
-      "version": "1.0.0",
-      "sha256": "2f73639e1c25f09950dad90e5560276de5f8fb66bbc024ae35fa0c072a0e08fe"
+      "version": "1.0.1",
+      "sha256": "36976172b28906a49c62f914ebae647e9eafb60ed93dec50f25a977e7cf7ad37"
     },
     "IPSViewControlThemeHelper": {
       "file": "src/IPSViewControlThemeHelper.php",
@@ -90,8 +90,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.6.6",
-      "sha256": "0cda94404b20b89c19afd0fb4e17fc6f6c09b35cdc4c7718354a2afc6ab9c77e",
+      "version": "1.6.7",
+      "sha256": "67ff6608658f2a5c61d56ba4c74673f92af988babf705fe598f0ab4e313288ad",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",

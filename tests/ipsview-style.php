@@ -491,4 +491,18 @@ try {
     assertTrueValue(str_contains($exception->getMessage(), 'selector'), 'Invalid selector errors must explain the invalid argument.');
 }
 
+$previousNumericLocale = setlocale(LC_NUMERIC, null);
+$commaNumericLocale = setlocale(LC_NUMERIC, 'de_DE.UTF-8', 'de_DE', 'German_Germany.1252', 'German');
+if ($commaNumericLocale !== false) {
+    $harness->setProperty('IPSViewStyleSource', 3);
+    $localeCSS = $harness->css();
+    assertTrueValue(
+        preg_match('/rgba\([^)]*, 0\.\d{3}\)/', $localeCSS) === 1,
+        'Derived IPSView alpha colors must use a CSS decimal point independently of LC_NUMERIC.'
+    );
+}
+if (is_string($previousNumericLocale)) {
+    setlocale(LC_NUMERIC, $previousNumericLocale);
+}
+
 fwrite(STDOUT, "IPSViewStyleHelper tests passed.\n");
