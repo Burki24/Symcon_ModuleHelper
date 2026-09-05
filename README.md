@@ -796,7 +796,7 @@ erhalten.
 | `IsIPSViewStyleMediaUpdate()` | Erkennt eine Aktualisierung der aktiven IPSView-Stilquelle. |
 | `ReadIPSViewStyleMediaContent()` | Liest den Inhalt des ausgewählten `.ipsView`-Medienobjekts. |
 | `ReadIPSViewStyleProfileMediaContent()` | Liest den Inhalt des ausgewählten Style-Profile-Medienobjekts. |
-| `IPSViewResolvedStyle()` | Liefert die vollständig aufgelösten universellen Stilwerte. |
+| `IPSViewResolvedStyle()` | Liefert die vollständig aufgelösten universellen Stilwerte einschließlich der eigenständigen semantischen Schattenfarbe. |
 | `IPSViewStyleCSSVariables()` | Rendert die aufgelösten Werte als gemeinsame `--ipsview-*`-CSS-Variablen. |
 
 ## IPSViewStyleConfigurationHelper

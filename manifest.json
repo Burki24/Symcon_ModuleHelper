@@ -90,8 +90,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.6.4",
-      "sha256": "f73a0314f8cd8935b227631386e07e1f6d5e0acf4504056ea11f36b67a06a5d4",
+      "version": "1.6.5",
+      "sha256": "35bed736a8468ff97074814a78e7e2a2381c40cc265a50a2d242a23f1bcf1b56",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
