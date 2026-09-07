@@ -476,6 +476,40 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `VisualizationThemeCSS()` | Liefert gemeinsame CSS-Tokens und eine kleine typografische/Fokus-Grundlage für Symcon-Visualisierungen. |
 
+## ResponsiveVisualizationHelper
+
+`src/ResponsiveVisualizationHelper.php` bildet die gemeinsame Grundlage für responsive native HTML-SDK-Kacheln. Er richtet den Root-Container einer Visualisierung als Container-Query-Kontext ein. Dadurch reagiert ein Modul auf die tatsächlich verfügbare Kachelbreite statt auf die oft davon abweichende Browser- oder App-Breite.
+
+Die konkrete Darstellung bleibt bewusst im jeweiligen Modul. Dort werden die Layoutregeln mit `@container symcon-visualization` definiert. Das funktioniert gleichermaßen in der Symcon-Konsole, im Browser und in den Symcon-Apps; User-Agent-Erkennung ist nicht erforderlich.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ResponsiveVisualizationHelper.php';
+
+use Burki24\SymconModuleHelper\ResponsiveVisualizationHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ResponsiveVisualizationHelper;
+
+    public function GetVisualizationHtml(): string
+    {
+        return '<style>' . $this->ResponsiveVisualizationCSS('#example-app') . '</style>';
+    }
+}
+```
+
+```css
+@container symcon-visualization (max-width: 42rem) {
+    .toolbar { padding-inline: var(--symc-responsive-padding); }
+}
+```
+
+| Methode | Aufgabe |
+| --- | --- |
+| `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. |
+
 ## VisualizationThemeConfigurationHelper
 
 `src/VisualizationThemeConfigurationHelper.php` ergänzt den nativen HTML-SDK-Stil optional um eine in allen Modulen identische Bearbeitungsmaske. Standardmäßig bleiben Symcons dynamische Inhalts-, Kachel- und Akzentfarben einschließlich Light-/Dark-Umschaltung aktiv. Die Option **Eigene Kachelfarben verwenden** wertet die semantischen Rollen für Text, Überschriften, Unterüberschriften, Hintergrund, Akzent sowie Information, Erfolg, Warnung und Gefahr einzeln aus. Nur Werte, die von ihrem jeweiligen Helper-Standard abweichen, werden als feste CSS-Overrides ausgegeben; alle unveränderten Rollen folgen weiterhin dem nativen Symcon-Schema. Das Zurücksetzen einer Farbe auf ihren Standard entfernt damit automatisch auch deren Override.

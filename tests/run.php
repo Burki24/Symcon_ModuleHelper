@@ -17,6 +17,7 @@ $tests = [
     'json-style.php',
     'ipsview-html-page.php',
     'visualization-theme.php',
+    'responsive-visualization.php',
     'visualization-theme-configuration.php',
     'ipsview-color-palette.php',
     'ipsview-font-catalog.php',
