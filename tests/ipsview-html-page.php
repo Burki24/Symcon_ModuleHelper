@@ -435,6 +435,12 @@ try {
     assertSameValue(3, count($englishFormItems), 'The common regeneration action must always follow the output controls.');
     assertSameValue('Button', $englishFormItems[2]['type'], 'The common form must expose regeneration as a button.');
     assertSameValue('Regenerate IPSView HTML', $englishFormItems[2]['caption'], 'The regeneration caption must be helper-owned.');
+    assertTrueValue(
+        is_string($englishFormItems[2]['onClick'])
+            && str_contains($englishFormItems[2]['onClick'], "IPS_RequestAction(\$id, 'IPSViewHTMLRegenerateVariables', \"\");")
+            && str_contains($englishFormItems[2]['onClick'], 'return \'MESSAGE:IPSView HTML regenerated.\';'),
+        'A normal Symcon Button must receive one executable onClick string.'
+    );
 
     $helper->setHelperLanguage('de_DE.UTF-8');
     $germanFormItems = $helper->pageFormItems();
