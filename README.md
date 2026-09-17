@@ -302,7 +302,7 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 ## IPSViewHTMLPageHelper
 
-`src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter.
+`src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter. Version 1.4.0 stellt außerdem den gemeinsamen Formularbutton zur manuellen Neugenerierung aller registrierten IPSView-WebContent-Variablen bereit.
 
 Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.
 
@@ -422,7 +422,9 @@ Configure optional IPSView HTML output.
 ```
 
 Ein Modul mit mehreren IPSView-Seiten ruft `MaintainIPSViewHTMLVariable()` und
-`UpdateIPSViewHTMLVariable()` je Ident auf. Die fachlichen Daten können dabei
+`UpdateIPSViewHTMLVariable()` je Ident auf. Für die gemeinsame manuelle
+Neugenerierung stellt das Modul zusätzlich `GetIPSViewHTML()` bereit und leitet
+`RequestAction()` zuerst an `HandleIPSViewHTMLPageAction()` weiter. Die fachlichen Daten können dabei
 einmal aufgebaut und anschließend getrennt für Symcon und IPSView gerendert
 werden. Beim Deaktivieren werden vorhandene IPSView-Variablen automatisch im
 Konfigurationsformular als beibehalten erkannt. Erst die dortige bestätigte
@@ -434,11 +436,13 @@ oder ein Modulupdate löscht keine Variablen.
 | Methode | Aufgabe |
 | --- | --- |
 | `RegisterIPSViewHTMLPageProperties()` | Registriert `EnableIPSView` sowie die internen Eigenschaften und Attribute für sichere, bestätigte Löschaufträge. |
-| `IPSViewHTMLPageFormItems()` | Liefert die zentral übersetzte Checkbox, Hinweise und bei beibehaltenen Variablen den Bestätigungsdialog zur Löschung. |
+| `HandleIPSViewHTMLPageAction()` | Verarbeitet die gemeinsamen Formularaktionen zur Neugenerierung und bestätigten Löschung. |
+| `IPSViewHTMLPageFormItems()` | Liefert die zentral übersetzte Checkbox, Hinweise, den Button zur Neugenerierung und bei beibehaltenen Variablen den Bestätigungsdialog zur Löschung. |
 | `InsertIPSViewHTMLPageFormItems()` | Ersetzt einen verschachtelten Formular-Marker durch die gemeinsamen IPSView-Ausgabeeinstellungen. |
 | `IsIPSViewHTMLPageEnabled()` | Liefert den aktuellen Zustand der gemeinsamen IPSView-Aktivierung. |
 | `MaintainIPSViewHTMLVariable()` | Legt eine optionale Stringvariable mit WebContent-Darstellung an, behält sie beim Deaktivieren und löscht sie nur nach ausdrücklicher Bestätigung. |
 | `UpdateIPSViewHTMLVariable()` | Aktualisiert eine vorhandene optionale IPSView-Variable nur bei aktivierter Ausgabe. |
+| `RegenerateIPSViewHTMLPages()` | Rendert über `GetIPSViewHTML()` neu und aktualisiert alle registrierten, vorhandenen IPSView-Variablen. |
 | `RenderVisualizationHTMLPage()` | Lädt Template, CSS und JavaScript, erzeugt den gemeinsamen Bootstrap und rendert das vollständige HTML-Dokument. |
 | `EncodeVisualizationHTMLJSON()` | Kodiert JSON mit zentralen Schutzflags für die sichere Einbettung in ein `script`-Element. |
 | `IPSViewTranslationsFromLocale()` | Liest alle Quelltexte aus der `locale.json` des konkreten Moduls und übersetzt sie mit der aktiven Symcon-Sprache. |

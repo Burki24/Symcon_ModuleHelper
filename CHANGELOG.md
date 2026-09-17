@@ -1,5 +1,7 @@
 # Changelog
 
+- `IPSViewHTMLPageHelper` 1.4.0 zentralisiert den Formularbutton und die Action zur manuellen Neugenerierung registrierter IPSView-WebContent-Seiten.
+
 ## Unreleased
 
 ### Added
