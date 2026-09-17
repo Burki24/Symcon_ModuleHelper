@@ -84,6 +84,16 @@ final class IPSViewHTMLPageHelperHarness
         return $this->HandleIPSViewHTMLPageAction($ident, $value);
     }
 
+    public function regeneratePages(): bool
+    {
+        return $this->RegenerateIPSViewHTMLPages();
+    }
+
+    public function GetIPSViewHTML(): string
+    {
+        return '<p>Regenerated</p>';
+    }
+
     public function setProperty(string $name, bool|string $value): void
     {
         $this->properties[$name] = $value;
@@ -386,7 +396,7 @@ try {
         'A missing optional IPSView variable must not emit a warning while loading the configuration form.'
     );
     assertSameValue(
-        2,
+        3,
         count($fallbackFormItems),
         'A missing optional IPSView variable must not create retained-variable deletion controls.'
     );
@@ -422,7 +432,9 @@ try {
         str_contains((string) $englishFormItems[1]['caption'], 'explicitly deletes them'),
         'The generic hint must explain that disabling does not delete variables automatically.'
     );
-    assertSameValue(2, count($englishFormItems), 'No deletion controls may be shown without retained variables.');
+    assertSameValue(3, count($englishFormItems), 'The common regeneration action must always follow the output controls.');
+    assertSameValue('Button', $englishFormItems[2]['type'], 'The common form must expose regeneration as a button.');
+    assertSameValue('Regenerate IPSView HTML', $englishFormItems[2]['caption'], 'The regeneration caption must be helper-owned.');
 
     $helper->setHelperLanguage('de_DE.UTF-8');
     $germanFormItems = $helper->pageFormItems();
@@ -464,7 +476,8 @@ try {
     assertTrueValue($helper->insertPageFormItems($form), 'Nested IPSView form markers must be replaced.');
     assertSameValue('CheckBox', $form[0]['items'][0]['type'], 'The marker must be replaced by the checkbox.');
     assertSameValue('Label', $form[0]['items'][1]['type'], 'The helper hint must follow the checkbox.');
-    assertSameValue('After marker', $form[0]['items'][2]['caption'], 'Following form items must be retained.');
+    assertSameValue('Button', $form[0]['items'][2]['type'], 'The shared regeneration button must replace the marker too.');
+    assertSameValue('After marker', $form[0]['items'][3]['caption'], 'Following form items must be retained.');
 
     assertFalseValue(
         $helper->maintainPageVariable('IPSViewExample', 'IPSView example', 100, '<p>Initial</p>'),
@@ -515,6 +528,12 @@ try {
         'Enabled existing IPSView variables must be updateable centrally.'
     );
     assertSameValue('<p>Updated</p>', $helper->values()['IPSViewExample'], 'The updated HTML must be stored.');
+    assertTrueValue($helper->regeneratePages(), 'Registered IPSView variables must be regenerated centrally.');
+    assertSameValue('<p>Regenerated</p>', $helper->values()['IPSViewExample'], 'Central regeneration must write freshly rendered HTML.');
+    assertTrueValue(
+        $helper->handlePageAction('IPSViewHTMLRegenerateVariables'),
+        'The helper-owned regeneration action must be handled.'
+    );
     assertFalseValue(
         $helper->updatePageVariable('MissingIPSViewVariable', '<p>Missing</p>'),
         'Missing IPSView variables must be ignored.'
@@ -543,7 +562,7 @@ try {
         'Disabling output must retain existing optional variables.'
     );
     assertSameValue(
-        '<p>Updated</p>',
+        '<p>Regenerated</p>',
         $helper->values()['IPSViewExample'],
         'Retained variables must keep their last HTML value.'
     );
@@ -555,24 +574,24 @@ try {
     }
 
     $retainedFormItems = $helper->pageFormItems();
-    assertSameValue(4, count($retainedFormItems), 'Disabled retained variables must add a warning and delete action.');
-    assertSameValue('PopupButton', $retainedFormItems[3]['type'], 'Deletion must use a confirmation popup.');
+    assertSameValue(5, count($retainedFormItems), 'Disabled retained variables must add a warning and delete action.');
+    assertSameValue('PopupButton', $retainedFormItems[4]['type'], 'Deletion must use a confirmation popup.');
     assertSameValue(
         'IPSView-Variablen löschen...',
-        $retainedFormItems[3]['caption'],
+        $retainedFormItems[4]['caption'],
         'The German delete action must be helper-owned.'
     );
     assertSameValue(
         'Variablen behalten',
-        $retainedFormItems[3]['popup']['closeCaption'],
+        $retainedFormItems[4]['popup']['closeCaption'],
         'Closing the confirmation must explicitly keep the variables.'
     );
     assertSameValue(
         3,
-        count($retainedFormItems[3]['popup']['items']),
+        count($retainedFormItems[4]['popup']['items']),
         'The confirmation popup must list every retained variable.'
     );
-    $deleteScript = implode("\n", $retainedFormItems[3]['popup']['buttons'][0]['onClick']);
+    $deleteScript = implode("\n", $retainedFormItems[4]['popup']['buttons'][0]['onClick']);
     assertTrueValue(
         str_contains($deleteScript, "IPS_RequestAction(\$id, 'IPSViewHTMLDeleteVariables', \"\");"),
         'The confirmation action must use the helper-owned module action.'
@@ -596,7 +615,7 @@ try {
         $helper->attributes()['IPSViewHTMLVariableRegistry'],
         'Confirmed deletion must clear the retained-variable registry.'
     );
-    assertSameValue(2, count($helper->pageFormItems()), 'Deletion controls must disappear after removal.');
+    assertSameValue(3, count($helper->pageFormItems()), 'Deletion controls must disappear after removal.');
 
     $helper->setProperty('EnableIPSView', true);
     assertTrueValue(
