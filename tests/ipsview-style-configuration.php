@@ -18,6 +18,9 @@ final class IPSViewStyleConfigurationHelperHarness
 
     private ?string $translationLanguage = null;
 
+    /** @var ?list<string> */
+    private ?array $nativeFamilyNames = null;
+
     public function register(): void
     {
         $this->RegisterIPSViewStyleProperties();
@@ -64,6 +67,12 @@ final class IPSViewStyleConfigurationHelperHarness
         $this->translationLanguage = $language;
     }
 
+    /** @param ?list<string> $families */
+    public function setNativeFamilyNames(?array $families): void
+    {
+        $this->nativeFamilyNames = $families;
+    }
+
     public function setProperty(string $name, mixed $value): void
     {
         $this->properties[$name] = $value;
@@ -78,6 +87,14 @@ final class IPSViewStyleConfigurationHelperHarness
     protected function HelperTranslationLanguageOverride(): ?string
     {
         return $this->translationLanguage;
+    }
+
+    /** @return list<string> */
+    protected function IPSViewStyleNativeFamilyNames(): array
+    {
+        return $this->nativeFamilyNames ?? array_keys(
+            \Burki24\SymconModuleHelper\IPSViewControlThemeHelper::families()
+        );
     }
 
     protected function RegisterPropertyInteger(string $name, int $default): void
@@ -202,6 +219,17 @@ $rows = $switchList['values'] ?? [];
 if (count($rows) !== 4) {
     throw new RuntimeException('The Switch family must expose all four native IPSView switch colors.');
 }
+
+$harness->setNativeFamilyNames([
+    \Burki24\SymconModuleHelper\IPSViewControlThemeHelper::FAMILY_BASE,
+    \Burki24\SymconModuleHelper\IPSViewControlThemeHelper::FAMILY_SWITCH
+]);
+$filteredFormItems = $harness->formItems();
+if (findStyleConfigurationItem($filteredFormItems, 'IPSViewStyleNativeFamily_switch') === null
+    || findStyleConfigurationItem($filteredFormItems, 'IPSViewStyleNativeFamily_calendar') !== null) {
+    throw new RuntimeException('Consumers must be able to restrict native IPSView families without changing the shared catalogue.');
+}
+$harness->setNativeFamilyNames(null);
 
 $harness->setProperty(
     'IPSViewStyleNativeSwitchColors',
