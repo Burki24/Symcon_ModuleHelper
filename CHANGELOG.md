@@ -1,5 +1,6 @@
 # Changelog
 
+- `IPSViewStyleConfigurationHelper` 1.0.6 erlaubt Modulen, die im Konfigurationsformular sichtbaren nativen IPSView-Familien über einen neutralen Hook einzuschränken.
 - `IPSViewHTMLPageHelper` 1.4.1 liefert die gemeinsame Neugenerierungsaktion als einzelnen, von normalen Symcon-Buttons unterstützten `onClick`-String aus.
 - `IPSViewHTMLPageHelper` 1.4.0 zentralisiert den Formularbutton und die Action zur manuellen Neugenerierung registrierter IPSView-WebContent-Seiten.
 

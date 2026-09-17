@@ -74,8 +74,8 @@
     },
     "IPSViewStyleConfigurationHelper": {
       "file": "src/IPSViewStyleConfigurationHelper.php",
-      "version": "1.0.5",
-      "sha256": "b422a23edfa3fc848fb4dd5d92b79c3c71673fd397e90d5e22bf8e2fe82c7c53",
+      "version": "1.0.6",
+      "sha256": "a02eaaf9bb5646b528d1d6b89215858412d52b836a4ab183678b567b180dca32",
       "dependencies": [
         "IPSViewControlThemeHelper",
         "IPSViewStyleHelper"

@@ -450,6 +450,8 @@ oder ein Modulupdate löscht keine Variablen.
 
 Der Helper bezieht `HelperTranslationHelper` und `VisualizationAssetHelper` als zentrale Abhängigkeiten. Die helper-eigenen Formulartexte werden aus `translations/IPSViewHTMLPageHelper.json` geladen; Consumer benötigen dafür keine zusätzlichen `locale.json`-Einträge. `VisualizationThemeHelper` und `IPSViewStyleHelper` bleiben eigenständige Bausteine; deren CSS wird dem Seiten-Helper lediglich übergeben.
 
+Module können die im erweiterten IPSView-Farbeditor sichtbaren nativen Steuerungsfamilien mit einer geschützten Methode `IPSViewStyleNativeFamilyNames()` einschränken. Der zentrale Katalog und der verlustfreie Theme-Transport bleiben dabei vollständig erhalten; der Hook steuert ausschließlich die modulspezifische Formularanzeige.
+
 ## VisualizationThemeHelper
 
 `src/VisualizationThemeHelper.php` stellt ein gemeinsames Design-Fundament für HTML-SDK-Visualisierungen bereit. Der Helper bevorzugt die von Symcon angebotenen Farben für Inhalt, Kachel und Akzent und ergänzt robuste Light-/Dark-Fallbacks. Dadurch folgen verschiedene Module demselben Symcon-nahen Erscheinungsbild, ohne ihre fachlichen Komponenten miteinander zu koppeln.
