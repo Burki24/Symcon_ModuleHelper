@@ -98,9 +98,14 @@ assertSameValue(14.0, $mediaFontStyle['FontSize'], 'Media font-size import must 
 
 $fontHarness->setProperty('IPSViewStyleSource', IPSViewStyleHelperHarness::IPSVIEW_STYLE_SOURCE_CUSTOM);
 $fontHarness->setProperty('IPSViewStyleFontFamily', 'PT Sans');
+$fontCSS = $fontHarness->css();
 assertTrueValue(
-    str_contains($fontHarness->css(), '--ipsview-font-family: PTSans;'),
+    str_contains($fontCSS, '--ipsview-font-family: PTSans;'),
     'CSS output must use the canonical shared font-family value.'
+);
+assertTrueValue(
+    str_contains($fontCSS, '--symc-font-family: var(--ipsview-role-font-family);'),
+    'IPSView CSS must bridge the selected family into the shared visualization theme.'
 );
 
 $fontHarness->setTranslationLanguage('de_DE.UTF-8');

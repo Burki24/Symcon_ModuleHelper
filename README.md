@@ -823,7 +823,9 @@ Labeltexte bleiben dabei unverändert. Typografie wird unter anderem über
 
 bereitgestellt. Die bisherigen Alias-Tokens wie `--ipsview-surface`,
 `--ipsview-success` und `--ipsview-danger` bleiben aus Kompatibilitätsgründen
-erhalten.
+erhalten. Zusätzlich bindet der IPSView-Stil `--symc-font-family` an die
+ausgewählte IPSView-Schrift. Damit übernehmen auch Elemente, die das gemeinsame
+`VisualizationThemeHelper`-Grundthema verwenden, dieselbe Schriftfamilie.
 
 ### Methoden
 
