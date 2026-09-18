@@ -1013,6 +1013,10 @@ trait IPSViewStyleHelper
             '--ipsview-role-disabled-opacity'               => 'var(--ipsview-disabled-opacity)',
             '--ipsview-role-shadow'                         => 'var(--ipsview-shadow)',
             '--ipsview-role-popup-shadow'                   => 'var(--ipsview-popup-shadow)',
+            // VisualizationThemeHelper uses this compatibility token for the
+            // common HTML foundation. Rebind it here so IPSView typography is
+            // inherited by consumers that use either helper contract.
+            '--symc-font-family'                            => 'var(--ipsview-role-font-family)',
             '--ipsview-page'                                => 'var(--ipsview-page-background)',
             '--ipsview-surface'                             => 'var(--ipsview-control-background)',
             '--ipsview-surface-strong'                      => 'var(--ipsview-control-background-active)',
