@@ -19,7 +19,7 @@ require_once __DIR__ . '/IPSViewStyleProfileHelper.php';
  * their components, but do not define module-specific colors, gradients,
  * typography, borders or shadows.
  *
- * @version 1.6.8
+ * @version 1.6.9
  */
 trait IPSViewStyleHelper
 {

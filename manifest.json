@@ -217,8 +217,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.6.8",
-      "sha256": "220d39acd4121188645d0479979eecea13f4012a4d45cdf2f507b3f6f31c5404",
+      "version": "1.6.9",
+      "sha256": "44140d34f866a59808948d29849de23a5bc2b1441df1fdc92df6f39d97e90e21",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
@@ -303,6 +303,6 @@
       ]
     }
   },
-  "repository_build": 141733235,
-  "repository_date": 1789758196
+  "repository_build": 266414664,
+  "repository_date": 1789789801
 }
