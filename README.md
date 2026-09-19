@@ -631,9 +631,10 @@ Unterstützt werden:
 - **Segment7** – Regular
 
 Historische Schreibweisen wie `Open Sans`, `Roboto Mono` oder `PT Sans` werden auf
-die kanonischen Werte normalisiert. TTF-Dateien gehören bewusst nicht in den
-zentralen Helper; der IPSViewAssistant hält seine lokalen Fontdateien weiterhin
-selbst für die Vorschau vor.
+die kanonischen Werte normalisiert. Der zentrale Helper liefert die zugehörigen
+TTF-Dateien samt Lizenzhinweisen aus und bettet in eigenständige HTML-Seiten nur
+den jeweils ausgewählten Schriftschnitt als `@font-face`-Regel ein. Damit bleiben
+die Seiten offline-fähig und zeigen nicht unbemerkt eine Browser-Ersatzschrift.
 
 ### Methoden
 
@@ -645,6 +646,8 @@ selbst für die Vorschau vor.
 | `capabilities()` / `styles()` | Liefert die verfügbaren Schriftschnitte einer Familie. |
 | `normalizeFamily()` / `normalizeStyle()` | Normalisiert bekannte Familien- und Schnitt-Aliase. |
 | `isValidFamily()` / `isValidStyle()` | Prüft kanonische Familie beziehungsweise Schriftschnitt. |
+| `cssFamily()` | Liefert die kanonische CSS-Familie mit generischem Fallback. |
+| `fontFaceCSS()` | Bettet den ausgewählten Katalog-Schnitt als offline-fähige `@font-face`-Regel ein. |
 
 ## IPSViewStyleProfileHelper
 
@@ -825,7 +828,9 @@ bereitgestellt. Die bisherigen Alias-Tokens wie `--ipsview-surface`,
 `--ipsview-success` und `--ipsview-danger` bleiben aus Kompatibilitätsgründen
 erhalten. Zusätzlich bindet der IPSView-Stil `--symc-font-family` an die
 ausgewählte IPSView-Schrift. Damit übernehmen auch Elemente, die das gemeinsame
-`VisualizationThemeHelper`-Grundthema verwenden, dieselbe Schriftfamilie.
+`VisualizationThemeHelper`-Grundthema verwenden, dieselbe Schriftfamilie. Für
+Schriften aus dem festen IPSView-Katalog hängt der CSS-Block außerdem die
+passende, selbst enthaltene `@font-face`-Regel an.
 
 ### Methoden
 

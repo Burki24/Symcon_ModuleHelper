@@ -24,6 +24,7 @@
 
 ### Fixed
 
+- `IPSViewFontCatalogHelper` 1.1.0 liefert die festen IPSView-Schriften einschließlich Segment7 als synchronisierte Assets aus; `IPSViewStyleHelper` 1.6.8 bettet den ausgewählten Schriftschnitt als offline-fähige `@font-face`-Regel in eigenständige HTML-Seiten ein, statt eine Browser-Ersatzschrift anzuzeigen.
 - Der Consumer-Sync wartet nach dem Aktualisieren eines Helper-Branches auf die dazugehörige PR-Head-SHA und wiederholt ausschließlich den SHA-gesicherten Merge bei GitHubs kurzzeitigem HTTP-409-Propagationzustand.
 - Der Consumer-Sync führt vollständig geprüfte Helper-PRs direkt und an die geprüfte Head-SHA gebunden zusammen, wenn GitHub Auto-Merge wegen Status `clean` oder fehlender Branch-Protection nicht anbietet.
 - `IPSViewHTMLPageHelper` 1.3.0 löscht bestätigte, zurückbehaltene Variablen über eine Helper-Aktion, ohne Benutzer-Properties per `IPS_SetProperty` und `IPS_ApplyChanges` zu verändern.

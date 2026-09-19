@@ -134,7 +134,7 @@ Folgende Fontfamilien sind bestätigt:
 | Indie Flower | ✓ | – | – | – |
 | Segment7 | ✓ | – | – | – |
 
-Die Original-TTF-Dateien bleiben zunächst Assistant-spezifisch, da sie dort für die Browser-/SVG-Vorschau benötigt werden. Der zentrale Helper soll primär Fontnamen, Fontfähigkeiten, Validierung und Auswahl bereitstellen.
+Die Original-TTF-Dateien werden zentral mit dem Fontkatalog ausgeliefert. Der Helper bettet für eigenständige HTML-Seiten nur den aktiven Schriftschnitt ein; der Assistant kann dieselben Dateien weiterhin für seine Browser-/SVG-Vorschau verwenden.
 
 ### Frühere Stilquellen-Diskussion
 
@@ -188,7 +188,7 @@ Die endgültigen Methodennamen werden passend zur bestehenden Helper-Architektur
 - [x] lokale Font-Matrix aus `IPSViewTypography.php` entfernen bzw. auf zentrale Definition delegieren
 - [x] Assistant-Auswahl vollständig aus zentralem Fontkatalog erzeugen
 - [x] Bold/Italic nur anbieten, wenn vom zentralen Katalog erlaubt
-- [x] lokale Font-Dateipfade/TTFs für Vorschau beibehalten
+- [x] Fontdateien zentral bündeln und nur den ausgewählten Schnitt in HTML/Vorschau einbetten
 - [x] SVG-/Browser-Vorschau unverändert funktionsfähig halten
 
 #### A5 – Abwärtskompatibilität
