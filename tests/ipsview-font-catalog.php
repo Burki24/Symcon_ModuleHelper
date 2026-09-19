@@ -93,4 +93,75 @@ assertSameValue(
     'Consumers must be able to reject unsupported cuts without a fallback.'
 );
 
+assertSameValue(
+    '"Segment7", monospace',
+    IPSViewFontCatalogHelper::cssFamily('Segment 7'),
+    'Known catalogue fonts must expose a quoted CSS family with a suitable generic fallback.'
+);
+assertSameValue(
+    'My Existing Web Font',
+    IPSViewFontCatalogHelper::cssFamily('My Existing Web Font'),
+    'Unknown custom font values must retain their existing CSS representation.'
+);
+
+$fontFaceExpectations = [
+    IPSViewFontCatalogHelper::FONT_ROBOTO         => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR     => ['normal', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD        => ['normal', 700],
+        IPSViewFontCatalogHelper::STYLE_ITALIC      => ['italic', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD_ITALIC => ['italic', 700]
+    ],
+    IPSViewFontCatalogHelper::FONT_ROBOTO_MONO    => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR     => ['normal', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD        => ['normal', 700],
+        IPSViewFontCatalogHelper::STYLE_ITALIC      => ['italic', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD_ITALIC => ['italic', 700]
+    ],
+    IPSViewFontCatalogHelper::FONT_DANCING_SCRIPT => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR => ['normal', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD    => ['normal', 700]
+    ],
+    IPSViewFontCatalogHelper::FONT_INDIE_FLOWER   => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR => ['normal', 400]
+    ],
+    IPSViewFontCatalogHelper::FONT_OPEN_SANS      => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR     => ['normal', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD        => ['normal', 700],
+        IPSViewFontCatalogHelper::STYLE_ITALIC      => ['italic', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD_ITALIC => ['italic', 700]
+    ],
+    IPSViewFontCatalogHelper::FONT_PT_SANS        => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR     => ['normal', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD        => ['normal', 700],
+        IPSViewFontCatalogHelper::STYLE_ITALIC      => ['italic', 400],
+        IPSViewFontCatalogHelper::STYLE_BOLD_ITALIC => ['italic', 700]
+    ],
+    IPSViewFontCatalogHelper::FONT_BEBAS_NEUE     => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR => ['normal', 400]
+    ],
+    IPSViewFontCatalogHelper::FONT_SEGMENT_7      => [
+        IPSViewFontCatalogHelper::STYLE_REGULAR => ['normal', 400]
+    ]
+];
+
+foreach ($fontFaceExpectations as $family => $styles) {
+    foreach ($styles as $style => [$cssStyle, $weight]) {
+        $fontFaceCSS = IPSViewFontCatalogHelper::fontFaceCSS($family, $style);
+        assertTrueValue(
+            str_contains($fontFaceCSS, '@font-face { font-family: "' . $family . '";'),
+            $family . ' ' . $style . ' must render a matching @font-face rule.'
+        );
+        assertTrueValue(
+            str_contains($fontFaceCSS, 'data:font/ttf;base64,'),
+            $family . ' ' . $style . ' must embed its bundled font data for offline pages.'
+        );
+        assertTrueValue(
+            str_contains($fontFaceCSS, 'font-style: ' . $cssStyle . '; font-weight: ' . $weight . ';'),
+            $family . ' ' . $style . ' must retain its declared CSS cut.'
+        );
+    }
+}
+
+assertSameValue('', IPSViewFontCatalogHelper::fontFaceCSS('Arial', 'regular'), 'Custom fonts must not invent bundled @font-face data.');
+
 fwrite(STDOUT, "IPSView font catalogue tests passed.\n");

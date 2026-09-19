@@ -100,12 +100,25 @@ $fontHarness->setProperty('IPSViewStyleSource', IPSViewStyleHelperHarness::IPSVI
 $fontHarness->setProperty('IPSViewStyleFontFamily', 'PT Sans');
 $fontCSS = $fontHarness->css();
 assertTrueValue(
-    str_contains($fontCSS, '--ipsview-font-family: PTSans;'),
-    'CSS output must use the canonical shared font-family value.'
+    str_contains($fontCSS, '--ipsview-font-family: "PTSans", sans-serif;'),
+    'CSS output must use the canonical shared font-family value with a generic fallback.'
 );
 assertTrueValue(
     str_contains($fontCSS, '--symc-font-family: var(--ipsview-role-font-family);'),
     'IPSView CSS must bridge the selected family into the shared visualization theme.'
+);
+assertTrueValue(
+    str_contains($fontCSS, '@font-face { font-family: "PTSans";')
+        && str_contains($fontCSS, 'data:font/ttf;base64,'),
+    'IPSView CSS must embed the selected font face for a self-contained offline page.'
+);
+
+$fontHarness->setProperty('IPSViewStyleFontFamily', 'Segment7');
+$segmentCSS = $fontHarness->css();
+assertTrueValue(
+    str_contains($segmentCSS, '--ipsview-font-family: "Segment7", monospace;')
+        && str_contains($segmentCSS, '@font-face { font-family: "Segment7";'),
+    'Segment7 must reach the page together with its actual bundled font face.'
 );
 
 $fontHarness->setTranslationLanguage('de_DE.UTF-8');

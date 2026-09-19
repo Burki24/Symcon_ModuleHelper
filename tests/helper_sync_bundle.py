@@ -43,6 +43,8 @@ expected_style_files = {
     "libs/helper/IPSViewStylePresetHelper.php",
     "libs/helper/IPSViewStyleProfileHelper.php",
     "libs/helper/translations/IPSViewStyleHelper.json",
+    "libs/helper/fonts/NOTICE.md",
+    "libs/helper/fonts/Segment7-Regular.ttf",
 }
 if not expected_style_files.issubset(style_files):
     raise SystemExit(f"Missing style bundle files: {sorted(expected_style_files - set(style_files))}")

@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.17.0",
+  "repository_version": "3.18.0",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -53,8 +53,135 @@
     },
     "IPSViewFontCatalogHelper": {
       "file": "src/IPSViewFontCatalogHelper.php",
-      "version": "1.0.0",
-      "sha256": "8f352af086f4ac98b57e5768d15f538301c54cb41e5f8d1d41c62330592bc660"
+      "version": "1.1.0",
+      "sha256": "cddb6f51b2d4ceb76d8b291204d26fa17d7ccf4711c3f4f462ec7f73f5514c25",
+      "assets": [
+        {
+          "file": "src/fonts/Apache-2.0.txt",
+          "target": "fonts/Apache-2.0.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "file": "src/fonts/BebasNeue-Regular.ttf",
+          "target": "fonts/BebasNeue-Regular.ttf",
+          "sha256": "8c6b9d4587002e47891b0d7dd66e37b5ecb6c61d0d571144d9e7dce03b6661f2"
+        },
+        {
+          "file": "src/fonts/DancingScript-Bold.ttf",
+          "target": "fonts/DancingScript-Bold.ttf",
+          "sha256": "953d83cf694dd25031eaf93de3161f271faf2a61c51f143d09adb5d8788af84a"
+        },
+        {
+          "file": "src/fonts/DancingScript-Regular.ttf",
+          "target": "fonts/DancingScript-Regular.ttf",
+          "sha256": "bebd5c61533d48c9d9812f590fa6274dc8e907a62d573f52933c19d1a33caa10"
+        },
+        {
+          "file": "src/fonts/IndieFlower-Regular.ttf",
+          "target": "fonts/IndieFlower-Regular.ttf",
+          "sha256": "e92aceba3c95fabe12edf01ae248f613f6d97eef3bdb7009200cb3fae53df609"
+        },
+        {
+          "file": "src/fonts/NOTICE.md",
+          "target": "fonts/NOTICE.md",
+          "sha256": "8382ef7a68e2bc68836fd9b27aa7d890ebd4a3c048b880c6b1514ae5a5489936"
+        },
+        {
+          "file": "src/fonts/OFL-1.1.txt",
+          "target": "fonts/OFL-1.1.txt",
+          "sha256": "6863ff4dc820f24756b6acfb38a2c6bc19d5b8d71b17030330a6f16eb4cee348"
+        },
+        {
+          "file": "src/fonts/OpenSans-Bold.ttf",
+          "target": "fonts/OpenSans-Bold.ttf",
+          "sha256": "f7916a37377e38527d4306303cfe89b653b49b0a6b0b05c6b7593f7ab0248da8"
+        },
+        {
+          "file": "src/fonts/OpenSans-BoldItalic.ttf",
+          "target": "fonts/OpenSans-BoldItalic.ttf",
+          "sha256": "b08b454c8e47e7ba3cbb59c0e6a8344174363c034d581fe12cb3c6fc3942b6d3"
+        },
+        {
+          "file": "src/fonts/OpenSans-Regular.ttf",
+          "target": "fonts/OpenSans-Regular.ttf",
+          "sha256": "037236ed4bf58a85f67074c165d308260fd6be01c86d7df4e79ea16eb273f8c5"
+        },
+        {
+          "file": "src/fonts/OpenSans-RegularItalic.ttf",
+          "target": "fonts/OpenSans-RegularItalic.ttf",
+          "sha256": "df8cd21a27b100aeb75454d0c4cb04bbf5d1cc54676cc35718189bf07b774000"
+        },
+        {
+          "file": "src/fonts/ParaType-Free-Font-License.txt",
+          "target": "fonts/ParaType-Free-Font-License.txt",
+          "sha256": "7b5da0a0bd901f50e4325f8258a814ff791a4281c262b2150a9215bed0241d3c"
+        },
+        {
+          "file": "src/fonts/PTSans-Bold.ttf",
+          "target": "fonts/PTSans-Bold.ttf",
+          "sha256": "af2ea7b99dfa8102105df9ddbf0aa58893169d9bf5befe54fb9d8f12549c477d"
+        },
+        {
+          "file": "src/fonts/PTSans-BoldItalic.ttf",
+          "target": "fonts/PTSans-BoldItalic.ttf",
+          "sha256": "ffd600561e9bc58f6ad014fb74e8790134dd735f40e504059aa3717fe7be6e11"
+        },
+        {
+          "file": "src/fonts/PTSans-Regular.ttf",
+          "target": "fonts/PTSans-Regular.ttf",
+          "sha256": "419e240303f11800c2b0d24b19bd361831be1789142586aeca5bf078a1e7733e"
+        },
+        {
+          "file": "src/fonts/PTSans-RegularItalic.ttf",
+          "target": "fonts/PTSans-RegularItalic.ttf",
+          "sha256": "187f3d67223972f22229cfcfaf1c26aef0f06db1e8130e1bbb8056b10d67af83"
+        },
+        {
+          "file": "src/fonts/Roboto-Bold.ttf",
+          "target": "fonts/Roboto-Bold.ttf",
+          "sha256": "c9cc991deb5d27f267830a19f2301eb164d9e61ec08669c1a1a291c5620ff40a"
+        },
+        {
+          "file": "src/fonts/Roboto-BoldItalic.ttf",
+          "target": "fonts/Roboto-BoldItalic.ttf",
+          "sha256": "e408e93bc15805661247698520f1ab944bbc2899fbd9ca71edc1b24dea6565f7"
+        },
+        {
+          "file": "src/fonts/Roboto-Regular.ttf",
+          "target": "fonts/Roboto-Regular.ttf",
+          "sha256": "017c0be9aaa6d0359737e1fa762ad304c0e0107927faff5a6c1f415c7f5244ed"
+        },
+        {
+          "file": "src/fonts/Roboto-RegularItalic.ttf",
+          "target": "fonts/Roboto-RegularItalic.ttf",
+          "sha256": "2c0958e0c7e9b63f36f672d3cccba14ca0d7ce2e3d6945b38e4ef3de35b79691"
+        },
+        {
+          "file": "src/fonts/RobotoMono-Bold.ttf",
+          "target": "fonts/RobotoMono-Bold.ttf",
+          "sha256": "d580ebfd08b9b1bb637021ac9a34d30abdf3a1a731865886ec01e0c5859f29c8"
+        },
+        {
+          "file": "src/fonts/RobotoMono-BoldItalic.ttf",
+          "target": "fonts/RobotoMono-BoldItalic.ttf",
+          "sha256": "ff99cc35746371f5cf412823d5237ad4c038a3b8a5e5eaad9b854d30075bc13a"
+        },
+        {
+          "file": "src/fonts/RobotoMono-Regular.ttf",
+          "target": "fonts/RobotoMono-Regular.ttf",
+          "sha256": "c59ecb6c18e38d4194249b6e1c555eb55c8e809258cf6d9b624d19d9268253bf"
+        },
+        {
+          "file": "src/fonts/RobotoMono-RegularItalic.ttf",
+          "target": "fonts/RobotoMono-RegularItalic.ttf",
+          "sha256": "591503d536469d17b08282d15f7f7b25fa2bfb5ed01ff9555808bd0439043b05"
+        },
+        {
+          "file": "src/fonts/Segment7-Regular.ttf",
+          "target": "fonts/Segment7-Regular.ttf",
+          "sha256": "defa7e57af4c4447d9b2875feedcdaa727df3acc67ee237aa74ed575f3616ed2"
+        }
+      ]
     },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
@@ -90,8 +217,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.6.7",
-      "sha256": "67ff6608658f2a5c61d56ba4c74673f92af988babf705fe598f0ab4e313288ad",
+      "version": "1.6.8",
+      "sha256": "220d39acd4121188645d0479979eecea13f4012a4d45cdf2f507b3f6f31c5404",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
