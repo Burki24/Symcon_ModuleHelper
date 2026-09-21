@@ -302,6 +302,16 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 ## IPSViewHTMLPageHelper
 
+Ab Version 1.5.0 speichert der Helper die Objekt-ID je registriertem Ausgabe-Ident
+im Attribut `IPSViewHTMLVariableIDs`. Nach der erstmaligen Übernahme dürfen
+WebContent-Variablen im Objektbaum verschoben oder umbenannt werden; Aktualisierung,
+Neugenerierung und die ausdrücklich bestätigte Löschaktion verwenden weiterhin
+dieselbe ID. Direkte Kindvariablen älterer Versionen werden automatisch übernommen.
+Bereits zuvor verschobene oder duplizierte Ausgaben werden nicht global gesucht:
+Ihre Zuordnung muss vor der Übernahme eindeutig unter der Besitzerinstanz
+wiederhergestellt werden. Consumer können bestehende Inhalte über
+`IPSViewHTMLVariableID($ident)` statt über eine Kindobjekt-Suche lesen.
+
 `src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter. Version 1.4.1 stellt außerdem den gemeinsamen Formularbutton zur manuellen Neugenerierung aller registrierten IPSView-WebContent-Variablen bereit.
 
 Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.
@@ -1231,5 +1241,12 @@ Die GitHub App wird auf den Consumer-Repositories installiert und benötigt dort
 Die zentrale Consumer-Konfiguration aktiviert standardmäßig `SQUASH`-Auto-Merge. Vor der Aktivierung prüft der Sync, dass der Pull Request von einem GitHub-App-Bot stammt, einen `helper-sync/`-Branch gegen den konfigurierten Zielbranch verwendet und ausschließlich die für das konkrete Helper-Bundle erzeugten Dateien verändert. Enthält ein PR zusätzliche Modul-, Test-, Workflow- oder Dokumentationsdateien außerhalb des generierten Bundles, wird Auto-Merge abgelehnt und der Sync-Lauf schlägt sichtbar fehl.
 
 Damit GitHub den PR erst nach der CI zusammenführt, müssen in jedem Consumer unter **Settings → General → Pull Requests** `Allow auto-merge` und `Allow squash merging` aktiviert sein. Für den jeweiligen `dev`-Branch müssen außerdem die gewünschten Tests als erforderliche Statusprüfungen in einer Branch Protection Rule oder einem Ruleset hinterlegt sein. Ohne unerfüllte Merge-Anforderung stellt GitHub Auto-Merge nicht bereit; der Sync führt niemals einen direkten Merge als Fallback aus.
+
+OpenCalendar verwendet diese automatische Merge-Policy sowohl für `dev` als auch
+für `dev_9.1`; die frühere manuelle Migrationsausnahme für `dev_9.1` entfällt.
+Die Helper-Sync-Branches bleiben je Zielbranch getrennt. Erforderliche
+Statusprüfungen müssen für beide Zielbranches separat konfiguriert sein.
+Änderungen werden weiterhin im Helper-Branch `dev` vorbereitet und erst nach
+der Übernahme nach `main` über den bestehenden Sync-Workflow verteilt.
 
 Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.

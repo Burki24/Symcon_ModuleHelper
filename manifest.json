@@ -185,8 +185,8 @@
     },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
-      "version": "1.4.1",
-      "sha256": "c0baf0f6f8b71a9c0e1d3b7497f69d64a17f4b1e516a605f093ade5c1aa34929",
+      "version": "1.5.0",
+      "sha256": "755bb013107369d1b2253ec9cafdce89f5fff76383afc35248a7aedd294914b6",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"

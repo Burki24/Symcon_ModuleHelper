@@ -410,7 +410,7 @@ try {
         'The optional IPSView output properties must use safe defaults.'
     );
     assertSameValue(
-        ['IPSViewHTMLVariableRegistry' => '[]'],
+        ['IPSViewHTMLVariableRegistry' => '[]', 'IPSViewHTMLVariableIDs' => '[]'],
         $helper->attributes(),
         'The optional IPSView output attributes must use empty defaults.'
     );
