@@ -5,8 +5,8 @@
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
-      "version": "1.0.0",
-      "sha256": "b9922d52dab18a253b1a1b371d93aec1631396741cbd611cf34922219ec6ab30"
+      "version": "1.1.0",
+      "sha256": "13e009dac28cda9bbf22638db00bd8d562a522a10fd592d9c770a7c5f22cf1fb"
     },
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",

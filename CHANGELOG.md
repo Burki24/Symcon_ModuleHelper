@@ -1,5 +1,7 @@
 # Changelog
 
+- `ChunkedJsonTransferHelper` 1.1.0 verhindert die Überschreitung des gesamten Symcon-Instanzbufferlimits durch verschlüsselte temporäre Transferdateien, eine instanzweite Bufferbudgetprüfung und synchronisierte Metadatenpflege. Regressionstests prüfen große parallele Transfers, Datenintegrität, Ablaufbereinigung, Neustart, Quoten und bestehende Buffertransfers.
+
 - `IPSViewHTMLPageHelper` 1.5.0 speichert die Objekt-IDs seiner WebContent-Ausgaben dauerhaft. Verschobene oder umbenannte Variablen werden weiter aktualisiert und neu generiert, ohne Duplikate anzulegen. Bestehende direkte Kindvariablen werden übernommen; die explizite Löschaktion berücksichtigt auch verschobene Ausgaben. Bereits verwaiste Ausgaben werden nicht global anhand ihres Namens gesucht.
 
 - `IPSViewStyleConfigurationHelper` 1.0.6 erlaubt Modulen, die im Konfigurationsformular sichtbaren nativen IPSView-Familien über einen neutralen Hook einzuschränken.
