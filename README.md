@@ -302,6 +302,16 @@ wird beispielsweise `VisualizationAsset('style.css')` relativ zum konkreten Modu
 
 ## IPSViewHTMLPageHelper
 
+Ab Version 1.5.0 speichert der Helper die Objekt-ID je registriertem Ausgabe-Ident
+im Attribut `IPSViewHTMLVariableIDs`. Nach der erstmaligen Übernahme dürfen
+WebContent-Variablen im Objektbaum verschoben oder umbenannt werden; Aktualisierung,
+Neugenerierung und die ausdrücklich bestätigte Löschaktion verwenden weiterhin
+dieselbe ID. Direkte Kindvariablen älterer Versionen werden automatisch übernommen.
+Bereits zuvor verschobene oder duplizierte Ausgaben werden nicht global gesucht:
+Ihre Zuordnung muss vor der Übernahme eindeutig unter der Besitzerinstanz
+wiederhergestellt werden. Consumer können bestehende Inhalte über
+`IPSViewHTMLVariableID($ident)` statt über eine Kindobjekt-Suche lesen.
+
 `src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter. Version 1.4.1 stellt außerdem den gemeinsamen Formularbutton zur manuellen Neugenerierung aller registrierten IPSView-WebContent-Variablen bereit.
 
 Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.

@@ -42,4 +42,10 @@ foreach ($tests as $test) {
     require_once __DIR__ . '/' . $test;
 }
 
+// Isolated object-tree simulation defines its own Symcon API stubs.
+passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/ipsview-moved-output.php'), $exitCode);
+if ($exitCode !== 0) {
+    exit($exitCode);
+}
+
 fwrite(STDOUT, "All helper tests passed.\n");

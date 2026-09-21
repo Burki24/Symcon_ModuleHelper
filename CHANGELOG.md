@@ -1,5 +1,7 @@
 # Changelog
 
+- `IPSViewHTMLPageHelper` 1.5.0 speichert die Objekt-IDs seiner WebContent-Ausgaben dauerhaft. Verschobene oder umbenannte Variablen werden weiter aktualisiert und neu generiert, ohne Duplikate anzulegen. Bestehende direkte Kindvariablen werden übernommen; die explizite Löschaktion berücksichtigt auch verschobene Ausgaben. Bereits verwaiste Ausgaben werden nicht global anhand ihres Namens gesucht.
+
 - `IPSViewStyleConfigurationHelper` 1.0.6 erlaubt Modulen, die im Konfigurationsformular sichtbaren nativen IPSView-Familien über einen neutralen Hook einzuschränken.
 - `IPSViewHTMLPageHelper` 1.4.1 liefert die gemeinsame Neugenerierungsaktion als einzelnen, von normalen Symcon-Buttons unterstützten `onClick`-String aus.
 - `IPSViewHTMLPageHelper` 1.4.0 zentralisiert den Formularbutton und die Action zur manuellen Neugenerierung registrierter IPSView-WebContent-Seiten.
