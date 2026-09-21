@@ -1242,4 +1242,11 @@ Die zentrale Consumer-Konfiguration aktiviert standardmäßig `SQUASH`-Auto-Merg
 
 Damit GitHub den PR erst nach der CI zusammenführt, müssen in jedem Consumer unter **Settings → General → Pull Requests** `Allow auto-merge` und `Allow squash merging` aktiviert sein. Für den jeweiligen `dev`-Branch müssen außerdem die gewünschten Tests als erforderliche Statusprüfungen in einer Branch Protection Rule oder einem Ruleset hinterlegt sein. Ohne unerfüllte Merge-Anforderung stellt GitHub Auto-Merge nicht bereit; der Sync führt niemals einen direkten Merge als Fallback aus.
 
+OpenCalendar verwendet diese automatische Merge-Policy sowohl für `dev` als auch
+für `dev_9.1`; die frühere manuelle Migrationsausnahme für `dev_9.1` entfällt.
+Die Helper-Sync-Branches bleiben je Zielbranch getrennt. Erforderliche
+Statusprüfungen müssen für beide Zielbranches separat konfiguriert sein.
+Änderungen werden weiterhin im Helper-Branch `dev` vorbereitet und erst nach
+der Übernahme nach `main` über den bestehenden Sync-Workflow verteilt.
+
 Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.

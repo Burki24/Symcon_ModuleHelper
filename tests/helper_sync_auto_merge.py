@@ -469,7 +469,7 @@ if set(open_calendar_by_branch) != {"dev", "dev_9.1"}:
     raise SystemExit(f"Unexpected OpenCalendar helper-sync targets: {sorted(open_calendar_by_branch)}")
 if open_calendar_by_branch["dev"].get("auto_merge", True) is not True:
     raise SystemExit("The established OpenCalendar dev helper sync must keep global auto-merge behavior.")
-if open_calendar_by_branch["dev_9.1"].get("auto_merge") is not False:
-    raise SystemExit("OpenCalendar dev_9.1 helper sync must require manual review during migration.")
+if open_calendar_by_branch["dev_9.1"].get("auto_merge", auto_merge["enabled"]) is not True:
+    raise SystemExit("OpenCalendar dev_9.1 helper sync must use the same automatic merge policy as dev.")
 
 print("Guarded helper synchronization and pull request auto-merge verified.")

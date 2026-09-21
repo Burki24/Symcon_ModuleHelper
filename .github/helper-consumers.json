@@ -15,8 +15,7 @@
     },
     {
       "repository": "Burki24/OpenCalendar",
-      "branch": "dev_9.1",
-      "auto_merge": false
+      "branch": "dev_9.1"
     },
     {
       "repository": "Burki24/WolfWSR",
