@@ -191,6 +191,83 @@ if not isinstance(pr_call, tuple) or pr_call[1:3] != (PARALLEL_BRANCH, PARALLEL_
     raise SystemExit(f"Parallel helper PR used unexpected base/head branches: {pr_call}")
 
 
+unchanged_calls: list[str] = []
+unchanged_entry = {
+    "version": "1.0.2",
+    "sha256": "digest",
+    "path": "libs/helper/DateHelper.php",
+    "source_sha": "previous-source-sha",
+}
+unchanged_manifest = {
+    "schema": 1,
+    "source_repository": "Burki24/Symcon_ModuleHelper",
+    "helpers": {"DateHelper": unchanged_entry},
+}
+unchanged_manifest_raw = (
+    json.dumps(unchanged_manifest, indent=4, ensure_ascii=False) + "\n"
+).encode("utf-8")
+unchanged_readme = MODULE.readme(unchanged_manifest, "en")
+original_source_sha = MODULE.SOURCE_SHA
+MODULE.SOURCE_SHA = "current-source-sha"
+MODULE.load_json_content = lambda _repo, path, _ref: (
+    {
+        "source_repository": "Burki24/Symcon_ModuleHelper",
+        "base_branch": BASE_BRANCH,
+        "readme_language": "en",
+        "helpers": {"DateHelper": {"target": "libs/helper/DateHelper.php"}},
+    }
+    if path == ".helper-sync.json"
+    else unchanged_manifest
+)
+MODULE.bundle_files = lambda *_args, **_kwargs: (
+    {"libs/helper/DateHelper.php": b"helper"},
+    {
+        "DateHelper": {
+            "version": "1.0.2",
+            "sha256": "digest",
+            "path": "libs/helper/DateHelper.php",
+            "source_sha": MODULE.SOURCE_SHA,
+        }
+    },
+)
+
+def unchanged_content(_repo: str, path: str, _ref: str) -> tuple[bytes, str] | None:
+    current_files = {
+        "libs/helper/DateHelper.php": b"helper",
+        "libs/helper/manifest.json": unchanged_manifest_raw,
+        "libs/helper/README.md": unchanged_readme,
+    }
+    raw = current_files.get(path)
+    return None if raw is None else (raw, "current-file-sha")
+
+MODULE.content = unchanged_content
+MODULE.create_sync_commit = lambda *_args, **_kwargs: unchanged_calls.append("commit") or EXPECTED_HEAD_SHA
+MODULE.open_pull_request = lambda *_args, **_kwargs: unchanged_calls.append("pull-request") or pull_request()
+try:
+    MODULE.sync(
+        REPOSITORY,
+        BASE_BRANCH,
+        "DateHelper",
+        {"version": "1.0.2", "sha256": "digest"},
+        {"helpers": {"DateHelper": {"dependencies": []}}},
+        False,
+        "SQUASH",
+    )
+finally:
+    MODULE.SOURCE_SHA = original_source_sha
+    MODULE.load_json_content = original_load_json_content
+    MODULE.bundle_files = original_bundle_files
+    MODULE.content = original_content
+    MODULE.create_sync_commit = original_create_sync_commit
+    MODULE.open_pull_request = original_open_pull_request
+
+if unchanged_calls:
+    raise SystemExit(
+        "An unchanged helper bundle created a source_sha-only pull request: "
+        f"{unchanged_calls}"
+    )
+
+
 batch_helpers = ["ConfigurationFormHelper", "DateHelper"]
 batch_manifest = {
     "repository_version": "3.18.2",
