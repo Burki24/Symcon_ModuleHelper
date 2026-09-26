@@ -24,6 +24,7 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `OpenHotWaterCirculationControl`
 - `OpenShutterButtonControl`
 - `IPSViewAssistant`
+- `JSLive`
 
 ## 2. Symcon_ModuleHelper konfigurieren
 

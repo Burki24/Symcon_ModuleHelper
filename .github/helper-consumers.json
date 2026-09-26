@@ -36,6 +36,11 @@
     {
       "repository": "Burki24/IPSViewAssistant",
       "branch": "dev"
+    },
+    {
+      "repository": "Burki24/JSLive",
+      "branch": "dev",
+      "auto_merge": false
     }
   ]
 }
