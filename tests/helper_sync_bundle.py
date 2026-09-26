@@ -186,4 +186,52 @@ if not {
 }.issubset(combined_files):
     raise SystemExit("The combined consumer bundle is missing subscribed helper files.")
 
+independent_subscriptions = {
+    "ConfigurationFormHelper": {
+        "target": "libs/helper/ConfigurationFormHelper.php"
+    },
+    "DateHelper": {"target": "libs/helper/DateHelper.php"},
+}
+independent_selection = ["ConfigurationFormHelper", "DateHelper"]
+if MODULE.synchronization_batch(
+    manifest,
+    independent_selection,
+    independent_subscriptions,
+    "ConfigurationFormHelper",
+    False,
+) != independent_selection:
+    raise SystemExit("A manual multi-helper synchronization was not combined into one batch.")
+if MODULE.synchronization_batch(
+    manifest,
+    independent_selection,
+    independent_subscriptions,
+    "DateHelper",
+    False,
+) != []:
+    raise SystemExit("A later manual synchronization root would create a competing pull request.")
+if MODULE.synchronization_batch(
+    manifest,
+    independent_selection,
+    independent_subscriptions,
+    "DateHelper",
+    True,
+) != ["DateHelper"]:
+    raise SystemExit("Automatic synchronization no longer processes helpers sequentially.")
+
+independent_files, independent_entries = MODULE.combined_consumer_bundle_files(
+    manifest,
+    independent_selection,
+    independent_subscriptions,
+)
+if set(independent_entries) != set(independent_selection):
+    raise SystemExit(
+        "The combined manual bundle is missing manifest entries: "
+        f"{sorted(set(independent_selection) - set(independent_entries))}"
+    )
+if not {
+    "libs/helper/ConfigurationFormHelper.php",
+    "libs/helper/DateHelper.php",
+}.issubset(independent_files):
+    raise SystemExit("The combined manual bundle is missing independent helper files.")
+
 print("Helper dependency bundle manifests verified.")
