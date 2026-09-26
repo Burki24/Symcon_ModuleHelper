@@ -674,6 +674,46 @@ def consumer_bundle_files(
     return files, entries
 
 
+def combined_consumer_bundle_files(
+    manifest: dict[str, Any],
+    helpers: list[str],
+    subscriptions: dict[str, Any],
+) -> tuple[dict[str, bytes], dict[str, dict[str, Any]]]:
+    """Build a conflict-checked bundle for one or more synchronization roots."""
+    files: dict[str, bytes] = {}
+    entries: dict[str, dict[str, Any]] = {}
+
+    for helper in helpers:
+        helper_files, helper_entries = consumer_bundle_files(manifest, helper, subscriptions)
+        for path, raw in helper_files.items():
+            existing = files.get(path)
+            if existing is not None and existing != raw:
+                raise RuntimeError(f"Conflicting helper bundle target: {path}")
+            files[path] = raw
+        entries.update(helper_entries)
+
+    return files, entries
+
+
+def synchronization_batch(
+    manifest: dict[str, Any],
+    selected_helpers: list[str],
+    subscriptions: dict[str, Any],
+    helper: str,
+    auto_merge: bool,
+) -> list[str]:
+    """Return the roots handled by this invocation without creating competing manual PRs."""
+    roots = synchronization_roots(manifest, selected_helpers, subscriptions)
+    if helper not in roots:
+        return []
+    if auto_merge or len(roots) <= 1:
+        return [helper]
+    if helper != roots[0]:
+        return []
+
+    return roots
+
+
 def sync(
     repo: str,
     base_branch: str,
@@ -697,30 +737,58 @@ def sync(
         print(f"Skipping {repo}: {helper} is not subscribed.")
         return
 
+    sync_helpers = [helper]
     if selected_helpers is not None:
         roots = synchronization_roots(manifest, selected_helpers, subscriptions)
-        if helper not in roots:
-            print(f"Skipping {repo}: {helper} is covered by a subscribed dependent bundle.")
+        sync_helpers = synchronization_batch(
+            manifest,
+            selected_helpers,
+            subscriptions,
+            helper,
+            auto_merge,
+        )
+        if not sync_helpers:
+            if helper not in roots:
+                reason = "covered by a subscribed dependent bundle"
+            else:
+                reason = "included in the combined manual helper bundle"
+            print(f"Skipping {repo}: {helper} is {reason}.")
             return
 
-    source_files, target_entries = consumer_bundle_files(manifest, helper, subscriptions)
+    source_files, target_entries = combined_consumer_bundle_files(
+        manifest,
+        sync_helpers,
+        subscriptions,
+    )
     target_manifest = load_json_content(repo, "libs/helper/manifest.json", base_branch) or {
         "schema": 1,
         "source_repository": "Burki24/Symcon_ModuleHelper",
         "helpers": {},
     }
     target_helpers = target_manifest.setdefault("helpers", {})
-    for dependency in target_entries[helper].get("dependencies", []):
-        dependency_name = str(dependency.get("name", ""))
-        if dependency_name and dependency_name not in subscriptions:
-            target_helpers.pop(dependency_name, None)
+    for sync_helper in sync_helpers:
+        for dependency in target_entries[sync_helper].get("dependencies", []):
+            dependency_name = str(dependency.get("name", ""))
+            if dependency_name and dependency_name not in subscriptions:
+                target_helpers.pop(dependency_name, None)
     target_helpers.update(target_entries)
 
     files = dict(source_files)
-    files["libs/helper/manifest.json"] = (
+    manifest_raw = (
         json.dumps(target_manifest, indent=4, ensure_ascii=False) + "\n"
     ).encode("utf-8")
+    files["libs/helper/manifest.json"] = manifest_raw
     files["libs/helper/README.md"] = readme(target_manifest, str(config.get("readme_language", "en")))
+
+    sync_name = helper
+    sync_version = str(source_meta["version"])
+    sync_digest = str(source_meta["sha256"])
+    if len(sync_helpers) > 1:
+        sync_name = "HelperBundle"
+        sync_version = str(manifest.get("repository_version", "")).strip()
+        if not sync_version:
+            raise RuntimeError("The central helper manifest is missing repository_version.")
+        sync_digest = hashlib.sha256(manifest_raw).hexdigest()
 
     up_to_date = True
     for path, raw in files.items():
@@ -729,15 +797,15 @@ def sync(
             up_to_date = False
             break
     if up_to_date:
-        print(f"{repo}: {helper} bundle already matches v{source_meta['version']}.")
+        print(f"{repo}: {sync_name} bundle already matches v{sync_version}.")
         return
 
-    branch = helper_sync_branch(base_branch, helper, str(source_meta["version"]))
+    branch = helper_sync_branch(base_branch, sync_name, sync_version)
 
-    commit_prefix = f"CHORE: Update {helper} to v{source_meta['version']}"
+    commit_prefix = f"CHORE: Update {sync_name} to v{sync_version}"
     expected_head_sha = create_sync_commit(repo, base_branch, branch, files, commit_prefix)
     pull_request = open_pull_request(
-        repo, base_branch, branch, helper, source_meta["version"], source_meta["sha256"]
+        repo, base_branch, branch, sync_name, sync_version, sync_digest
     )
     if auto_merge:
         enable_auto_merge(

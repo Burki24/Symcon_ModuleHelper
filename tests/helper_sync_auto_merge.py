@@ -191,6 +191,120 @@ if not isinstance(pr_call, tuple) or pr_call[1:3] != (PARALLEL_BRANCH, PARALLEL_
     raise SystemExit(f"Parallel helper PR used unexpected base/head branches: {pr_call}")
 
 
+batch_helpers = ["ConfigurationFormHelper", "DateHelper"]
+batch_manifest = {
+    "repository_version": "3.18.2",
+    "helpers": {
+        "ConfigurationFormHelper": {"dependencies": []},
+        "DateHelper": {"dependencies": []},
+    },
+}
+batch_subscriptions = {
+    "ConfigurationFormHelper": {
+        "target": "libs/helper/ConfigurationFormHelper.php"
+    },
+    "DateHelper": {"target": "libs/helper/DateHelper.php"},
+}
+batch_calls: list[tuple[object, ...]] = []
+original_consumer_bundle_files = MODULE.consumer_bundle_files
+MODULE.load_json_content = lambda _repo, path, _ref: (
+    {
+        "source_repository": "Burki24/Symcon_ModuleHelper",
+        "base_branch": BASE_BRANCH,
+        "readme_language": "en",
+        "helpers": batch_subscriptions,
+    }
+    if path == ".helper-sync.json"
+    else None
+)
+
+def fake_consumer_bundle_files(
+    _manifest: dict[str, object],
+    helper: str,
+    subscriptions: dict[str, object],
+) -> tuple[dict[str, bytes], dict[str, dict[str, object]]]:
+    target = str(subscriptions[helper]["target"])
+    return (
+        {target: helper.encode("utf-8")},
+        {
+            helper: {
+                "version": "1.0.0",
+                "sha256": helper.lower(),
+                "path": target,
+            }
+        },
+    )
+
+def fake_batch_commit(
+    repo: str,
+    base_branch: str,
+    branch: str,
+    files: dict[str, bytes],
+    message: str,
+) -> str:
+    batch_calls.append(("commit", repo, base_branch, branch, files, message))
+    return EXPECTED_HEAD_SHA
+
+def fake_batch_pull_request(
+    repo: str,
+    base_branch: str,
+    branch: str,
+    helper: str,
+    version: str,
+    digest: str,
+) -> dict[str, object]:
+    batch_calls.append(("pr", repo, base_branch, branch, helper, version, digest))
+    return pull_request()
+
+MODULE.consumer_bundle_files = fake_consumer_bundle_files
+MODULE.content = lambda *_args, **_kwargs: None
+MODULE.create_sync_commit = fake_batch_commit
+MODULE.open_pull_request = fake_batch_pull_request
+try:
+    for helper in batch_helpers:
+        MODULE.sync(
+            REPOSITORY,
+            BASE_BRANCH,
+            helper,
+            {"version": "1.0.0", "sha256": helper.lower()},
+            batch_manifest,
+            False,
+            "SQUASH",
+            batch_helpers,
+        )
+finally:
+    MODULE.load_json_content = original_load_json_content
+    MODULE.consumer_bundle_files = original_consumer_bundle_files
+    MODULE.content = original_content
+    MODULE.create_sync_commit = original_create_sync_commit
+    MODULE.open_pull_request = original_open_pull_request
+
+batch_commits = [call for call in batch_calls if call[0] == "commit"]
+batch_pull_requests = [call for call in batch_calls if call[0] == "pr"]
+if len(batch_commits) != 1 or len(batch_pull_requests) != 1:
+    raise SystemExit(f"Manual multi-helper sync created competing pull requests: {batch_calls}")
+
+batch_commit = batch_commits[0]
+if batch_commit[3] != "helper-sync/helper-bundle-v3.18.2":
+    raise SystemExit(f"Manual helper bundle used an unexpected branch: {batch_commit[3]}")
+batch_files = batch_commit[4]
+if not isinstance(batch_files, dict):
+    raise SystemExit("Manual helper bundle did not pass generated files to the commit.")
+expected_batch_files = {
+    "libs/helper/ConfigurationFormHelper.php",
+    "libs/helper/DateHelper.php",
+    "libs/helper/manifest.json",
+    "libs/helper/README.md",
+}
+if set(batch_files) != expected_batch_files:
+    raise SystemExit(f"Manual helper bundle contains unexpected files: {sorted(batch_files)}")
+batch_target_manifest = json.loads(batch_files["libs/helper/manifest.json"].decode("utf-8"))
+if set(batch_target_manifest.get("helpers", {})) != set(batch_helpers):
+    raise SystemExit("Manual helper bundle manifest does not contain every synchronized helper.")
+if batch_pull_requests[0][4:6] != ("HelperBundle", "3.18.2"):
+    raise SystemExit(f"Manual helper bundle PR metadata is invalid: {batch_pull_requests[0]}")
+
+
 node_id = MODULE.validate_auto_merge_candidate(
     pull_request(),
     REPOSITORY,
