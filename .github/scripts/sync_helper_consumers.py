@@ -695,6 +695,39 @@ def combined_consumer_bundle_files(
     return files, entries
 
 
+def preserve_unchanged_source_shas(
+    current: dict[str, Any],
+    generated: dict[str, Any],
+) -> None:
+    """Keep provenance stable when a helper payload did not change."""
+    metadata_keys = {"source_sha", "dependencies"}
+    current_payload = {
+        key: value for key, value in current.items() if key not in metadata_keys
+    }
+    generated_payload = {
+        key: value for key, value in generated.items() if key not in metadata_keys
+    }
+    current_source_sha = current.get("source_sha")
+    if (
+        current_payload == generated_payload
+        and isinstance(current_source_sha, str)
+        and current_source_sha
+    ):
+        generated["source_sha"] = current_source_sha
+
+    current_dependencies = {
+        str(dependency.get("name", "")): dependency
+        for dependency in current.get("dependencies", [])
+        if isinstance(dependency, dict)
+    }
+    for dependency in generated.get("dependencies", []):
+        if not isinstance(dependency, dict):
+            continue
+        previous = current_dependencies.get(str(dependency.get("name", "")))
+        if previous is not None:
+            preserve_unchanged_source_shas(previous, dependency)
+
+
 def synchronization_batch(
     manifest: dict[str, Any],
     selected_helpers: list[str],
@@ -766,6 +799,10 @@ def sync(
         "helpers": {},
     }
     target_helpers = target_manifest.setdefault("helpers", {})
+    for name, generated_entry in target_entries.items():
+        current_entry = target_helpers.get(name)
+        if isinstance(current_entry, dict):
+            preserve_unchanged_source_shas(current_entry, generated_entry)
     for sync_helper in sync_helpers:
         for dependency in target_entries[sync_helper].get("dependencies", []):
             dependency_name = str(dependency.get("name", ""))
