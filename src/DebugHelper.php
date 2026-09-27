@@ -18,7 +18,7 @@ use Throwable;
  * common secret fields and credentials (including JSON encoded as text), and
  * limiting oversized messages unless the caller explicitly raises the limit.
  *
- * @version 1.0.1
+ * @version 1.0.2
  */
 trait DebugHelper
 {
