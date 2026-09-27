@@ -73,6 +73,25 @@ debugAssertSame('***', $structured['nested']['password'], 'Nested passwords must
 debugAssertSame(200, $structured['nested']['statusCode'], 'Ordinary code/status fields must remain visible.');
 debugAssertSame('***', $structured['nested']['devicePin'], 'Module-specific sensitive keys must be maskable.');
 
+$nestedPayload = [
+    'title'    => 'Living room chart',
+    'Password' => 'synthetic-password',
+    'nested'   => ['ApiKey' => 'synthetic-api-key', 'value' => 12345]
+];
+$encodedPayload = json_encode($nestedPayload, JSON_THROW_ON_ERROR);
+$nested = json_decode($helper->format([
+    'json'   => $encodedPayload,
+    'base64' => base64_encode($encodedPayload)
+]), true, 512, JSON_THROW_ON_ERROR);
+$jsonPayload = json_decode($nested['json'], true, 512, JSON_THROW_ON_ERROR);
+$base64Payload = json_decode(base64_decode($nested['base64'], true), true, 512, JSON_THROW_ON_ERROR);
+foreach ([$jsonPayload, $base64Payload] as $payload) {
+    debugAssertSame('Living room chart', $payload['title'], 'Nested payload text must remain visible.');
+    debugAssertSame('***', $payload['Password'], 'Nested JSON passwords must be masked.');
+    debugAssertSame('***', $payload['nested']['ApiKey'], 'Nested JSON API keys must be masked.');
+    debugAssertSame(12345, $payload['nested']['value'], 'Nested numeric values must remain visible.');
+}
+
 $inline = $helper->format(
     "Authorization: Bearer abc.def.ghi\n"
     . "Cookie: session=secret\n"
@@ -100,6 +119,9 @@ $truncated = $helper->format(str_repeat('ä', 100), 80);
 debugAssertTrue(strlen($truncated) <= 80, 'DebugHelper must respect the configured byte limit.');
 debugAssertTrue(str_ends_with($truncated, '… [truncated]'), 'Truncated debug output must be clearly marked.');
 debugAssertSame(1, preg_match('//u', $truncated), 'Truncation must not split UTF-8 characters.');
+
+$longPayload = str_repeat('L', 17_000);
+debugAssertSame($longPayload, $helper->format($longPayload, PHP_INT_MAX), 'An explicit unlimited length must preserve the complete payload.');
 
 debugAssertSame('NAN', $helper->format(NAN), 'Non-finite floating-point values must remain debuggable.');
 

@@ -105,6 +105,22 @@ class ExampleModule extends IPSModuleStrict
 | `EncodeDataFlowMessage()` | Erzeugt ein JSON-Datenflussobjekt aus `DataID` und Payload und verhindert eine zweite `DataID` in der Payload. |
 | `DecodeDataFlowMessage()` | Decodiert und validiert ein JSON-Datenflussobjekt und prüft optional die erwartete `DataID`. |
 
+## DebugHelper
+
+`src/DebugHelper.php` formatiert strukturierte Symcon-Debugausgaben und maskiert
+bekannte Zugangsdaten. JSON-Objekte und -Listen, die als String oder als
+Base64-kodierter JSON-String übergeben werden, werden vor der Ausgabe ebenfalls
+rekursiv bereinigt. Frei formulierte Texte und Messwerte bleiben erhalten;
+unbekannte Geheimnisse in beliebigem Skript- oder Medieninhalt können nicht
+zuverlässig erkannt werden.
+
+`SendSafeDebug()` begrenzt einzelne Ausgaben standardmäßig auf 16 KiB. Für
+bewusst vollständige Diagnoseausgaben kann der Aufrufer `PHP_INT_MAX` als
+`$maxLength` übergeben. Diese Option sollte nur hinter einer expliziten
+Debug-Aktivierung verwendet werden, weil große Payloads viele Ressourcen im
+Symcon-Debugkanal belegen können. Die Maskierung bekannter Zugangsdaten bleibt
+dabei aktiv.
+
 ## ChunkedJsonTransferHelper
 
 `src/ChunkedJsonTransferHelper.php` zerlegt große JSON-Listen in kurzlebige, größenbegrenzte Seiten für mehrstufige Symcon-Modulaufrufe. Damit können Child-, Splitter- und Parent-Module Datenmengen austauschen, die Symcons festes 1-MiB-Limit für PHP- und Datenflussausgaben überschreiten würden.
