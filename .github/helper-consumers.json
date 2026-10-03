@@ -41,6 +41,10 @@
       "repository": "Burki24/JSLive",
       "branch": "dev",
       "auto_merge": false
+    },
+    {
+      "repository": "Burki24/SymconECharts",
+      "branch": "dev"
     }
   ]
 }
