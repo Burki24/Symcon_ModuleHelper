@@ -261,6 +261,11 @@
       "version": "1.0.0",
       "sha256": "0cebd0f08e6416a6d7d4d5fdbb19bf96d457d3e2d51fcf2a1d3e6adf5e967451"
     },
+    "SVGPreviewHelper": {
+      "file": "src/SVGPreviewHelper.php",
+      "version": "1.0.0",
+      "sha256": "14313a55020df27931e1ffe071fa599a39152493c6305ab2ef5322922981817b"
+    },
     "SymconOAuthHelper": {
       "file": "src/SymconOAuthHelper.php",
       "version": "1.0.0",

@@ -62,6 +62,62 @@ class ExampleModule extends IPSModuleStrict
 | `LoadConfigurationForm()` | Lädt und validiert die `form.json` des konkreten Moduls als assoziatives Array. |
 | `EncodeConfigurationForm()` | Serialisiert die dynamisch bearbeitete Formularstruktur als JSON-Objekt. |
 
+## SVGPreviewHelper
+
+`src/SVGPreviewHelper.php` stellt die gemeinsame technische Basis für
+SVG-Vorschauen in Symcon-Konfigurationsformularen bereit. Der Helper kodiert
+vertrauenswürdig erzeugtes SVG als Base64-Data-URI, maskiert dynamische Texte
+XML-sicher und initialisiert ein eindeutig benanntes `Image`-Formularfeld auch
+innerhalb verschachtelter Panels oder Popups.
+
+Die konkrete Vorschau bleibt Aufgabe des Consumers. Der Helper kennt weder
+Diagrammtypen noch Farben, Layouts oder fachliche Werte. `dataUri()` prüft den
+SVG-Dokumentanfang, ist aber ausdrücklich kein Sanitizer für beliebiges SVG.
+Consumer erzeugen deshalb ausschließlich kontrolliertes, eigenständiges
+Markup und übergeben dynamische Werte zuvor an `escape()`.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/ConfigurationFormHelper.php';
+require_once __DIR__ . '/../libs/helper/SVGPreviewHelper.php';
+
+use Burki24\SymconModuleHelper\ConfigurationFormHelper;
+use Burki24\SymconModuleHelper\SVGPreviewHelper;
+
+class ExampleModule extends IPSModuleStrict
+{
+    use ConfigurationFormHelper;
+
+    public function GetConfigurationForm(): string
+    {
+        $form = $this->LoadConfigurationForm();
+        $label = SVGPreviewHelper::escape($this->ReadPropertyString('Title'));
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+            . '<text>' . $label . '</text></svg>';
+        $form = SVGPreviewHelper::withImage($form, 'PreviewImage', $svg);
+
+        return $this->EncodeConfigurationForm($form);
+    }
+
+    public function UpdatePreview(string $Title): void
+    {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg"><text>'
+            . SVGPreviewHelper::escape($Title)
+            . '</text></svg>';
+        $this->UpdateFormField('PreviewImage', 'image', SVGPreviewHelper::dataUri($svg));
+    }
+}
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `dataUri()` | Prüft den SVG-Dokumentanfang und erzeugt eine Base64-kodierte `image/svg+xml`-Data-URI. |
+| `escape()` | Maskiert dynamische Texte und Attributwerte für XML-/SVG-Markup. |
+| `withImage()` | Liefert eine Kopie des Formulars mit genau einem eindeutig benannten `Image`-Feld, dessen `image`-Wert die SVG-Data-URI enthält. |
+
 ## DataFlowHelper
 
 `src/DataFlowHelper.php` vereinheitlicht das JSON-Transportformat für Symcon-Datenflüsse zwischen Child-, Splitter- und Parent-Modulen. Der Helper kümmert sich bewusst nur um die Transporthülle aus `DataID` und Payload; `SendDataToParent()`, `SendDataToChildren()`, Fehlerübersetzung und fachliche Request-/Response-Strukturen bleiben Aufgabe des jeweiligen Moduls.
@@ -1211,6 +1267,7 @@ libs/
     │   └── IPSViewStyleHelper.json
     ├── ParentConnectionHelper.php
     ├── PersistentJsonCacheHelper.php
+    ├── SVGPreviewHelper.php
     ├── SymconOAuthHelper.php
     ├── VariableHelper.php
     ├── VariablePresentationHelper.php

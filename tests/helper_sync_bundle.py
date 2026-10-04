@@ -67,6 +67,27 @@ if "libs/helper/IPSViewStylePresetHelper.php" not in preset_files:
     raise SystemExit("Missing IPSViewStylePresetHelper from its consumer bundle.")
 
 
+svg_preview_files, svg_preview_entries = MODULE.bundle_files(
+    manifest,
+    "SVGPreviewHelper",
+    "libs/helper/SVGPreviewHelper.php",
+)
+
+if set(svg_preview_entries) != {"SVGPreviewHelper"}:
+    raise SystemExit(
+        f"Unexpected top-level SVG-preview manifest entries: {sorted(svg_preview_entries)}"
+    )
+
+svg_preview_entry = svg_preview_entries["SVGPreviewHelper"]
+if svg_preview_entry.get("dependencies", []) != []:
+    raise SystemExit(
+        f"Unexpected SVG-preview dependencies: {svg_preview_entry.get('dependencies', [])}"
+    )
+
+if "libs/helper/SVGPreviewHelper.php" not in svg_preview_files:
+    raise SystemExit("Missing SVGPreviewHelper from its consumer bundle.")
+
+
 visualization_theme_files, visualization_theme_entries = MODULE.bundle_files(
     manifest,
     "VisualizationThemeConfigurationHelper",

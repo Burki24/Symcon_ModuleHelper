@@ -13,6 +13,7 @@ $tests = [
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',
+    'svg-preview.php',
     'helper-translation.php',
     'json-style.php',
     'ipsview-html-page.php',
