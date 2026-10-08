@@ -21,12 +21,37 @@ final class ConfigurationFormHarness
     {
         return $this->EncodeConfigurationForm($form);
     }
+
+    /** @param list<array<string,mixed>> $items @param list<string> $names @return list<array<string,mixed>> */
+    public function setVisibility(array $items, array $names, bool $visible): array
+    {
+        return $this->SetFormFieldVisibility($items, $names, $visible);
+    }
 }
 
 $formPath = __DIR__ . '/form.json';
 $hadExistingForm = is_file($formPath);
 $existingForm = $hadExistingForm ? file_get_contents($formPath) : false;
 $harness = new ConfigurationFormHarness();
+
+$nestedItems = [
+    ['type' => 'Label', 'name' => 'Unchanged', 'visible' => true],
+    [
+        'type'  => 'RowLayout',
+        'items' => [
+            ['type' => 'NumberSpinner', 'name' => 'CustomRangeValue', 'visible' => true],
+            ['type' => 'Select', 'name' => 'CustomRangeUnit', 'visible' => true]
+        ]
+    ]
+];
+$hiddenItems = $harness->setVisibility($nestedItems, ['CustomRangeValue', 'CustomRangeUnit'], false);
+assertSameValue(false, $hiddenItems[1]['items'][0]['visible'], 'Nested matching fields must be hidden.');
+assertSameValue(false, $hiddenItems[1]['items'][1]['visible'], 'Every matching field must be hidden.');
+assertSameValue(true, $hiddenItems[0]['visible'], 'Unrelated fields must remain unchanged.');
+assertSameValue(true, $nestedItems[1]['items'][0]['visible'], 'The original form items must not be mutated.');
+assertSameValue($hiddenItems, $harness->setVisibility($hiddenItems, ['CustomRangeValue', 'CustomRangeUnit'], false), 'Repeated visibility updates must be idempotent.');
+$shownItems = $harness->setVisibility($hiddenItems, ['CustomRangeValue', 'CustomRangeUnit'], true);
+assertSameValue($nestedItems, $shownItems, 'Matching fields must be shown again without changing other form items.');
 
 try {
     if (is_file($formPath) && !unlink($formPath)) {

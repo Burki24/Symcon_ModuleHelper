@@ -45,6 +45,12 @@ class ExampleModule extends IPSModuleStrict
     {
         $form = $this->LoadConfigurationForm();
 
+        $form['elements'] = $this->SetFormFieldVisibility(
+            $form['elements'],
+            ['CustomRangeValue', 'CustomRangeUnit'],
+            $this->ReadPropertyString('Range') === 'custom'
+        );
+
         $form['actions'][] = [
             'type'  => 'Label',
             'label' => 'Dynamic content'
@@ -61,6 +67,7 @@ class ExampleModule extends IPSModuleStrict
 | --- | --- |
 | `LoadConfigurationForm()` | Lädt und validiert die `form.json` des konkreten Moduls als assoziatives Array. |
 | `EncodeConfigurationForm()` | Serialisiert die dynamisch bearbeitete Formularstruktur als JSON-Objekt. |
+| `SetFormFieldVisibility()` | Setzt `visible` für Felder mit exakt passendem `name` auch in verschachtelten `items`; andere Felder bleiben unverändert. Die Eingabeliste wird nicht verändert. |
 
 ## SVGPreviewHelper
 
