@@ -97,6 +97,33 @@ trait ConfigurationFormHelper
     }
 
     /**
+     * Sets the visibility of named fields within nested configuration-form items.
+     *
+     * Unmatched items and other attributes are retained. The input array is not
+     * modified, so repeated calls with the same arguments are idempotent.
+     *
+     * @param list<array<string,mixed>> $items   Form elements or nested items.
+     * @param list<string>              $names   Exact field names to update.
+     * @param bool                      $visible Visibility assigned to matching fields.
+     *
+     * @return list<array<string,mixed>> Form items with updated visibility.
+     */
+    protected function SetFormFieldVisibility(array $items, array $names, bool $visible): array
+    {
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], $names, true)) {
+                $item['visible'] = $visible;
+            }
+            if (isset($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->SetFormFieldVisibility($item['items'], $names, $visible);
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /**
      * Resolves form.json relative to the concrete module class rather than this helper file.
      *
      * @return string Absolute path to the module's form.json.
