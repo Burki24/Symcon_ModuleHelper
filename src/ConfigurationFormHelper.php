@@ -16,7 +16,7 @@ use UnexpectedValueException;
  * resolves the directory of the concrete module class via reflection so a
  * vendored helper can reliably access that module's form.json file.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 trait ConfigurationFormHelper
 {
