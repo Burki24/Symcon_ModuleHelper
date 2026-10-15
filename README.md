@@ -236,6 +236,49 @@ Der Empfänger startet zunächst einen Transfer, ruft danach die Seiten `0` bis 
 | `ClearChunkedJsonTransfer()` | Entfernt Metadaten und alle bekannten Seiten eines Transfers. |
 | `CleanupExpiredChunkedJsonTransfers()` | Entfernt abgelaufene Transfers eines Scopes und liefert deren Anzahl. |
 
+## VariableSearchHelper
+
+`src/VariableSearchHelper.php` durchsucht einen begrenzten Teil des Symcon-
+Objektbaums nach Variablen. Der Helper filtert nach Namensbestandteil und
+Variablentyp, berücksichtigt ausgeblendete Objekte, Tiefen-, Objekt- und
+Treffergrenzen und liefert ausschließlich neutrale Metadaten aus Variablen-ID,
+Name, Pfad und Typ. Bereits konfigurierte Variablen werden allein anhand ihrer
+ID ausgeschlossen und gezählt.
+
+Die Formularoberfläche und fachliche Standardwerte bleiben beim Consumer.
+Vor dem Übernehmen einer Mehrfachauswahl wiederholt der Consumer dieselbe
+Suche und lässt die übermittelten IDs mit
+`ResolveSelectedVariableIDs()` gegen dieses frische Ergebnis prüfen. Dadurch
+werden veraltete oder manipulierte Auswahldaten kontrolliert abgewiesen.
+
+### Verwendung
+
+```php
+require_once __DIR__ . '/../libs/helper/VariableSearchHelper.php';
+
+use Burki24\SymconModuleHelper\VariableSearchHelper;
+
+$result = VariableSearchHelper::Search(
+    rootObjectID: 0,
+    nameContains: 'Fenster',
+    variableTypes: [0],
+    includeHidden: false,
+    excludedVariableIDs: [12345]
+);
+
+$selectedIDs = VariableSearchHelper::ResolveSelectedVariableIDs(
+    $submittedCandidateRows,
+    $freshResult['rows']
+);
+```
+
+### Methoden
+
+| Methode | Aufgabe |
+| --- | --- |
+| `Search()` | Durchsucht einen begrenzten Objektbaum und liefert passende, noch nicht konfigurierte Variablen sowie Zähler und Begrenzungsstatus. |
+| `ResolveSelectedVariableIDs()` | Liefert eindeutige ausgewählte IDs, sofern jede davon weiterhin im frischen Suchergebnis enthalten ist. |
+
 ## VariablePresentationHelper
 
 `src/VariablePresentationHelper.php` erzeugt wiederverwendbare native Symcon-Darstellungen für Variablen. Version 2.0.0 führt den bisherigen Helper mit den allgemein nutzbaren Teilen des ursprünglich universell angelegten Presentation-Helpers aus `WolfWSR` zusammen.
