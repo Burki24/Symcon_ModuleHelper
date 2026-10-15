@@ -12,6 +12,7 @@
 
 ### Added
 
+- `VariableSearchHelper` stellt eine begrenzte, typgefilterte Variablensuche mit ID-basierter Ausschlussliste und erneuter serverseitiger Auswahlprüfung für Konfigurationsformulare bereit.
 - `ConfigurationFormHelper` kann die Sichtbarkeit benannter Formularfelder auch in verschachtelten Layouts zentral setzen; Tests sichern unveränderte Eingaben und wiederholte Aufrufe ab.
 - `ChunkedJsonTransferHelper` für kurzlebige, größenbegrenzte JSON-Seiten bei mehrstufigen Symcon-Modultransfers.
 - Bufferseiten mit standardmäßig 192 KiB, Transfer-Token, Ablaufzeit, explizitem Abschluss und Cleanup verwaister Transfers vermeiden das 1-MiB-Ausgabelimit, ohne das Buffer-Softlimit von 256 KiB auszureizen.

@@ -276,6 +276,11 @@
       "version": "1.2.0",
       "sha256": "43b205a2ca87553a3a59a9e94f1c5c72fc4643cebedb080a9706139d98b30624"
     },
+    "VariableSearchHelper": {
+      "file": "src/VariableSearchHelper.php",
+      "version": "1.0.0",
+      "sha256": "f7f18b03a320578ecb2ffd816879df2e280e0d96c18cac27320198c73b564f22"
+    },
     "VariablePresentationHelper": {
       "file": "src/VariablePresentationHelper.php",
       "version": "2.0.0",
