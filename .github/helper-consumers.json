@@ -45,6 +45,26 @@
     {
       "repository": "Burki24/SymconECharts",
       "branch": "dev"
+    },
+    {
+      "repository": "Burki24/IPS_Informations",
+      "branch": "dev",
+      "auto_merge": false
+    },
+    {
+      "repository": "Burki24/BlindControl",
+      "branch": "soda_fg",
+      "auto_merge": false
+    },
+    {
+      "repository": "Burki24/iCal-Calendar",
+      "branch": "dev_apple",
+      "auto_merge": false
+    },
+    {
+      "repository": "Burki24/Zigbee2MQTT",
+      "branch": "dev_V6",
+      "auto_merge": false
     }
   ]
 }

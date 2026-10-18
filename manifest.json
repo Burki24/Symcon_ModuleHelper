@@ -311,6 +311,14 @@
           "sha256": "d6bdb94af8fe86647f2350be25b6bed1aee481bc6866bf205a7537e2d5b533bc"
         }
       ]
+    },
+    "DebugFlowHelper": {
+      "file": "src/DebugFlowHelper.php",
+      "version": "1.0.0",
+      "sha256": "7acb9342e958a867d17ce53c96a69a176a4f28886875b64166372f15eddd11d8",
+      "dependencies": [
+        "DebugHelper"
+      ]
     }
   },
   "repository_build": 48173477,
