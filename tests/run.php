@@ -10,6 +10,7 @@ $tests = [
     'data-flow.php',
     'chunked-json-transfer.php',
     'debug-helper.php',
+    'debug-flow.php',
     'variable-presentation.php',
     'parent-connection.php',
     'visualization-asset.php',

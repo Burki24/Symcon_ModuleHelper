@@ -24,6 +24,40 @@ Patch-Version. Reine Metadaten-Commits werden ignoriert. Der Metadaten-Commit wi
 repository-eigenen `GITHUB_TOKEN` geschrieben; anschließend startet der
 Workflow den bestehenden Helper-Sync ausdrücklich per `workflow_dispatch`.
 
+## DebugFlowHelper
+
+`src/DebugFlowHelper.php` ergänzt den bestehenden `DebugHelper` um die im
+OpenHomeAlarm-Piloten abgenommene Ablaufstruktur. Öffentliche Modul-Einstiege
+verwenden `DebugFlowStart(__FUNCTION__, __LINE__, $safeContext)` und im
+`finally`-Block `DebugFlowEnd(__FUNCTION__, __LINE__, $result, $failed, $void)`.
+Verschachtelte Aufrufe teilen eine Vorgangskennung und erhalten getrennte
+Aufrufnummern. Die Ereignisse `START`, `ENDE`, `AKTION`, `SENDEN`, `EMPFANG`
+und `FEHLER` enthalten die Felder `Instanz`, `Vorgang`, `Aufruf`, `Meldung`
+und `Bezug`. Deutsche Fachmeldungen und die Auswahl ungefährlicher Werte
+bleiben Aufgabe des jeweiligen Moduls; technische Identifier bleiben erhalten.
+
+`DebugFlowEvent()` erzeugt eine auf 4096 Bytes begrenzte und bereinigte
+Nutzlast. `DebugFlowException()` übernimmt ausschließlich Fehlerklasse,
+Fehlerzeile und Dateiname, niemals beliebige Exception-Texte oder Argumente.
+Text- und Struktur-Rückgaben werden am Funktionsende nur nach Umfang
+beschrieben. Boolean-Ergebnisse werden neutral als Ja/Nein angegeben, da
+auch eine reguläre Abfrage `false` liefern kann.
+
+Für ausdrücklich geprüfte, nicht vertrauliche Gerätewerte stehen
+`DebugFlowRequestAction($id, $value, __FUNCTION__, __LINE__)`,
+`DebugFlowWriteValue($ident, $value, __FUNCTION__, __LINE__, $includeValue)`
+und `DebugFlowReadValue($id, __FUNCTION__, __LINE__, $includeValue)` bereit.
+Jeder native Aufruf erfolgt genau einmal. Aktionsannahme bestätigt keine
+Gerätewirkung. Bei privaten Textquellen oder Statuspayloads muss
+`$includeValue` auf `false` gesetzt werden; Zugangsdaten und unkontrollierte
+Bodies werden nicht als Kontext übergeben. Schreibresultate und geworfene
+Ausnahmen bleiben erhalten. Ein ausfallender Debug-Kanal wird abgefangen.
+
+Der Helper überschreibt keine nativen Modulmethoden und setzt keine Timer,
+Properties oder Runtime-Attribute. Er wird über die bestehende Subscription
+und sein Bundle einschließlich `DebugHelper` eingebunden. Die Einführung
+verändert den abgenommenen OHA-Piloten nicht.
+
 ## ConfigurationFormHelper
 
 `src/ConfigurationFormHelper.php` unterstützt dynamische Symcon-Konfigurationsformulare. Der Helper ermittelt per Reflection das Verzeichnis der konkreten Modulklasse und lädt von dort die zugehörige `form.json`.
