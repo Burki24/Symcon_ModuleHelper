@@ -464,3 +464,7 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 5. OpenCalendar PR #86 prüfen: neuer Helper-Bundle-Stand, `Tests` und `Check Style` müssen grün werden und Auto-Merge nach `dev` auslösen.
 6. In OpenCalendar kontrollieren, dass `Style-Profil` sowie die neue Quelle `Zentrale Vorgabe` mit allen acht Presets sichtbar sind.
 7. Danach Paket E – Export/Import des Style Profile V1 – beginnen.
+
+## Ergänzung 2026-10-21: eingebettete HTTP-Visualisierungen
+
+`VisualizationAssetHelper` unterstützt einen expliziten Verzeichnis-Hook für durch Symcon ausgewertete Modulklassen. Die generische HTTP-Ursprungsermittlung für eingebettete Seiten liegt als manifestiertes JavaScript-Asset beim Helper. SymconiCloud verwendet beide Erweiterungen; die WoIst-Ausgabe wurde auf dem angeschlossenen Symcon-System als eingebettete HTTP-Karte mit leerem Serveradressfeld geprüft.

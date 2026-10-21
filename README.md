@@ -421,6 +421,17 @@ class ExampleModule extends IPSModuleStrict
 
 Kann eine Datei nicht gelesen werden, liefert der Helper einen leeren String und schreibt den betroffenen Pfad über `SendDebug()`. Er ist damit für `IPSModule`- und `IPSModuleStrict`-Module gedacht.
 
+Im WebHook-Kontext kann Symcon die Modulklasse mit einem synthetischen Reflection-Dateinamen auswerten. Module mit HTTP-Ausgabe überschreiben deshalb den zentralen Verzeichnis-Hook:
+
+```php
+protected function VisualizationAssetDirectory(): string
+{
+    return __DIR__ . '/visualization';
+}
+```
+
+Ohne Override bleibt die bisherige Reflection-Auflösung erhalten. `VisualizationHTTPOriginScript()` liefert den gemeinsam verteilten Browser-Baustein `visualization/http-origin.js`. Dessen `SymconHTTPOrigin.resolve(window)` ermittelt einen HTTP(S)-Ursprung aus eigener Adresse, zugänglichem Elternfenster, `ancestorOrigins` oder `document.referrer`. Pfade, Query und Fragment werden nicht übernommen; nicht unterstützte Schemata und URLs mit Zugangsdaten werden abgelehnt. Ohne geeigneten Ursprung liefert er `null`; native Ansichten ohne diese Browserinformationen benötigen weiterhin eine explizite Serveradresse. Der aufrufende Loader behandelt eine ausdrücklich konfigurierte Adresse vorrangig.
+
 ### Verwendung
 
 ```php
