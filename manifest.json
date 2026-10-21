@@ -259,7 +259,7 @@
     "ResponsiveVisualizationHelper": {
       "file": "src/ResponsiveVisualizationHelper.php",
       "version": "1.0.0",
-      "sha256": "0cebd0f08e6416a6d7d4d5fdbb19bf96d457d3e2d51fcf2a1d3e6adf5e967451"
+      "sha256": "d48656a9d03da7e2332321d8a0d448fd1f558a5f0dbab808a5622e0ab7dd8afe"
     },
     "SVGPreviewHelper": {
       "file": "src/SVGPreviewHelper.php",

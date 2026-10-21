@@ -684,7 +684,10 @@ class ExampleModule extends IPSModuleStrict
 
 | Methode | Aufgabe |
 | --- | --- |
-| `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. |
+| `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. Mit dem optionalen dritten Parameter `true` wird ein bildschirmfüllender Flex-Rahmen ohne äußeres Scrollen erzeugt. |
+| `ResponsiveVisualizationLayoutOptions(bool $nativeTile = true)` | Liefert `tileHeaderVisible` und `tileHeaderInset` für die native Kachelüberschrift. Sichtbarer Titel oder fehlgeschlagene Objekterkennung reservieren 58 CSS-Pixel, ausgeblendete Titel und IPSView (`false`) 0 Pixel. |
+
+Für bildschirmfüllende Karten und Diagramme ruft das Modul beispielsweise `ResponsiveVisualizationCSS('#example-app', 'example-view', true)` auf und übergibt die Layoutoptionen an seinen Client. Der Client setzt `--symc-tile-header-inset` am Root-Element auf den gelieferten Pixelwert. Der gemeinsame Rahmen berücksichtigt diesen Abstand einmal als oberen Innenabstand. Modul-CSS darf keinen zweiten Titelabstand und keine feste gemeinsame Höhenvorgabe ergänzen; fachliche Aufteilung, Listen und Breakpoints bleiben im Modul. Bestehende Aufrufe mit zwei Parametern behalten ihr bisheriges CSS unverändert.
 
 ## VisualizationThemeConfigurationHelper
 
