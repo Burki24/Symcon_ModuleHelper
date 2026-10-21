@@ -1393,7 +1393,7 @@ MIT
 
 `manifest.json` ist die maschinenlesbare Quelle für Version und SHA-256 aller Helper. Die Consumer-Repositories deklarieren ihre verwendeten Helper über `.helper-sync.json`.
 
-Bei Änderungen unter `src/` erzeugt `.github/workflows/helper-sync.yml` automatisch einen Update-Branch und einen Pull Request gegen den jeweiligen `dev`-Branch eines abonnierten Repositories. Der Sync aktualisiert das abonnierte Helper-Bundle einschließlich deklarierter Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md`. Übersetzungskataloge werden dadurch gemeinsam mit dem zugehörigen Helper verteilt.
+Nach der Metadatenfreigabe auf `main` erzeugt `.github/workflows/helper-sync.yml` pro Consumer und konfiguriertem Zielbranch höchstens einen Update-Branch und Pull Request für die ausgewählten abonnierten Helper. Mehrere Helper werden auch bei aktiviertem Auto-Merge in einem gemeinsamen Bundle zusammengefasst, damit parallel wartende Helper-PRs nicht dasselbe Manifest überschreiben. Der Sync aktualisiert das abonnierte Helper-Bundle einschließlich deklarierter Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md`. Übersetzungskataloge werden dadurch gemeinsam mit dem zugehörigen Helper verteilt.
 
 Für den repositoryübergreifenden Zugriff wird eine GitHub App verwendet. Im Repository `Symcon_ModuleHelper` werden dafür benötigt:
 
@@ -1404,7 +1404,7 @@ Die GitHub App wird auf den Consumer-Repositories installiert und benötigt dort
 
 Die zentrale Consumer-Konfiguration aktiviert standardmäßig `SQUASH`-Auto-Merge. Vor der Aktivierung prüft der Sync, dass der Pull Request von einem GitHub-App-Bot stammt, einen `helper-sync/`-Branch gegen den konfigurierten Zielbranch verwendet und ausschließlich die für das konkrete Helper-Bundle erzeugten Dateien verändert. Enthält ein PR zusätzliche Modul-, Test-, Workflow- oder Dokumentationsdateien außerhalb des generierten Bundles, wird Auto-Merge abgelehnt und der Sync-Lauf schlägt sichtbar fehl.
 
-Damit GitHub den PR erst nach der CI zusammenführt, müssen in jedem Consumer unter **Settings → General → Pull Requests** `Allow auto-merge` und `Allow squash merging` aktiviert sein. Für den jeweiligen `dev`-Branch müssen außerdem die gewünschten Tests als erforderliche Statusprüfungen in einer Branch Protection Rule oder einem Ruleset hinterlegt sein. Ohne unerfüllte Merge-Anforderung stellt GitHub Auto-Merge nicht bereit; der Sync führt niemals einen direkten Merge als Fallback aus.
+Damit GitHub den PR erst nach der CI zusammenführt, müssen in jedem Consumer unter **Settings → General → Pull Requests** `Allow auto-merge` und `Allow squash merging` aktiviert sein. Für den jeweiligen `dev`-Branch müssen außerdem die gewünschten Tests als erforderliche Statusprüfungen in einer Branch Protection Rule oder einem Ruleset hinterlegt sein. Meldet GitHub den vollständig validierten PR als `clean` oder fehlen Branch-Protection-Regeln, verwendet der bestehende Fallback einen direkten Merge mit fest erwarteter Head-SHA. Ein instabiler Status löst keinen direkten Fallback-Merge aus.
 
 OpenCalendar verwendet diese automatische Merge-Policy sowohl für `dev` als auch
 für `dev_9.1`; die frühere manuelle Migrationsausnahme für `dev_9.1` entfällt.
@@ -1414,3 +1414,5 @@ Statusprüfungen müssen für beide Zielbranches separat konfiguriert sein.
 der Übernahme nach `main` über den bestehenden Sync-Workflow verteilt.
 
 Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.
+
+Verteilungsläufe werden serialisiert. Bei instabilem GitHub-PR-Status wartet der Sync höchstens 72 Versuche mit fünf Sekunden Abstand (rund sechs Minuten zuzüglich API-Laufzeit). Ein Consumer-Fehler stoppt nur dessen Verarbeitung; andere Consumer und Zielbranches werden weiterhin bearbeitet. Die Actions-Zusammenfassung listet das Ergebnis je Zielbranch auf. Offene Fehler führen nach Abschluss aller Consumer weiterhin zu einem fehlgeschlagenen Lauf. „Processed“ bestätigt die Bearbeitung, nicht den erfolgreichen Merge. Nach Behebung der Ursache kann der bestehende Workflow erneut gestartet werden; bereits aktuelle Bundles werden übersprungen.

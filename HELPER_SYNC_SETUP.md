@@ -53,7 +53,7 @@ Bei einer Änderung unter `src/` oder an `manifest.json`:
 1. prüft der zentrale Workflow das Manifest,
 2. liest die Subscription der Consumer aus dem jeweils in `.github/helper-consumers.json` konfigurierten Zielbranch,
 3. überspringt nicht abonnierte oder bereits aktuelle Helper,
-4. erzeugt für veraltete Helper einen Branch `helper-sync/...`; für den normalen `dev`-Zielbranch bleibt das bisherige Namensschema unverändert, zusätzliche Zielbranches erhalten einen eigenen Branch-Pfad wie `helper-sync/dev-9-1/...`, damit parallele Syncs desselben Repositories nicht kollidieren,
+4. bündelt die ausgewählten abonnierten Helper pro Consumer und Zielbranch unabhängig von Auto-Merge in höchstens einem Pull Request und erzeugt dafür einen Branch `helper-sync/...`; für den normalen `dev`-Zielbranch bleibt das bisherige Namensschema unverändert, zusätzliche Zielbranches erhalten einen eigenen Branch-Pfad wie `helper-sync/dev-9-1/...`, damit parallele Syncs desselben Repositories nicht kollidieren,
 5. schreibt das vollständige Helper-Bundle einschließlich Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md` in einem Commit,
 6. dokumentiert transitive Abhängigkeiten innerhalb des abonnierten Helper-Eintrags, sodass `.helper-sync.json` ausschließlich die bewusst abonnierten Helper enthält,
 7. eröffnet einen Pull Request gegen den zentral konfigurierten Zielbranch,
@@ -118,3 +118,9 @@ Workflow den Consumer-Sync ausdrücklich per `workflow_dispatch`. Die
 Helper-Sync-App wird dadurch nur noch für die Consumer-Repositories benötigt.
 Automatische Helper-PRs erhalten immer einen konsistenten, bereits
 versionierten Manifeststand.
+
+## Fehler und Wiederholung
+
+Verteilungsläufe laufen über eine gemeinsame Concurrency-Gruppe nacheinander. Mehrere Zielbranches desselben Repositories werden für das App-Token nur einmal als Repository angefordert. Die Verarbeitung erfolgt je Consumer und Zielbranch; ein Fehler wird protokolliert und hält die übrigen Ziele nicht auf. Abschließend stehen die Ergebnisse in der Actions-Zusammenfassung, und offene Fehler lassen den Lauf sichtbar fehlschlagen.
+
+GitHub kann während noch laufender Consumer-Prüfungen die Aktivierung von Auto-Merge mit `unstable status` ablehnen. Der Sync wiederholt den Versuch bis zu 72-mal mit fünf Sekunden Abstand und prüft dabei erneut den erwarteten Head und den zulässigen Dateiumfang. Bleibt der Status instabil, enthält die Fehlermeldung den betroffenen PR-Link. Nach Prüfung des Consumers kann der Workflow mit `all` wiederholt werden. Bestehende PRs desselben Helper-/Bundle-Versionsbranches werden aktualisiert und bereits aktuelle Bundles übersprungen. Bereits offene Einzel-PRs aus älteren Läufen werden nicht automatisch geschlossen.

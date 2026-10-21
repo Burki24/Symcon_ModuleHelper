@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- Der Helper-Sync bündelt ausgewählte Helper auch bei Auto-Merge pro Consumer-Zielbranch, serialisiert Verteilungsläufe und dedupliziert die Repository-Liste für das App-Token. Consumer-Fehler werden isoliert und abschließend sichtbar zusammengefasst. Das Wartefenster für instabile PR-Status umfasst rund sechs Minuten; erwarteter Head und Dateiumfang bleiben bei Wiederholungen geprüft.
+
 - `IPSViewHTMLPageHelper` ersetzt Template-Platzhalter nur einmal und prüft unbekannte Platzhalter vor dem Einsetzen der Daten. Gleich aussehende Texte in Gerätebezeichnungen und anderen Nutzdaten bleiben unverändert.
 
 ### Added

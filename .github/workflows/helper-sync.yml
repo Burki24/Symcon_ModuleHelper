@@ -21,6 +21,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: helper-consumer-distribution
+  cancel-in-progress: false
+
 jobs:
   sync:
     if: "${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'CHORE: Update helper metadata') }}"
@@ -96,7 +100,9 @@ jobs:
               consumer_method = str(consumer.get("merge_method", merge_method)).upper()
               if bool(consumer.get("auto_merge", auto_merge.get("enabled", False))) and consumer_method not in {"MERGE", "SQUASH", "REBASE"}:
                   raise SystemExit(f"Unsupported auto-merge method for {repository}: {consumer_method}")
-              repositories.append(repository[len(prefix):])
+              name = repository[len(prefix):]
+              if name not in repositories:
+                  repositories.append(name)
           if not repositories:
               raise SystemExit("No consumer repositories configured.")
           print("repositories<<EOF")
@@ -128,4 +134,4 @@ jobs:
           BEFORE_SHA: ${{ steps.source.outputs.base_ref }}
           SOURCE_SHA: ${{ steps.source.outputs.source_sha }}
           REQUESTED_HELPER: ${{ inputs.helper || 'all' }}
-        run: python3 .github/scripts/sync_helper_consumers.py
+        run: python3 -u .github/scripts/sync_helper_consumers.py
