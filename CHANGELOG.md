@@ -10,6 +10,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- `IPSViewHTMLPageHelper` ersetzt Template-Platzhalter nur einmal und prüft unbekannte Platzhalter vor dem Einsetzen der Daten. Gleich aussehende Texte in Gerätebezeichnungen und anderen Nutzdaten bleiben unverändert.
+
 ### Added
 
 - `VariableSearchHelper` stellt eine begrenzte, typgefilterte Variablensuche mit ID-basierter Ausschlussliste und erneuter serverseitiger Auswahlprüfung für Konfigurationsformulare bereit.
