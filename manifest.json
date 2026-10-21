@@ -289,7 +289,14 @@
     "VisualizationAssetHelper": {
       "file": "src/VisualizationAssetHelper.php",
       "version": "1.0.0",
-      "sha256": "1693b2399bcf95d270a6d9a01df6534caad906497bd4ba9489916a951abaffcc"
+      "sha256": "e0c83656659f0264b63075bee155c04d16fb39da4540f1bcfb8e860bbaef1b9e",
+      "assets": [
+        {
+          "file": "src/visualization/http-origin.js",
+          "target": "visualization/http-origin.js",
+          "sha256": "2ae76879f0597414bc60511d9d36c93f1993aec336cb711067ee8925d560be58"
+        }
+      ]
     },
     "VisualizationThemeHelper": {
       "file": "src/VisualizationThemeHelper.php",

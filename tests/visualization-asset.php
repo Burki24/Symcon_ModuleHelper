@@ -6,7 +6,7 @@ use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 
 require_once __DIR__ . '/../src/VisualizationAssetHelper.php';
 
-final class VisualizationAssetHelperHarness
+class VisualizationAssetHelperHarness
 {
     use VisualizationAssetHelper;
 
@@ -45,6 +45,15 @@ file_put_contents($assetPath, 'Visualization helper asset');
 
 try {
     $helper = new VisualizationAssetHelperHarness();
+    $explicit = new class() extends VisualizationAssetHelperHarness {
+        protected function VisualizationAssetDirectory(): string
+        {
+            return __DIR__ . '/visualization';
+        }
+    };
+    assertSameValue('Visualization helper asset', $explicit->load('helper-asset.txt'), 'Consumers must be able to override synthetic WebHook reflection paths.');
+    $script = (new ReflectionMethod($helper, 'VisualizationHTTPOriginScript'))->invoke($helper);
+    assertTrueValue(str_contains($script, 'SymconHTTPOrigin'), 'The shared origin resolver asset must be available.');
 
     assertSameValue(
         'Visualization helper asset',
