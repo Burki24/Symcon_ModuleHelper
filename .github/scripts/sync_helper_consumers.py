@@ -33,7 +33,7 @@ AUTO_MERGE_DIRECT_FALLBACK_MESSAGES = (
 AUTO_MERGE_TRANSIENT_MESSAGES = (
     "is in unstable status",
 )
-AUTO_MERGE_ENABLE_ATTEMPTS = 24
+AUTO_MERGE_ENABLE_ATTEMPTS = 72
 AUTO_MERGE_RETRY_DELAY_SECONDS = 5
 PULL_REQUEST_HEAD_REFRESH_ATTEMPTS = 8
 DIRECT_MERGE_ATTEMPTS = 3
@@ -552,8 +552,14 @@ def enable_auto_merge(
                 merge_validated_pull_request(repo, pull_request, merge_method, expected_head_sha)
                 return
             retryable = any(fragment in message for fragment in AUTO_MERGE_TRANSIENT_MESSAGES)
-            if not retryable or attempt + 1 >= AUTO_MERGE_ENABLE_ATTEMPTS:
+            if not retryable:
                 raise
+            if attempt + 1 >= AUTO_MERGE_ENABLE_ATTEMPTS:
+                raise RuntimeError(
+                    f"Auto-merge remains pending for https://github.com/{repo}/pull/{number} "
+                    f"after {AUTO_MERGE_ENABLE_ATTEMPTS} attempts: {error}. "
+                    "Inspect the consumer checks and rerun helper synchronization."
+                ) from error
             print(
                 f"Waiting to enable auto-merge for {repo}#{number}: "
                 f"GitHub still reports an unstable pull request status "
@@ -735,11 +741,11 @@ def synchronization_batch(
     helper: str,
     auto_merge: bool,
 ) -> list[str]:
-    """Return the roots handled by this invocation without creating competing manual PRs."""
+    """Return one combined set of roots per consumer, regardless of merge policy."""
     roots = synchronization_roots(manifest, selected_helpers, subscriptions)
     if helper not in roots:
         return []
-    if auto_merge or len(roots) <= 1:
+    if len(roots) <= 1:
         return [helper]
     if helper != roots[0]:
         return []
@@ -784,7 +790,7 @@ def sync(
             if helper not in roots:
                 reason = "covered by a subscribed dependent bundle"
             else:
-                reason = "included in the combined manual helper bundle"
+                reason = "included in the combined helper bundle"
             print(f"Skipping {repo}: {helper} is {reason}.")
             return
 
@@ -868,23 +874,44 @@ def main() -> None:
         print("No helper changes detected.")
         return
     print("Helpers selected for synchronization:", ", ".join(helpers))
-    for helper in helpers:
-        source_meta = manifest["helpers"][helper]
-        for consumer in consumers:
-            auto_merge = bool(consumer.get("auto_merge", auto_merge_defaults.get("enabled", False)))
-            merge_method = str(
-                consumer.get("merge_method", auto_merge_defaults.get("merge_method", "SQUASH"))
-            )
-            sync(
-                str(consumer["repository"]),
-                str(consumer["branch"]),
-                helper,
-                source_meta,
-                manifest,
-                auto_merge,
-                merge_method,
-                helpers,
-            )
+    failures = []
+    summary = ["## Helper distribution", "", "| Consumer | Result |", "| --- | --- |"]
+    for consumer in consumers:
+        repo = str(consumer["repository"])
+        branch = str(consumer["branch"])
+        auto_merge = bool(consumer.get("auto_merge", auto_merge_defaults.get("enabled", False)))
+        merge_method = str(
+            consumer.get("merge_method", auto_merge_defaults.get("merge_method", "SQUASH"))
+        )
+        try:
+            for helper in helpers:
+                sync(
+                    repo,
+                    branch,
+                    helper,
+                    manifest["helpers"][helper],
+                    manifest,
+                    auto_merge,
+                    merge_method,
+                    helpers,
+                )
+        except Exception as error:
+            failures.append(f"{repo}@{branch}: {error}")
+            print(f"Consumer sync failed for {repo}@{branch}: {error}", file=sys.stderr, flush=True)
+            summary.append(f"| {repo}@{branch} | Failed; see consumer log |")
+        else:
+            summary.append(f"| {repo}@{branch} | Processed; merge may still be pending |")
+    summary_text = "\n".join(summary) + "\n"
+    print(summary_text, flush=True)
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with Path(summary_path).open("a", encoding="utf-8", newline="\n") as output:
+            output.write(summary_text)
+    if failures:
+        raise RuntimeError(
+            f"{len(failures)} consumer synchronization(s) failed after processing all consumers:\n"
+            + "\n".join(failures)
+        )
 
 
 if __name__ == "__main__":

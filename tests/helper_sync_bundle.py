@@ -236,8 +236,14 @@ if MODULE.synchronization_batch(
     independent_subscriptions,
     "DateHelper",
     True,
-) != ["DateHelper"]:
-    raise SystemExit("Automatic synchronization no longer processes helpers sequentially.")
+) != []:
+    raise SystemExit("Automatic synchronization would create competing helper pull requests.")
+
+if MODULE.synchronization_batch(
+    manifest, independent_selection, independent_subscriptions,
+    "ConfigurationFormHelper", True,
+) != independent_selection:
+    raise SystemExit("Automatic synchronization did not combine all selected roots.")
 
 independent_files, independent_entries = MODULE.combined_consumer_bundle_files(
     manifest,

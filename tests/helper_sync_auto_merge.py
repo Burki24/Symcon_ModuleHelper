@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
 import importlib.util
 import json
 from pathlib import Path
@@ -508,6 +510,34 @@ if unstable_attempts != 3:
     )
 if any(call[0] == "PUT" for call in api_calls):
     raise SystemExit("An unstable pull request must never fall back to a direct merge.")
+
+# A permanently unstable PR must fail visibly, never bypass GitHub with a merge.
+unstable_attempts = 0
+
+def fake_permanently_unstable_graphql(query, variables):
+    global unstable_attempts
+    if "query($pullRequestId" in query:
+        return {"node": {"autoMergeRequest": None}}
+    unstable_attempts += 1
+    raise RuntimeError("GitHub GraphQL request failed: Pull request is in unstable status")
+
+MODULE.graphql = fake_permanently_unstable_graphql
+with contextlib.redirect_stdout(io.StringIO()):
+    try:
+        MODULE.enable_auto_merge(
+            REPOSITORY, pull_request(), BASE_BRANCH, HEAD_BRANCH,
+            EXPECTED_FILES, "SQUASH", EXPECTED_HEAD_SHA,
+        )
+    except RuntimeError as error:
+        if "unstable status" not in str(error):
+            raise
+    else:
+        raise SystemExit("Permanently unstable status was silently ignored.")
+if unstable_attempts != MODULE.AUTO_MERGE_ENABLE_ATTEMPTS:
+    raise SystemExit("Permanent instability did not use the bounded retry policy.")
+if any(call[0] == "PUT" for call in api_calls):
+    raise SystemExit("Permanent instability must never trigger a direct merge.")
+
 
 direct_merge_calls: list[tuple[str, str, object | None]] = []
 
