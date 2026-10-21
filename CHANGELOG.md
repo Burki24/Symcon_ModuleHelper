@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- `OpenFreeMapHelper` deklariert Abhängigkeiten mit dem vom Vendor-Sync ausgewerteten Feld `dependencies`. Die CI prüft das vollständige eigenständige Kartenbundle einschließlich transitiver Helper und aller Ressourcen; der Manifestvalidator lehnt das irrtümliche Feld `requires` ausdrücklich ab.
+
 - `VisualizationAssetHelper` bietet einen überschreibbaren Asset-Verzeichnispfad für synthetische Klassen-Dateinamen im Symcon-WebHook-Kontext. Der zentrale Browser-Baustein `visualization/http-origin.js` ermittelt den HTTP(S)-Ursprung eingebetteter Visualisierungen über eigene Adresse, Elternfenster, Vorfahren oder Referrer.
 
 - Der Helper-Sync bündelt ausgewählte Helper auch bei Auto-Merge pro Consumer-Zielbranch, serialisiert Verteilungsläufe und dedupliziert die Repository-Liste für das App-Token. Consumer-Fehler werden isoliert und abschließend sichtbar zusammengefasst. Das Wartefenster für instabile PR-Status umfasst rund sechs Minuten; erwarteter Head und Dateiumfang bleiben bei Wiederholungen geprüft.
@@ -19,6 +21,8 @@
 - `IPSViewHTMLPageHelper` ersetzt Template-Platzhalter nur einmal und prüft unbekannte Platzhalter vor dem Einsetzen der Daten. Gleich aussehende Texte in Gerätebezeichnungen und anderen Nutzdaten bleiben unverändert.
 
 ### Added
+
+- `OpenFreeMapHelper` zentralisiert unabhängige Kartenprofile, übersetzte Designer-Menüs, Hell-/Dunkel-Automatik, Stile, HTTPS-Stil-URLs, Kartendetails, Sprache und Farbpaletten. MapLibre und Leaflet-Anbindung werden mit Lizenzen und Hashes gebündelt; der Renderer wird gzip-komprimiert über den Consumer ausgeliefert. Der Controller erhält eine Karteninstanz und die vom Consumer verwaltete Ansicht bei Design- und Datenupdates.
 
 - `SymconiCloud` nimmt mit Zielbranch `dev` und seiner vorhandenen Helper-Subscription an der automatischen Verteilung teil.
 

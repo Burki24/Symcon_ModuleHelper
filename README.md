@@ -1402,6 +1402,8 @@ MIT
 
 ## Automatischer Vendor-Sync
 
+Helper-Abhängigkeiten werden im zentralen Manifest ausschließlich als `dependencies` deklariert. Das Feld `requires` wird als Fehler abgewiesen. Der CI-Bundletest prüft für `OpenFreeMapHelper` ausdrücklich beide benötigten Helper, alle Kartenressourcen und Übersetzungen sowie die unveränderten Quelldateien im erzeugten Paket.
+
 `manifest.json` ist die maschinenlesbare Quelle für Version und SHA-256 aller Helper. Die Consumer-Repositories deklarieren ihre verwendeten Helper über `.helper-sync.json`.
 
 Nach der Metadatenfreigabe auf `main` erzeugt `.github/workflows/helper-sync.yml` pro Consumer und konfiguriertem Zielbranch höchstens einen Update-Branch und Pull Request für die ausgewählten abonnierten Helper. Mehrere Helper werden auch bei aktiviertem Auto-Merge in einem gemeinsamen Bundle zusammengefasst, damit parallel wartende Helper-PRs nicht dasselbe Manifest überschreiben. Der Sync aktualisiert das abonnierte Helper-Bundle einschließlich deklarierter Abhängigkeiten und Assets sowie `libs/helper/manifest.json` und `libs/helper/README.md`. Übersetzungskataloge werden dadurch gemeinsam mit dem zugehörigen Helper verteilt.
@@ -1427,3 +1429,24 @@ der Übernahme nach `main` über den bestehenden Sync-Workflow verteilt.
 Ein manueller Lauf ist über `workflow_dispatch` möglich; dabei kann ein einzelner Helpername oder `all` angegeben werden.
 
 Verteilungsläufe werden serialisiert. Bei instabilem GitHub-PR-Status wartet der Sync höchstens 72 Versuche mit fünf Sekunden Abstand (rund sechs Minuten zuzüglich API-Laufzeit). Ein Consumer-Fehler stoppt nur dessen Verarbeitung; andere Consumer und Zielbranches werden weiterhin bearbeitet. Die Actions-Zusammenfassung listet das Ergebnis je Zielbranch auf. Offene Fehler führen nach Abschluss aller Consumer weiterhin zu einem fehlgeschlagenen Lauf. „Processed“ bestätigt die Bearbeitung, nicht den erfolgreichen Merge. Nach Behebung der Ursache kann der bestehende Workflow erneut gestartet werden; bereits aktuelle Bundles werden übersprungen.
+
+
+## OpenFreeMapHelper
+
+`OpenFreeMapHelper` liefert unabhängige Kartenprofile, einen übersetzten OpenFreeMap-Menübereich und den persistenten Vektorkarten-Controller. Der Helper enthält keine Geräte- oder iCloud-Logik. Er verwendet `HelperTranslationHelper` und `VisualizationAssetHelper`.
+
+| Methode | Vertrag |
+| --- | --- |
+| `RegisterOpenFreeMapProperties($prefix)` | Registriert ein Profil, etwa `Tile` oder `IPSView`. |
+| `OpenFreeMapFormSection($prefix, $enabled)` | Eigener ExpansionPanel-Menübereich mit Theme, Stilen, Stil-URLs, Details, Sprache und Farbpaletten. |
+| `ReadOpenFreeMapDesign($prefix)` | Normalisierte Optionen für den Browser. |
+| `CopyOpenFreeMapProperties($source, $target)` | Kopiert gespeicherte Werte; ApplyChanges bleibt Aufgabe des Consumers. |
+| `OpenFreeMapPropertyNames()` | Namen für dynamische Formularfreigaben. |
+| `OpenFreeMapAssets($rendererPath, $serverURL)` | CSS und kleiner Bootstrap einschließlich Ursprungsermittlung; bindet den Renderer asynchron über den Consumer-Endpunkt ein. |
+| `OpenFreeMapRendererAsset()` | gzip-Daten des unveränderten Renderers für einen öffentlichen GET-Endpunkt mit `Content-Encoding: gzip` und JavaScript-MIME-Typ. |
+
+`maps/openfreemap.js` hält eine Leaflet-Vektorebene und eine GL-Karte über Daten-, Stil-, Farb- und Theme-Wechsel hinweg. Nur der Basisstil wird aktualisiert; Leaflet-Kamera, Marker und Auswahl bleiben beim Consumer. Höchstens sechs Basisstile werden im Seitenspeicher gehalten; ausstehende veraltete Stilabrufe werden abgebrochen. Stil-JSON-Kameravorgaben werden vor der Anwendung entfernt. Eigene Kartenfarben, Ebenensichtbarkeit und Namenübersetzungen werden auf einer Kopie angewendet, sodass deaktivierte Anpassungen die Originaldarstellung wiederherstellen.
+
+Automatik verwendet den berechneten Designer-Hintergrund und beobachtet Theme-Änderungen. Explizit sind Hell und Dunkel möglich. Die fünf mitgelieferten Stil-Vorgaben und eigene HTTPS-Stil-URLs können je Theme gewählt werden. Farbgruppen: Land, Wasser, Grünflächen, Straßen, Gebäude und Texte; Ebenengruppen: Beschriftungen, POI, Gebäude und Grenzen. Eigene Stile müssen passende Vektorebenen enthalten. Attribution wird nicht ausgeblendet.
+
+Die Renderer-Dateien werden kanonisch mit dem Helper verteilt: MapLibre GL JS 5.24.0 (BSD-3-Clause), MapLibre-GL-Leaflet 0.1.4 (ISC), unveränderte Quellen und Lizenzen sowie `maps/vendor/NOTICE.json` mit SHA-256. Wegen Symcons 1-MB-Ausgabebuffer darf der Renderer nicht vollständig in HTML eingebettet werden. Der Consumer stellt ihn über einen reinen Bibliotheks-Asset-Endpunkt bereit; Geräte- und Kontodaten gehören nicht in diesen Endpunkt. Browsereinsatz erfordert WebGL. Die OpenFreeMap-Stile und Kartenregionen werden vom Browser beim Anbieter abgerufen; Kontozugangsdaten und Transporttokens werden nicht weitergereicht.

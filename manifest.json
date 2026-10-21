@@ -326,6 +326,57 @@
       "dependencies": [
         "DebugHelper"
       ]
+    },
+    "OpenFreeMapHelper": {
+      "file": "src/OpenFreeMapHelper.php",
+      "version": "1.0.0",
+      "sha256": "8cf7b0ebd38d1499c02a240be3a368ab46eb518ccce63741bb0cb23af441c47e",
+      "dependencies": [
+        "HelperTranslationHelper",
+        "VisualizationAssetHelper"
+      ],
+      "assets": [
+        {
+          "file": "src/maps/openfreemap.js",
+          "target": "maps/openfreemap.js",
+          "sha256": "7fd0dd8555aa360df75fe5bd705d79b90caed7bb031b6ffebe2fd6f1e81f8daa"
+        },
+        {
+          "file": "src/maps/vendor/BRIDGE-LICENSE",
+          "target": "maps/vendor/BRIDGE-LICENSE",
+          "sha256": "eaa721ba158cbeff47ad53b1035dfc26ff744df66662c93ff715c9885197ebf3"
+        },
+        {
+          "file": "src/maps/vendor/leaflet-maplibre-gl.js",
+          "target": "maps/vendor/leaflet-maplibre-gl.js",
+          "sha256": "1e6cf8cb3eb5fd909879aa1bf36a383fb506c9a5b2dbbfababce65a294dd1fcb"
+        },
+        {
+          "file": "src/maps/vendor/maplibre-gl.css",
+          "target": "maps/vendor/maplibre-gl.css",
+          "sha256": "ab1e70d59ec40465bae7e7030da2f3ccf28133fd502e62bd598eefbadfd7a732"
+        },
+        {
+          "file": "src/maps/vendor/maplibre-gl.js",
+          "target": "maps/vendor/maplibre-gl.js",
+          "sha256": "45a9b07a9189ce56054c620a947ccf41e291e58c95e9b61533b740aaa65ee5cb"
+        },
+        {
+          "file": "src/maps/vendor/MAPLIBRE-LICENSE.txt",
+          "target": "maps/vendor/MAPLIBRE-LICENSE.txt",
+          "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
+        },
+        {
+          "file": "src/maps/vendor/NOTICE.json",
+          "target": "maps/vendor/NOTICE.json",
+          "sha256": "7ca96c1b37e965261d9e51db1bd0de8ddcea4706f6b41bb85c0471958f09d114"
+        },
+        {
+          "file": "src/translations/OpenFreeMapHelper.json",
+          "target": "translations/OpenFreeMapHelper.json",
+          "sha256": "96f0af1be8c6e65b43e900638f9a67147331096f43db2980a0508289f5c6d5c0"
+        }
+      ]
     }
   },
   "repository_build": 37439526,

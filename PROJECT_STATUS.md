@@ -468,3 +468,7 @@ Bei Beginn eines neuen Chats in diesem Projekt:
 ## Ergänzung 2026-10-21: eingebettete HTTP-Visualisierungen
 
 `VisualizationAssetHelper` unterstützt einen expliziten Verzeichnis-Hook für durch Symcon ausgewertete Modulklassen. Die generische HTTP-Ursprungsermittlung für eingebettete Seiten liegt als manifestiertes JavaScript-Asset beim Helper. SymconiCloud verwendet beide Erweiterungen; die WoIst-Ausgabe wurde auf dem angeschlossenen Symcon-System als eingebettete HTTP-Karte mit leerem Serveradressfeld geprüft.
+
+## Ergänzung 2026-10-21: OpenFreeMap-Designer
+
+OpenFreeMapHelper bietet einen eigenständigen wiederverwendbaren Kartenvertrag einschließlich übersetzter Menüs, Profile, Paletten und persistentem Vektorkarten-Controller. SymconiCloud verwendet ihn für Kachel und IPSView. MapLibre wird lokal als gzip-Ressource bereitgestellt, um das Symcon-Ausgabelimit einzuhalten. Native Kachel, IPSView, Auto-/Hell-/Dunkelmodus, Wasserfarbe und Erhalt von Ansicht/Auswahl/Popup wurden am angeschlossenen System geprüft.

@@ -29,6 +29,8 @@ def validate_dependencies(helpers: dict[str, Any]) -> None:
         if name in visiting:
             raise SystemExit(f"Circular helper dependency involving {name}.")
         visiting.add(name)
+        if "requires" in helpers[name]:
+            raise SystemExit(f"Unsupported dependency field for {name}: use dependencies instead of requires.")
         dependencies = helpers[name].get("dependencies", [])
         if not isinstance(dependencies, list) or not all(isinstance(item, str) for item in dependencies):
             raise SystemExit(f"Dependencies for {name} must be a string array.")
