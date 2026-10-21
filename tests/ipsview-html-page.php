@@ -687,6 +687,13 @@ try {
     );
     assertTrueValue(str_contains($nativeHtml, '"value":1.0'), 'Float fractions must be preserved.');
 
+    $literalHtml = $helper->render(false, [
+        'state'        => ['label' => '{{MODULE_SCRIPT}} {{UNKNOWN}}'],
+        'replacements' => ['{{MODULE_CONTENT}}' => '<p>{{MODULE_SCRIPT}} {{UNKNOWN}}</p>']
+    ]);
+    assertTrueValue(str_contains($literalHtml, '"label":"{{MODULE_SCRIPT}} {{UNKNOWN}}"'), 'Bootstrap strings must preserve literal placeholder-shaped user data.');
+    assertTrueValue(str_contains($literalHtml, '<p>{{MODULE_SCRIPT}} {{UNKNOWN}}</p>'), 'Custom replacement values must never be processed as template instructions.');
+
     $ipsViewHtml = $helper->render(true, [
         'ipsViewStyle' => ':root { --ipsview: 1; }',
         'state'        => [],

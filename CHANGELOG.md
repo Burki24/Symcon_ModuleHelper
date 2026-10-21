@@ -10,7 +10,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- `IPSViewHTMLPageHelper` ersetzt Template-Platzhalter nur einmal und prüft unbekannte Platzhalter vor dem Einsetzen der Daten. Gleich aussehende Texte in Gerätebezeichnungen und anderen Nutzdaten bleiben unverändert.
+
 ### Added
+
+- `ResponsiveVisualizationHelper` zentralisiert die Erkennung sichtbarer nativer Kachelüberschriften einschließlich des 58-Pixel-Abstands und bietet einen optionalen bildschirmfüllenden Flex-Rahmen für Karten und Diagramme. Bestehende CSS-Aufrufe bleiben unverändert.
 
 - `VariableSearchHelper` stellt eine begrenzte, typgefilterte Variablensuche mit ID-basierter Ausschlussliste und erneuter serverseitiger Auswahlprüfung für Konfigurationsformulare bereit.
 - `ConfigurationFormHelper` kann die Sichtbarkeit benannter Formularfelder auch in verschachtelten Layouts zentral setzen; Tests sichern unveränderte Eingaben und wiederholte Aufrufe ab.

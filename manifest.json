@@ -186,7 +186,7 @@
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
       "version": "1.5.1",
-      "sha256": "8c0b58a2df1fd0a2be6d7c5e5bc90815fae03b40e04f65dc0d1c18876700f4f8",
+      "sha256": "33e3e1d1a663a2a174b10c1ab66feb93fc95fb788fc80151fb810099c883f49d",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"
@@ -259,7 +259,7 @@
     "ResponsiveVisualizationHelper": {
       "file": "src/ResponsiveVisualizationHelper.php",
       "version": "1.0.0",
-      "sha256": "0cebd0f08e6416a6d7d4d5fdbb19bf96d457d3e2d51fcf2a1d3e6adf5e967451"
+      "sha256": "d48656a9d03da7e2332321d8a0d448fd1f558a5f0dbab808a5622e0ab7dd8afe"
     },
     "SVGPreviewHelper": {
       "file": "src/SVGPreviewHelper.php",

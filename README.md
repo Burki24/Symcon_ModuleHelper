@@ -472,6 +472,8 @@ wiederhergestellt werden. Consumer können bestehende Inhalte über
 
 `src/IPSViewHTMLPageHelper.php` vereinheitlicht die technische Erzeugung nativer HTML-SDK-Seiten und eigenständiger IPSView-WebContent-Seiten. Der Helper lädt immer dieselbe Asset-Struktur aus `visualization/index.html`, `visualization/style.css` und `visualization/app.js`, erzeugt einen gemeinsamen Bootstrap-Vertrag und ersetzt einen festen Satz validierter Template-Platzhalter. Version 1.4.1 stellt außerdem den gemeinsamen Formularbutton zur manuellen Neugenerierung aller registrierten IPSView-WebContent-Variablen bereit.
 
+Template-Platzhalter werden ausschließlich im Template geprüft und genau einmal ersetzt. Platzhalterähnliche Texte in Daten, Übersetzungen oder Ersatzwerten bleiben unverändert und werden nicht als weitere Template-Anweisungen ausgewertet.
+
 Zusätzlich verwaltet der Helper die optionale IPSView-Ausgabe als getrennten Kanal: Die gemeinsame Eigenschaft `EnableIPSView` ist standardmäßig deaktiviert. Erst nach Aktivierung werden zusätzliche String-Variablen mit nativer WebContent-Darstellung angelegt und mit dem im IPSView-Modus gerenderten HTML befüllt. Native Symcon-Kacheln und vorhandene WebContent-Variablen bleiben davon unabhängig und können weiterhin das Symcon-Farbschema verwenden. Beim späteren Deaktivieren bleiben vorhandene IPSView-Variablen mit Objekt-ID, Inhalt und bestehenden Verknüpfungen erhalten; sie werden lediglich nicht mehr aktualisiert. Das Konfigurationsformular bietet anschließend eine getrennte, ausdrücklich zu bestätigende Löschaktion an.
 
 Die sichtbare Oberfläche bleibt modulspezifisch. OpenHomeAlarm kann daher weiterhin ein Alarm-Dashboard, OpenCalendar eine Kalenderansicht und LMNB mehrere fachlich getrennte Seiten rendern, während Aktivierung, Variablenpflege, Sprache, Viewport, CSS-/JavaScript-Einbettung, JSON-Sicherheit, IPSView-Modus und Bootstrap-Struktur identisch verarbeitet werden.
@@ -682,7 +684,10 @@ class ExampleModule extends IPSModuleStrict
 
 | Methode | Aufgabe |
 | --- | --- |
-| `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. |
+| `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. Mit dem optionalen dritten Parameter `true` wird ein bildschirmfüllender Flex-Rahmen ohne äußeres Scrollen erzeugt. |
+| `ResponsiveVisualizationLayoutOptions(bool $nativeTile = true)` | Liefert `tileHeaderVisible` und `tileHeaderInset` für die native Kachelüberschrift. Sichtbarer Titel oder fehlgeschlagene Objekterkennung reservieren 58 CSS-Pixel, ausgeblendete Titel und IPSView (`false`) 0 Pixel. |
+
+Für bildschirmfüllende Karten und Diagramme ruft das Modul beispielsweise `ResponsiveVisualizationCSS('#example-app', 'example-view', true)` auf und übergibt die Layoutoptionen an seinen Client. Der Client setzt `--symc-tile-header-inset` am Root-Element auf den gelieferten Pixelwert. Der gemeinsame Rahmen berücksichtigt diesen Abstand einmal als oberen Innenabstand. Modul-CSS darf keinen zweiten Titelabstand und keine feste gemeinsame Höhenvorgabe ergänzen; fachliche Aufteilung, Listen und Breakpoints bleiben im Modul. Bestehende Aufrufe mit zwei Parametern behalten ihr bisheriges CSS unverändert.
 
 ## VisualizationThemeConfigurationHelper
 
