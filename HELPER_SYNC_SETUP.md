@@ -25,6 +25,7 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `OpenShutterButtonControl`
 - `IPSViewAssistant`
 - `JSLive`
+- `SymconiCloud` (Zielbranch `dev`; vorhandene `.helper-sync.json`)
 
 ## 2. Symcon_ModuleHelper konfigurieren
 

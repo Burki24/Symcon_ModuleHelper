@@ -18,6 +18,8 @@
 
 ### Added
 
+- `SymconiCloud` nimmt mit Zielbranch `dev` und seiner vorhandenen Helper-Subscription an der automatischen Verteilung teil.
+
 - `ResponsiveVisualizationHelper` zentralisiert die Erkennung sichtbarer nativer Kachelüberschriften einschließlich des 58-Pixel-Abstands und bietet einen optionalen bildschirmfüllenden Flex-Rahmen für Karten und Diagramme. Bestehende CSS-Aufrufe bleiben unverändert.
 
 - `VariableSearchHelper` stellt eine begrenzte, typgefilterte Variablensuche mit ID-basierter Ausschlussliste und erneuter serverseitiger Auswahlprüfung für Konfigurationsformulare bereit.
