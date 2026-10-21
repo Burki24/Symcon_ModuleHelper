@@ -75,6 +75,9 @@ jobs:
       - name: Validate embedded visualization origins
         run: node tests/visualization-http-origin.js
 
+      - name: Validate vector map themes and persistence
+        run: node tests/openfreemap.js
+
       - name: PHP lint
         shell: bash
         run: |

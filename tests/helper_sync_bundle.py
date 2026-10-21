@@ -261,4 +261,56 @@ if not {
 }.issubset(independent_files):
     raise SystemExit("The combined manual bundle is missing independent helper files.")
 
-print("Helper dependency bundle manifests verified.")
+map_files, map_entries = MODULE.bundle_files(
+    manifest, "OpenFreeMapHelper", "libs/helper/OpenFreeMapHelper.php"
+)
+map_entry = map_entries["OpenFreeMapHelper"]
+map_dependencies = {item["name"] for item in map_entry.get("dependencies", [])}
+if map_dependencies != {"HelperTranslationHelper", "VisualizationAssetHelper"}:
+    raise SystemExit(f"OpenFreeMap dependencies are incomplete: {sorted(map_dependencies)}")
+
+expected_map_assets = {
+    "maps/openfreemap.js",
+    "maps/vendor/maplibre-gl.js",
+    "maps/vendor/maplibre-gl.css",
+    "maps/vendor/leaflet-maplibre-gl.js",
+    "maps/vendor/MAPLIBRE-LICENSE.txt",
+    "maps/vendor/BRIDGE-LICENSE",
+    "maps/vendor/NOTICE.json",
+    "translations/OpenFreeMapHelper.json",
+}
+actual_map_assets = {item["path"] for item in map_entry.get("assets", [])}
+if actual_map_assets != {f"libs/helper/{path}" for path in expected_map_assets}:
+    raise SystemExit("OpenFreeMap bundle must contain every renderer, license and translation asset.")
+source_map_assets = {
+    path.relative_to(ROOT / "src").as_posix()
+    for path in (ROOT / "src/maps").rglob("*") if path.is_file()
+}
+if not source_map_assets.issubset(expected_map_assets):
+    raise SystemExit("New map resources must be covered by the distribution contract.")
+for path in expected_map_assets | {
+    "OpenFreeMapHelper.php", "HelperTranslationHelper.php", "VisualizationAssetHelper.php",
+    "visualization/http-origin.js",
+}:
+    target = f"libs/helper/{path}"
+    if map_files.get(target) != (ROOT / "src" / path).read_bytes():
+        raise SystemExit(f"OpenFreeMap bundle is missing or changes source bytes: {target}")
+if "OpenFreeMapHelper" not in MODULE.expand_dependents(manifest, {"VisualizationAssetHelper"}):
+    raise SystemExit("Visualization asset updates must also select the OpenFreeMap consumer root.")
+
+verifier_spec = importlib.util.spec_from_file_location(
+    "verify_manifest", ROOT / ".github/scripts/verify_manifest.py"
+)
+if verifier_spec is None or verifier_spec.loader is None:
+    raise SystemExit("Unable to load the manifest validator.")
+verifier = importlib.util.module_from_spec(verifier_spec)
+verifier_spec.loader.exec_module(verifier)
+try:
+    verifier.validate_dependencies({"ExampleHelper": {"requires": ["MissingHelper"]}})
+except SystemExit as error:
+    if "use dependencies instead of requires" not in str(error):
+        raise
+else:
+    raise SystemExit("The manifest validator silently accepted the unsupported requires field.")
+
+print("Helper dependency bundle manifests verified, including the complete OpenFreeMap bundle.")
