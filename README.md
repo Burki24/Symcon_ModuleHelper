@@ -58,6 +58,38 @@ Properties oder Runtime-Attribute. Er wird über die bestehende Subscription
 und sein Bundle einschließlich `DebugHelper` eingebunden. Die Einführung
 verändert den abgenommenen OHA-Piloten nicht.
 
+## ReverseGeocodingHelper
+
+`src/ReverseGeocodingHelper.php` provides optional server-side reverse geocoding
+through a configured private Nominatim service. Consumers own opt-in and serialized
+background scheduling. Only coordinates and format/language parameters leave Symcon;
+no device IDs, names or account credentials are accepted. A GitHub fork is source
+code, not a running API endpoint. Public OSM Nominatim is excluded for device tracking.
+
+- Call `RegisterReverseGeocodingCache()` in `Create()`.
+- `NormalizeNominatimServer($url)` validates an HTTP(S) base URL with an optional
+  path prefix. Credentials, query parameters and fragments are rejected.
+- `ReadNominatimAddress($server, $latitude, $longitude, $language = 'de')` never
+  performs I/O: `null` means pending/expired; `''` means a cached missing result
+  or a provider cooldown.
+- `ResolveNominatimAddress(...)` performs at most one request. Positive results
+  expire after 24 hours; missing coverage after one hour. HTTP/response failures
+  impose a five-minute cooldown per server/language. Consumers schedule retries.
+- `ClearReverseGeocodingCache()` removes addresses and cooldowns, for example on
+  disable. Persistent instance attributes contain private location data; protect
+  configuration files and backups accordingly.
+
+Cache keys separate server/language and round coordinates to six decimals. At most
+512 positions and 16 cooldowns are retained. The API uses `/reverse`, `format=jsonv2`,
+`addressdetails=1` and `accept-language` (`de`, `en`, `de-DE`, etc.). TLS is verified;
+redirects are never followed. Connection/total timeout: two/four seconds; response
+limit: 64 KiB. Provider error details are never exposed. Addresses are plain data;
+render them through `textContent` or equivalent escaping. Nominatim returns the
+closest suitable OSM object, which may differ from the exact street/house number.
+
+`PersistentJsonCacheHelper` is a manifest dependency included in automatic bundles.
+There are no additional resources or translation catalogs in this helper.
+
 ## ConfigurationFormHelper
 
 `src/ConfigurationFormHelper.php` unterstützt dynamische Symcon-Konfigurationsformulare. Der Helper ermittelt per Reflection das Verzeichnis der konkreten Modulklasse und lädt von dort die zugehörige `form.json`.

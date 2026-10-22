@@ -6,6 +6,8 @@ require_once __DIR__ . '/bootstrap.php';
 
 $tests = [
     'persistent-json-cache.php',
+    'reverse-geocoding.php',
+    'reverse-geocoding-http.php',
     'configuration-form.php',
     'data-flow.php',
     'chunked-json-transfer.php',

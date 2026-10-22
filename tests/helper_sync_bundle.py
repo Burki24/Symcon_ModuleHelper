@@ -321,4 +321,21 @@ except SystemExit as error:
 else:
     raise SystemExit("The manifest validator silently accepted the unsupported requires field.")
 
-print("Helper dependency bundle manifests verified, including the complete OpenFreeMap bundle.")
+geo_files, geo_entries = MODULE.bundle_files(
+    manifest, "ReverseGeocodingHelper", "libs/helper/ReverseGeocodingHelper.php"
+)
+if set(geo_files) != {
+    "libs/helper/ReverseGeocodingHelper.php", "libs/helper/PersistentJsonCacheHelper.php"
+}:
+    raise SystemExit("Reverse geocoding must distribute its complete persistent-cache dependency.")
+if [entry["name"] for entry in geo_entries["ReverseGeocodingHelper"]["dependencies"]] != [
+    "PersistentJsonCacheHelper"
+]:
+    raise SystemExit("Reverse-geocoding dependency metadata is incomplete.")
+for target, raw in geo_files.items():
+    if raw != (ROOT / "src" / Path(target).name).read_bytes():
+        raise SystemExit(f"Reverse-geocoding bundle changed source bytes: {target}")
+if "ReverseGeocodingHelper" not in MODULE.expand_dependents(manifest, {"PersistentJsonCacheHelper"}):
+    raise SystemExit("Persistent-cache updates must select subscribed reverse-geocoding consumers.")
+
+print("Helper dependency bundle manifests verified, including maps and reverse geocoding.")
