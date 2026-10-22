@@ -391,7 +391,7 @@
     "ReverseGeocodingHelper": {
       "file": "src/ReverseGeocodingHelper.php",
       "version": "1.0.0",
-      "sha256": "0f81508631f9e025f59b1e34a9b3f181f34195f865e1f47714ecc0a14547cc80",
+      "sha256": "37403fc3a35ea79daa139f992f1e1d5f4c53d090817962bf17f88c97428ee14b",
       "dependencies": [
         "PersistentJsonCacheHelper"
       ]

@@ -24,6 +24,12 @@
 
 ### Added
 
+- Nominatim und Geoapify verwenden dieselbe kompakte Adressdarstellung aus strukturierten Feldern: Straße/Hausnummer, PLZ/Ort und Land. Zusätzliche Verwaltungsebenen entfallen; die Genauigkeitsstufen bleiben erhalten. Alte formatierte Cachetexte werden schrittweise neu aufgelöst, ohne das Geoapify-Tagesbudget zurückzusetzen.
+
+- `ReverseGeocodingHelper` unterstützt Geoapify mit festem HTTPS-Endpunkt, API-Key, Genauigkeitsstufen und persistentem UTC-Tagesbudget je Instanz. Cachetreffer sind budgetfrei; HTTP-Fehler zählen mit. Deaktivieren, Schlüsselwechsel und Neustart setzen den Verbrauch nicht zurück. Bestehende Nominatim-Aufrufe bleiben kompatibel; gemeinsame HTTP- und Cachelogik wird wiederverwendet.
+
+- `ReverseGeocodingHelper` begrenzt Nominatim-Adressdetails nach Standortgenauigkeit: Gebäude bis einschließlich 20 m, Straße bis 100 m, Gebiet bis 1000 m und sonst Ort. Unbekannte Genauigkeit erlaubt nur Ortsangaben. Detailgetrennte Cache-Schlüssel und gefilterte strukturierte Antworten verhindern die Wiederverwendung zu genauer Hausadressen; bestehende Aufrufer bleiben kompatibel.
+
 - `OpenFreeMapHelper` zentralisiert unabhängige Kartenprofile, übersetzte Designer-Menüs, Hell-/Dunkel-Automatik, Stile, HTTPS-Stil-URLs, Kartendetails, Sprache und Farbpaletten. MapLibre und Leaflet-Anbindung werden mit Lizenzen und Hashes gebündelt; der Renderer wird gzip-komprimiert über den Consumer ausgeliefert. Der Controller erhält eine Karteninstanz und die vom Consumer verwaltete Ansicht bei Design- und Datenupdates.
 
 - `SymconiCloud` nimmt mit Zielbranch `dev` und seiner vorhandenen Helper-Subscription an der automatischen Verteilung teil.
