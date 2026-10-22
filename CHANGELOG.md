@@ -12,6 +12,8 @@
 
 ### Fixed
 
+- `OpenFreeMapHelper` bietet einen validierten, tabgebundenen Sitzungsspeicher für Kartenmittelpunkt, Zoom, Auswahl und Popup über den Neuaufbau eines nativen Kachel-iframes hinweg. Scope-Trennung, Ablaufzeit, beschädigte Daten und gesperrter Browser-Speicher sind abgesichert.
+
 - `OpenFreeMapHelper` deklariert Abhängigkeiten mit dem vom Vendor-Sync ausgewerteten Feld `dependencies`. Die CI prüft das vollständige eigenständige Kartenbundle einschließlich transitiver Helper und aller Ressourcen; der Manifestvalidator lehnt das irrtümliche Feld `requires` ausdrücklich ab.
 
 - `VisualizationAssetHelper` bietet einen überschreibbaren Asset-Verzeichnispfad für synthetische Klassen-Dateinamen im Symcon-WebHook-Kontext. Der zentrale Browser-Baustein `visualization/http-origin.js` ermittelt den HTTP(S)-Ursprung eingebetteter Visualisierungen über eigene Adresse, Elternfenster, Vorfahren oder Referrer.
