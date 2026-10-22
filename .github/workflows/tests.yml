@@ -73,6 +73,9 @@ jobs:
       - name: Validate isolated helper distribution
         run: python3 tests/helper_sync_distribution.py
 
+      - name: Validate large helper assets and unchanged trees
+        run: python3 tests/helper_sync_content.py
+
       - name: Validate embedded visualization origins
         run: node tests/visualization-http-origin.js
 
