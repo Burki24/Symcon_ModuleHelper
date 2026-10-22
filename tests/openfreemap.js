@@ -31,6 +31,32 @@ assert.equal(style.layers[1].paint['fill-color'], '#abcdef', 'The cached upstrea
 assert.equal(api.prepareStyle(style, {...config, customColors: false}, false).layers[1].paint['fill-color'], '#abcdef');
 
 async function lifecycle() {
+    const stored = new Map();
+    let clock = 1000;
+    const memoryEnvironment = {Date: {now() { return clock; }}, location: {search: '?visuID=12345&visuUsername=test&token=must-not-be-stored'},
+        sessionStorage: {getItem(key) { return stored.get(key) || null; }, setItem(key, value) { stored.set(key, value); }}};
+    const viewState = {center: [52.1, 13.2], zoom: 14, selected: 'synthetic-a', popup: true};
+    const memory = api.createViewState('map:1:2', memoryEnvironment);
+    assert.equal(memory.read(), null);
+    memory.write(viewState);
+    assert.deepEqual(api.createViewState('map:1:2', memoryEnvironment).read(), viewState, 'A replacement iframe restores its tab-scoped map state.');
+    assert.equal(api.createViewState('map:2:2', memoryEnvironment).read(), null, 'Instances cannot share view state.');
+    assert.equal(api.createViewState('map:1:3', memoryEnvironment).read(), null, 'Account connections cannot share view state.');
+    assert.equal(api.createViewState('map:1:2', {...memoryEnvironment, location: {search: '?visuID=other'}}).read(), null);
+    assert.equal([...stored.keys()].join('').includes('must-not-be-stored'), false, 'Transport credentials never enter the storage key.');
+    memory.write({...viewState, center: [NaN, 1]});
+    assert.deepEqual(memory.read(), viewState, 'Invalid camera values cannot replace a valid state.');
+    memory.write({...viewState, zoom: 24});
+    assert.equal(memory.read().zoom, 24, 'Detailed vector zoom levels must not be discarded by a raster-specific limit.');
+    memory.write({...viewState, selected: null, popup: false});
+    assert.equal(memory.read().selected, null, 'Removed selection is persisted.');
+    clock += 4 * 60 * 60 * 1000 + 1;
+    assert.equal(memory.read(), null, 'Old view state expires.');
+    for (const key of stored.keys()) stored.set(key, '{invalid');
+    assert.equal(memory.read(), null, 'Corrupt browser storage must not break rendering.');
+    const unavailable = {...memoryEnvironment, get sessionStorage() { throw new Error('Storage blocked'); }};
+    assert.equal(api.createViewState('map:1:2', unavailable).read(), null);
+    assert.doesNotThrow(() => api.createViewState('map:1:2', unavailable).write(viewState));
     let creates = 0;
     const applied = [];
     const requests = [];
