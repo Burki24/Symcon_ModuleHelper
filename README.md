@@ -61,27 +61,52 @@ verändert den abgenommenen OHA-Piloten nicht.
 ## ReverseGeocodingHelper
 
 `src/ReverseGeocodingHelper.php` provides optional server-side reverse geocoding
-through a configured private Nominatim service. Consumers own opt-in and serialized
-background scheduling. Only coordinates and format/language parameters leave Symcon;
-no device IDs, names or account credentials are accepted. A GitHub fork is source
+through a configured private Nominatim service or the Geoapify API. Consumers own opt-in and serialized
+background scheduling. Coordinates, format/language parameters and, for Geoapify,
+the provider API key leave Symcon; no device IDs, names or Apple credentials are accepted. A GitHub fork is source
 code, not a running API endpoint. Public OSM Nominatim is excluded for device tracking.
 
 - Call `RegisterReverseGeocodingCache()` in `Create()`.
 - `NormalizeNominatimServer($url)` validates an HTTP(S) base URL with an optional
   path prefix. Credentials, query parameters and fragments are rejected.
-- `ReadNominatimAddress($server, $latitude, $longitude, $language = 'de')` never
+- `ReverseGeocodingPrecision($accuracy)` selects conservative detail from a positive
+  horizontal accuracy in metres: up to and including 20 m building (`zoom=18`),
+  up to 100 m street (`17`), up to 1000 m area (`14`), otherwise city (`10`).
+  Missing, zero, negative or non-finite accuracy uses city detail and level `unknown`.
+  The result contains `zoom`, `level`, `approximate` and normalized `accuracy`.
+  These are display limits, not a guarantee of a correct house number.
+- `ReadNominatimAddress($server, $latitude, $longitude, $language = 'de', $zoom = 18)` never
   performs I/O: `null` means pending/expired; `''` means a cached missing result
   or a provider cooldown.
-- `ResolveNominatimAddress(...)` performs at most one request. Positive results
+- `ResolveNominatimAddress(..., $language = 'de', $zoom = 18)` performs at most one request. Positive results
   expire after 24 hours; missing coverage after one hour. HTTP/response failures
   impose a five-minute cooldown per server/language. Consumers schedule retries.
 - `ClearReverseGeocodingCache()` removes addresses and cooldowns, for example on
   disable. Persistent instance attributes contain private location data; protect
   configuration files and backups accordingly.
 
-Cache keys separate server/language and round coordinates to six decimals. At most
+Accuracy-aware consumers pass the policy zoom to both calls and provide localized
+approximation notices. Existing callers retain building detail by default. Zoom
+must be an integer from 0 to 18. Both providers use structured address fields at
+every level; neither `display_name` nor `formatted` is used as a fallback.
+Missing components are omitted; no usable structured fields produce an empty result.
+
+The common compact layout is **street house number, postcode place, country**.
+At building detail, redundant neighbourhood/county/state hierarchies are omitted.
+Street detail removes the house number; area detail uses at most one neighbourhood
+instead of a street; city detail omits neighbourhood and postcode. The existing
+20/100/1000-metre policy is unchanged. Rural places and missing city fields use
+village/town/municipality/hamlet or a permitted broader fallback. Empty and duplicate
+components are omitted and whitespace normalized. This is a display format, not
+postal validation or a guarantee that two providers return identical source data.
+
+Cache keys separate server/language/detail and round coordinates to six decimals.
+Legacy keys, including the previous `detail-v1` format, are not reused; addresses
+are resolved again as consumers schedule them. The format migration does not reset
+Geoapify usage; exhausted budgets continue to defer uncached positions.
+Provider cooldowns remain shared across detail tiers. At most
 512 positions and 16 cooldowns are retained. The API uses `/reverse`, `format=jsonv2`,
-`addressdetails=1` and `accept-language` (`de`, `en`, `de-DE`, etc.). TLS is verified;
+`addressdetails=1`, `layer=address`, `zoom` and `accept-language` (`de`, `en`, `de-DE`, etc.). TLS is verified;
 redirects are never followed. Connection/total timeout: two/four seconds; response
 limit: 64 KiB. Provider error details are never exposed. Addresses are plain data;
 render them through `textContent` or equivalent escaping. Nominatim returns the
@@ -89,6 +114,39 @@ closest suitable OSM object, which may differ from the exact street/house number
 
 `PersistentJsonCacheHelper` is a manifest dependency included in automatic bundles.
 There are no additional resources or translation catalogs in this helper.
+
+### Geoapify and local request budgets
+
+- `NormalizeGeoapifyKey($apiKey)` validates the credential without including it in
+  exceptions. `NormalizeGeoapifyLanguage($language)` accepts two-letter languages
+  and maps regional variants such as `de-DE` to `de`.
+- `ReadGeoapifyAddress($apiKey, $latitude, $longitude, $language = 'de', $zoom = 18)`
+  has the same cache-only null/empty contract as Nominatim. Credential fingerprints,
+  language, coordinates and detail separate entries; plaintext keys are not stored.
+- `ResolveGeoapifyAddress(..., $language = 'de', $zoom = 18, $dailyLimit = 2500)`
+  performs at most one request to the fixed HTTPS reverse endpoint. It selects
+  building/street/locality/city and uses the shared compact formatter at every detail level.
+  It shares the bounded TLS transport, TTLs and five-minute failure cooldown.
+  Existing Nominatim calls and their defaults remain compatible.
+- `GeoapifyDailyUsage($dailyLimit)` returns `day` (UTC), `used`, `remaining`,
+  `available` and the Unix timestamp `nextReset`. Limits range from 0 to 1,000,000;
+  zero stops new requests but permits cached addresses. Usage is persisted before
+  HTTP, includes failures, and survives restarts, key changes and address-cache
+  clearing. Corrupt counters fail closed; a worker contains them for that UTC day.
+- Resolve calls **must be serialized per instance**, including quota reservation.
+  Budgets are instance-local, not provider account quotas. For shared API keys,
+  coordinate the sum of limits across instances, systems and other applications.
+  Consumers should defer pending work until UTC midnight when the budget is spent.
+- Consumers select Geoapify explicitly and retain server-side credentials. Do not
+  include keys or request URLs in visualization state, logs, exceptions or examples.
+  The fixed source credit `Powered by Geoapify` linked to
+  `https://www.geoapify.com/` and OpenStreetMap attribution must accompany displayed
+  results. API keys/configuration and backups need normal Symcon access protection.
+
+Provider reference: [Geoapify reverse API](https://apidocs.geoapify.com/docs/geocoding/reverse-geocoding/).
+No API account is created or contacted by the offline tests. No new dependency or
+map resource is required; the existing ReverseGeocodingHelper subscription contains
+the complete implementation and its PersistentJsonCacheHelper dependency.
 
 ## ConfigurationFormHelper
 
@@ -1489,7 +1547,7 @@ Die Renderer-Dateien werden kanonisch mit dem Helper verteilt: MapLibre GL JS 5.
 
 `VisualizationAssetHelper::VisualizationInteractionScript()` liefert die kleine, minifizierte Browserbibliothek `visualization/interaction.min.js`; die lesbare Quelle `interaction.js` wird ebenfalls manifestiert verteilt. `IPSViewHTMLPageHelper::RenderVisualizationHTMLPage()` fügt sie verbindlich vor dem Modulskript in native und IPSView-Ausgaben ein, auch bei einem eigenen Modulskript-Replacement. Eigenständige äußere HTML-Loader müssen dieselbe Methode einbinden. Mehrfache Einbindung erzeugt keine zusätzlichen globalen Listener.
 
-Bei gro�en HTML-Ausgaben kann der Consumer mit `VisualizationInteractionScriptURL(): string` einen festen gleichurspr�nglichen `/hook/...`-Asset-Pfad bereitstellen. Enth�lt sein Template `{{INTERACTION_SCRIPT}}` im Kopf vor jedem Modulskript, liefert der Seiten-Helper dort ein parserblockierendes Script-Element statt des Inline-Payloads. Der GET-Endpunkt muss genau `VisualizationInteractionScript()` als JavaScript ausliefern. Ohne diesen optionalen Vertrag bleibt die automatische Inline-Einbindung erhalten. Fremde URLs und Pfadtraversierung werden abgewiesen. ECharts verwendet diesen Weg, damit seine gro�en Ausgaben unter Symcons 1-MB-Grenze bleiben.
+Bei großen HTML-Ausgaben kann der Consumer mit `VisualizationInteractionScriptURL(): string` einen festen gleichursprünglichen `/hook/...`-Asset-Pfad bereitstellen. Enthält sein Template `{{INTERACTION_SCRIPT}}` im Kopf vor jedem Modulskript, liefert der Seiten-Helper dort ein parserblockierendes Script-Element statt des Inline-Payloads. Der GET-Endpunkt muss genau `VisualizationInteractionScript()` als JavaScript ausliefern. Ohne diesen optionalen Vertrag bleibt die automatische Inline-Einbindung erhalten. Fremde URLs und Pfadtraversierung werden abgewiesen. ECharts verwendet diesen Weg, damit seine großen Ausgaben unter Symcons 1-MB-Grenze bleiben.
 
 `window.SymconVisualizationInteraction` stellt `point(event)`, `delta(event, target)`, `scroll(event, target)`, `registerWheelRegion(element, handler)` und `dispose()` bereit. `createRouter(environment)` ist der isolierbare Node-/Browser-Testeinstieg. Eine Region erhält normalisierte Pixel-Deltas und korrigierte Viewport-Koordinaten; sie signalisiert eine übernommene Aktion mit `true` oder `preventDefault()`. Fachlicher Karten-/Diagrammzoom bleibt beim Consumer. Ctrl-/Meta-Mausrad wird nicht übernommen. Normale überlaufende Scrollcontainer werden automatisch bedient und an ihren Grenzen vom äußeren Scrollen getrennt. Kalender können ihre modalspezifische Zielauswahl behalten und nur `scroll()` aufrufen.
 
