@@ -86,6 +86,24 @@ Ein einzelner Consumer kann Auto-Merge mit `"auto_merge": false` deaktivieren od
 
 ## 4. Manueller Lauf
 
+### Große Assets und unveränderte Pakete
+
+GitHub liefert bei Dateien über 1 MiB über die Contents-API keinen eingebetteten
+Base64-Inhalt, sondern `encoding: none`. Der Sync liest diese Dateien über die
+Git-Blob-API nach und prüft Dateigröße und Git-Blob-SHA. Ein ausgelassener Inhalt
+darf nicht als leere Datei gelten; tatsächlich leere Dateien bleiben unterstützt.
+Das betrifft insbesondere den mit OpenFreeMap verteilten MapLibre-Renderer.
+
+Bereits identische Pakete werden übersprungen. Zusätzlich wird vor dem Anlegen
+eines Commits der erzeugte Git-Baum mit dem aktuellen Zielbaum verglichen. Ist
+er identisch, entstehen weder Commit noch Branch-Änderung oder Pull Request.
+Die Auto-Merge-Prüfung bleibt unverändert streng: Ein vorhandener leerer PR
+oder ein PR mit fremden Dateien wird weiterhin nicht automatisch gemergt.
+`tests/helper_sync_content.py` prüft diese Fälle einschließlich des echten
+großen MapLibre-Assets; der Test ist Teil der CI.
+
+### Workflow starten
+
 Unter **Symcon_ModuleHelper → Actions → Sync Helpers to Consumers → Run workflow** kann der Sync jederzeit manuell gestartet werden.
 
 Als Helper kann entweder ein konkreter Name, zum Beispiel `VariablePresentationHelper`, oder `all` angegeben werden.

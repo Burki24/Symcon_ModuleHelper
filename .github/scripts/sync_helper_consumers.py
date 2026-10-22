@@ -87,6 +87,7 @@ def optional_api(method: str, path: str) -> Any | None:
 
 
 def content(repo: str, path: str, ref: str) -> tuple[bytes, str] | None:
+    """Read exact file bytes, including Contents API responses above 1 MiB."""
     encoded_path = urllib.parse.quote(path, safe="/")
     encoded_ref = urllib.parse.quote(ref, safe="")
     result = optional_api("GET", f"/repos/{repo}/contents/{encoded_path}?ref={encoded_ref}")
@@ -94,8 +95,23 @@ def content(repo: str, path: str, ref: str) -> tuple[bytes, str] | None:
         return None
     if not isinstance(result, dict) or result.get("type") != "file":
         raise RuntimeError(f"Unexpected content response for {repo}:{path}")
-    raw = base64.b64decode(result.get("content", ""))
-    return raw, str(result["sha"])
+    sha = str(result.get("sha", ""))
+    size = result.get("size")
+    if result.get("encoding") == "none":
+        # GitHub omits inline data above 1 MiB. Empty content is not an empty file.
+        result = api("GET", f"/repos/{repo}/git/blobs/{sha}")
+        if not isinstance(result, dict) or result.get("sha") != sha:
+            raise RuntimeError(f"Unexpected Git blob response for {repo}:{path}.")
+    if result.get("encoding") != "base64" or not isinstance(result.get("content"), str):
+        raise RuntimeError(f"Unsupported content encoding for {repo}:{path}.")
+    try:
+        raw = base64.b64decode("".join(result["content"].split()), validate=True)
+    except ValueError as error:
+        raise RuntimeError(f"Invalid Base64 content for {repo}:{path}.") from error
+    actual_sha = hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+    if actual_sha != sha or (isinstance(size, int) and len(raw) != size):
+        raise RuntimeError(f"Git blob integrity check failed for {repo}:{path}.")
+    return raw, sha
 
 
 def create_blob(repo: str, body: bytes) -> str:
@@ -113,7 +129,8 @@ def create_sync_commit(
     branch: str,
     files: dict[str, bytes],
     message: str,
-) -> str:
+) -> str | None:
+    """Create an update only when its tree differs from the current base tree."""
     encoded_base = urllib.parse.quote(f"heads/{base_branch}", safe="/")
     base_ref = api("GET", f"/repos/{repo}/git/ref/{encoded_base}")
     base_sha = str(base_ref["object"]["sha"])
@@ -129,6 +146,8 @@ def create_sync_commit(
             "sha": create_blob(repo, body),
         })
     tree = api("POST", f"/repos/{repo}/git/trees", {"base_tree": base_tree_sha, "tree": tree_entries})
+    if str(tree["sha"]) == base_tree_sha:
+        return None
     commit = api(
         "POST",
         f"/repos/{repo}/git/commits",
@@ -847,6 +866,9 @@ def sync(
 
     commit_prefix = f"CHORE: Update {sync_name} to v{sync_version}"
     expected_head_sha = create_sync_commit(repo, base_branch, branch, files, commit_prefix)
+    if expected_head_sha is None:
+        print(f"{repo}: {sync_name} bundle already matches v{sync_version}; no tree changes.")
+        return
     pull_request = open_pull_request(
         repo, base_branch, branch, sync_name, sync_version, sync_digest
     )
