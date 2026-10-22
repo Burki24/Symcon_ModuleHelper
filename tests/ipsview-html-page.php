@@ -19,6 +19,8 @@ final class IPSViewHTMLPageHelperHarness
 {
     use IPSViewHTMLPageHelper;
 
+    public string $interactionURL = '';
+
     /** @var list<array{message:string,data:mixed,format:int}> */
     private array $debugMessages = [];
 
@@ -161,6 +163,11 @@ final class IPSViewHTMLPageHelperHarness
     public function debugMessages(): array
     {
         return $this->debugMessages;
+    }
+
+    protected function VisualizationInteractionScriptURL(): string
+    {
+        return $this->interactionURL;
     }
 
     protected function RegisterPropertyBoolean(string $name, bool $default): void
@@ -669,6 +676,26 @@ try {
         'options'            => ['compact' => false],
         'replacements'       => ['{{MODULE_CONTENT}}' => '<section id="module"></section>']
     ]);
+
+    assertTrueValue(str_contains($nativeHtml, 'SymconVisualizationInteraction'), 'Every rendered page must include shared interaction handling.');
+
+    file_put_contents($templatePath, str_replace('</head>', '{{INTERACTION_SCRIPT}}</head>', $template));
+    $helper->interactionURL = '/hook/Test/assets/interaction.js';
+    $externalHtml = $helper->render(true, ['replacements' => ['{{MODULE_CONTENT}}' => 'External']]);
+    assertTrueValue(str_contains($externalHtml, '<script src="/hook/Test/assets/interaction.js"></script>'), 'A fixed external interaction asset must load before module startup.');
+    assertFalseValue(str_contains($externalHtml, 'SymconVisualizationInteraction'), 'External delivery must avoid duplicating the inline interaction payload.');
+    foreach (['https://example.com/interaction.js', '/hook/Test/../secret', '//example.com/script'] as $invalidURL) {
+        $helper->interactionURL = $invalidURL;
+        $invalidAssetRejected = false;
+        try {
+            $helper->render(true, ['replacements' => ['{{MODULE_CONTENT}}' => 'Invalid']]);
+        } catch (InvalidArgumentException) {
+            $invalidAssetRejected = true;
+        }
+        assertTrueValue($invalidAssetRejected, 'External interaction assets must reject nonlocal and traversal paths.');
+    }
+    $helper->interactionURL = '';
+    file_put_contents($templatePath, $template);
 
     assertTrueValue(str_contains($nativeHtml, 'lang="de-DE"'), 'The page language must be rendered.');
     assertTrueValue(str_contains($nativeHtml, 'class="module-page"'), 'HTML classes must be normalized.');

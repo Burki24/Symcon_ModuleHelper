@@ -75,6 +75,16 @@ jobs:
       - name: Validate embedded visualization origins
         run: node tests/visualization-http-origin.js
 
+      - name: Validate visualization interaction build
+        run: |
+          npx --yes esbuild@0.28.2 src/visualization/interaction.js --minify --target=es2018 --outfile="$RUNNER_TEMP/interaction.min.js"
+          cmp src/visualization/interaction.min.js "$RUNNER_TEMP/interaction.min.js"
+
+      - name: Validate visualization wheel interaction
+        run: |
+          node tests/visualization-interaction.js
+          node tests/visualization-interaction.js --minified
+
       - name: Validate vector map themes and persistence
         run: node tests/openfreemap.js
 

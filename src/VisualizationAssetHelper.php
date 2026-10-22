@@ -51,6 +51,16 @@ trait VisualizationAssetHelper
         return $script;
     }
 
+    /** Returns shared wheel routing, scrolling and direct iframe UI forwarding. */
+    protected function VisualizationInteractionScript(): string
+    {
+        $script = file_get_contents(__DIR__ . '/visualization/interaction.min.js');
+        if ($script === false) {
+            throw new RuntimeException('The visualization interaction asset could not be loaded.');
+        }
+        return $script;
+    }
+
     /**
      * Resolves an asset path relative to the concrete module class.
      *

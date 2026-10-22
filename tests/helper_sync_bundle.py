@@ -173,6 +173,14 @@ expected_page_files = {
 if not expected_page_files.issubset(page_files):
     raise SystemExit(f"Missing page bundle files: {sorted(expected_page_files - set(page_files))}")
 
+# Every HTML-page consumer must receive both the reviewed source and its runtime build.
+for asset in ["visualization/interaction.js", "visualization/interaction.min.js"]:
+    target = f"libs/helper/{asset}"
+    if page_files.get(target) != (ROOT / "src" / asset).read_bytes():
+        raise SystemExit(f"Shared wheel resource missing or altered in page bundle: {target}")
+if "IPSViewHTMLPageHelper" not in MODULE.expand_dependents(manifest, {"VisualizationAssetHelper"}):
+    raise SystemExit("Interaction updates must select HTML-page consumers automatically.")
+
 subscriptions = {"IPSViewStyleHelper", "IPSViewHTMLPageHelper"}
 if subscriptions != set(style_entries) | set(page_entries):
     raise SystemExit("Consumer subscriptions and top-level manifest entries must remain identical.")

@@ -186,7 +186,7 @@
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
       "version": "1.5.2",
-      "sha256": "cc29a1f8225dcdbc6c420b3f35851b7d5fb066567728aa34296261b8ae8fc86f",
+      "sha256": "7bcaac830f174881e49b20b962f5b846eead660eacad5e0d3b673cdb1c3ec031",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"
@@ -289,12 +289,22 @@
     "VisualizationAssetHelper": {
       "file": "src/VisualizationAssetHelper.php",
       "version": "1.0.1",
-      "sha256": "ef3adcd38be489ea129bf2e95ad15d32673879e90bf4da8f1272fbf958a0513c",
+      "sha256": "d530a0e81dde3d1410f360fc2915a523d3cf3275c9efb5e9fc304c90ad98aea3",
       "assets": [
         {
           "file": "src/visualization/http-origin.js",
           "target": "visualization/http-origin.js",
           "sha256": "2ae76879f0597414bc60511d9d36c93f1993aec336cb711067ee8925d560be58"
+        },
+        {
+          "file": "src/visualization/interaction.js",
+          "target": "visualization/interaction.js",
+          "sha256": "830baf8049e7274d3796386d93186c45bcb65102e4bf4a8a704171187fb22c96"
+        },
+        {
+          "file": "src/visualization/interaction.min.js",
+          "target": "visualization/interaction.min.js",
+          "sha256": "851bb2e77a7111da86fbcd0dc0acb554fd68c6cffa826b1af132eb6847d65959"
         }
       ]
     },
