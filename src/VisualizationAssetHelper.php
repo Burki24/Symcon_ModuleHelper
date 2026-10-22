@@ -15,7 +15,7 @@ use RuntimeException;
  * vendored helper can reliably access files from that module's visualization
  * directory.
  *
- * @version 1.0.1
+ * @version 1.0.2
  */
 trait VisualizationAssetHelper
 {
