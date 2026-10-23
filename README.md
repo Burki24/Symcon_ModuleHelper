@@ -511,6 +511,34 @@ eine Position mit `latitude`, `longitude`, positivem `accuracy`, ganzzahligem
 km/h (0 deaktiviert den Geschwindigkeitsfilter). Der Zonenradius muss größer
 als der Grenzpuffer sein. Konfigurationsfehler werfen `InvalidArgumentException`.
 
+Zonen können `hysteresis`, `maxAccuracy` und `confirmSeconds` überschreiben;
+fehlende oder null gesetzte Felder erben den globalen Wert. `customGPS=false`
+erzwingt die globale Übernahme und ignoriert ruhende eigene Werte. Ohne dieses
+Flag werden vorhandene eigene Werte berücksichtigt. Die normalisierte Struktur
+alter Zonen ohne aktive Überschreibungen bleibt unverändert, damit bestehende
+Quellidentitäten und Aufenthalte erhalten bleiben.
+`ResolveGeofenceZoneSettings($zones, $settings)` liefert die geprüften wirksamen
+Einstellungen je Zonen-ID. Radius und Puffer werden je Zone zusammen geprüft;
+Standortalter und Geschwindigkeitsfilter bleiben global.
+
+Ein Wechsel benötigt die Qualität der Herkunfts- und der Zielzone und die längere
+der beiden Bestätigungszeiten. Für Eintritt aus „außerhalb“ bzw. Austritt ins
+Freie gilt jeweils nur die vorhandene Zone. Ein neuer Cacheaufruf derselben
+Position bestätigt weiterhin keinen Wechsel. Bei Qualitätsverlust merkt sich
+der Zustand die zuletzt bestätigte Herkunftszone in `qualityZone`; auch spätere
+ungenaue Positionen oder eine Serialisierung können deren Austrittsregeln nicht
+umgehen. Ein verlässlicher Neustart des Aufenthalts erfordert eine neue Position.
+Ein Wechsel in eine andere Zone muss auch nach Unbekannt die längere
+Bestätigungszeit abwarten; bis zur Bestätigung bleibt das Ergebnis unbekannt.
+Alte persistierte Zustände ohne dieses zusätzliche Feld bleiben lesbar.
+
+Eine weit entfernte Zielzone darf ihre eigene großzügigere Qualitätsgrenze
+nutzen, wenn der gesamte Genauigkeitskreis eindeutig außerhalb der Referenzzone
+liegt und keine strengere Herkunftsregel verletzt wird. Im Grenzbereich der
+Referenzzone kann eine großzügigere andere Zone keine falsche Abwesenheit
+begründen. Die Priorität einer eindeutig passenden Referenzzone bei überlappenden
+Zonen bleibt erhalten; Qualitäts- und Bestätigungsregeln gelten auch dort.
+
 Das Ergebnis enthält `presence` (-1 unbekannt, 0 außerhalb der Referenzzone,
 1 innerhalb), `zone` (null unbekannt, leer außerhalb, sonst Zonen-ID), `since`,
 `duration`, `distance` zur Referenzzone (null bei unbrauchbarem Standort),

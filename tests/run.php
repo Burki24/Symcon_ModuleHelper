@@ -17,6 +17,7 @@ $tests = [
     'debug-flow.php',
     'variable-presentation.php',
     'geofence.php',
+    'geofence-zones.php',
     'parent-connection.php',
     'visualization-asset.php',
     'openfreemap.php',
