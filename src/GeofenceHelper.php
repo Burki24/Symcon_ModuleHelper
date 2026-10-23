@@ -10,7 +10,7 @@ use InvalidArgumentException;
  * Pure geofence evaluation with accuracy envelopes, hysteresis and sample confirmation.
  * State is supplied and persisted by the caller; no I/O or platform dependency.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 trait GeofenceHelper
 {
