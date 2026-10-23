@@ -16,7 +16,23 @@ $geofence = new class() {
     {
         return $this->GeofenceDistanceMeters($a, $b, $c, $d);
     }
+
+    public function aggregate(array $states): int
+    {
+        return $this->AggregateGeofencePresence($states);
+    }
 };
+foreach ([[[], -1], [[0], 0], [[0, 0], 0], [[1, 0], 1], [[1, -1], 1], [[-1, 0], -1], [[-1, -1], -1]] as [$members, $expected]) {
+    assertSameValue($expected, $geofence->aggregate($members), 'Aggregate presence follows the explicit any-present/all-absent contract.');
+}
+foreach ([[true], ['1'], [2], [1, null], ['member' => 0]] as $invalid) {
+    try {
+        $geofence->aggregate($invalid);
+        throw new RuntimeException('Invalid aggregate member states were accepted.');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
 $fix = ['latitude' => 0.0, 'longitude' => 0.0, 'accuracy' => 5, 'timestamp' => 1900];
 assertTrueValue(abs($geofence->distance(0, 0, 0, 90) - 10007557.22101796) < 0.01, 'Equatorial quarter-circle distance.');
 assertTrueValue(abs($geofence->distance(0, 179.999, 0, -179.999) - 222.39016) < 0.01, 'Antimeridian distance must take the short arc.');

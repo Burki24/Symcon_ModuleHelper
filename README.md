@@ -489,6 +489,13 @@ keine `OPTIONS`; diese sind ausschließlich für Boolean und String vorgesehen.
 
 ## GeofenceHelper
 
+`AggregateGeofencePresence(list<int> $states): int` bildet die gemeinsame
+Anwesenheit unabhängiger Auswertungen: mindestens eine 1 ergibt 1; eine
+nichtleere Liste ausschließlich aus 0 ergibt 0; sonst -1. Zulässig sind nur
+die ganzzahligen Zustände -1, 0 und 1. Leere Auswahl ist unbekannt; ungültige
+Zustände oder assoziative Eingaben werfen `InvalidArgumentException`. Die
+Funktion verändert weder die Einzelzustände noch deren Zeitmessung.
+
 Reine, anbieterunabhängige Auswertung kreisförmiger Zonen ohne I/O, Timer oder
 Symcon-Abhängigkeit. `NormalizeGeofenceZones(array $zones)` prüft eine Liste von
 1 bis 64 Zonen mit eindeutiger `id`, `name`, `latitude`, `longitude` und positivem
