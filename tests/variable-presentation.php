@@ -130,6 +130,12 @@ final class VariablePresentationHarness
     }
 
     /** @return array<string,mixed> */
+    public function integerOptions(array $options, string $icon = '', int $color = -1, string $prefix = '', string $suffix = ''): array
+    {
+        return $this->IntegerOptionsPresentation($options, $icon, $color, $prefix, $suffix);
+    }
+
+    /** @return array<string,mixed> */
     public function webContent(int $htmlType = 0, bool $padding = true): array
     {
         return $this->WebContentPresentation($htmlType, $padding);
@@ -296,10 +302,39 @@ assertSameValue(1, $enumeration['LAYOUT'] ?? null, 'Enumeration presentation mus
 assertSameValue(2, $enumeration['DISPLAY'] ?? null, 'Enumeration presentation must keep the requested display mode.');
 assertSameValue($enumerationOptions, json_decode((string) $enumeration['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Enumeration options must round-trip through JSON.');
 
-$readOnlyOptions = $presentation->options($enumerationOptions, 'list', -1, '[', ']');
+$readOnlyDefinitions = [['Value' => false, 'Caption' => 'No'], ['Value' => true, 'Caption' => 'Yes']];
+$readOnlyOptions = $presentation->options($readOnlyDefinitions, 'list', -1, '[', ']');
 assertSameValue(VARIABLE_PRESENTATION_VALUE_PRESENTATION, $readOnlyOptions['PRESENTATION'] ?? null, 'Read-only options must use value presentation.');
 assertSameValue('list', $readOnlyOptions['ICON'] ?? null, 'Read-only options must keep the configured icon.');
-assertSameValue($enumerationOptions, json_decode((string) $readOnlyOptions['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Read-only options must round-trip through JSON.');
+assertSameValue($readOnlyDefinitions, json_decode((string) $readOnlyOptions['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Boolean options must retain their native JSON contract.');
+$stringOptions = [['Value' => 'idle', 'Caption' => 'Idle'], ['Value' => 'active', 'Caption' => 'Active']];
+assertSameValue($stringOptions, json_decode($presentation->options($stringOptions)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'String options must remain unchanged.');
+
+assertSameValue($enumerationOptions, json_decode($presentation->options($enumerationOptions)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Existing options serialization must remain unchanged for staged distribution.');
+
+// Official SDK: OPTIONS only applies to Boolean/String; Integer requires constant intervals.
+// https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/value-presentation/
+$integerOptions = [
+    ['Value' => -1, 'Caption' => 'Unavailable'],
+    ['Value' => 0, 'Caption' => 'No'],
+    ['Value' => 1, 'Caption' => 'Yes/東京', 'IconActive' => true, 'IconValue' => 'check', 'ColorActive' => true, 'ColorValue' => 0x00AA00]
+];
+$integerStates = $presentation->integerOptions($integerOptions, 'list', 0x445566, '[', ']');
+assertSameValue(false, isset($integerStates['OPTIONS']), 'Integer options must not use the unsupported OPTIONS parameter.');
+assertSameValue(true, $integerStates['INTERVALS_ACTIVE'] ?? null, 'Integer states must activate numeric intervals.');
+$integerIntervals = json_decode($integerStates['INTERVALS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue([-1, 0, 1], array_column($integerIntervals, 'IntervalMinValue'), 'Negative, zero and positive integer states must remain distinct.');
+assertSameValue([-1, 0, 1], array_column($integerIntervals, 'IntervalMaxValue'), 'Each state must match exactly, without covering gaps.');
+assertSameValue([true, true, true], array_column($integerIntervals, 'ConstantActive'), 'Intervals must display text constants.');
+assertSameValue(['Unavailable', 'No', 'Yes/東京'], array_column($integerIntervals, 'ConstantValue'), 'State captions must survive UTF-8 encoding.');
+assertSameValue('check', $integerIntervals[2]['IconValue'], 'State-specific icon must survive interval conversion.');
+// Native MCP verification on Symcon 9.1 rejects Color; ColorValue is accepted.
+assertSameValue(0x00AA00, $integerIntervals[2]['ColorValue'], 'Interval colors must use the native ColorValue key.');
+assertSameValue(false, isset($integerIntervals[2]['Color']), 'Do not emit the rejected Color interval parameter.');
+assertSameValue(true, $integerIntervals[2]['ColorActive'], 'Explicit color activation must survive.');
+assertSameValue([-1, 1, 'list', 0x445566, '[', ']'], [$integerStates['MIN'], $integerStates['MAX'], $integerStates['ICON'], $integerStates['COLOR'], $integerStates['PREFIX'], $integerStates['SUFFIX']], 'Numeric presentation must retain range and global decoration.');
+$sparse = json_decode($presentation->integerOptions([['Value' => 8, 'Caption' => 'Eight'], ['Value' => -7, 'Caption' => 'Minus seven']])['INTERVALS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue([8, -7], array_column($sparse, 'IntervalMaxValue'), 'Sparse and unordered options must not fill unmatched ranges.');
 
 assertSameValue(
     [
@@ -378,6 +413,13 @@ $invalidCalls = [
     static fn () => $presentation->switch(['glowIntensity' => 101]),
     static fn () => $presentation->shutter(['sunPosition' => 3]),
     static fn () => $presentation->enumeration([]),
+    static fn () => $presentation->options([]),
+    static fn () => $presentation->integerOptions([]),
+    static fn () => $presentation->integerOptions([['Value' => false, 'Caption' => 'No']]),
+    static fn () => $presentation->integerOptions([['Value' => '0', 'Caption' => 'No']]),
+    static fn () => $presentation->integerOptions([['Value' => 0.5, 'Caption' => 'Half']]),
+    static fn () => $presentation->integerOptions([['Value' => 0, 'Caption' => 'A'], ['Value' => 0, 'Caption' => 'B']]),
+    static fn () => $presentation->integerOptions([['Value' => -1, 'Caption' => null]]),
 ];
 foreach ($invalidCalls as $invalidCall) {
     try {

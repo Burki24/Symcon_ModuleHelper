@@ -467,12 +467,25 @@ class ExampleModule extends IPSModuleStrict
 | `SwitchPresentation()` | Native Schalterdarstellung mit Icons, Leuchtfarbe und Usage-Type. |
 | `ShutterPresentation()` | Native Rollladen-/Rotationsdarstellung mit frei definierbaren Grenzwerten. |
 | `EnumerationPresentation()` | Interaktive native Aufzählung aus frei übergebenen Optionsdefinitionen. |
-| `OptionsPresentation()` | Read-only-Wertanzeige mit frei übergebener Optionsliste, z. B. für Boolean- oder String-Zustände. |
+| `OptionsPresentation()` | Read-only-Wertanzeige für Boolean-/String-Zustände über `OPTIONS`. |
+| `IntegerOptionsPresentation()` | Read-only-Integer-Zustände über exakte Zahlenintervalle mit Textkonstanten. |
 | `WebContentPresentation()` | Webinhalt als HTML oder Webseite mit steuerbarem Padding. |
 | `DateTimePresentation()` | Parametrisierbare native Datum-/Uhrzeitdarstellung. |
 | `DateTimeTemplatePresentation()` | Datum/Uhrzeit mit einer nativen Symcon-Vorlage, um bestehendes Darstellungsverhalten exakt beizubehalten. |
 
 Die Methoden geben ausschließlich native Symcon-Presentation-Arrays zurück. Sie führen keine Geräteerkennung durch, lesen keine Modul-Properties und übersetzen keine Beschriftungen. Dadurch kann dieselbe Helper-Datei unverändert in unterschiedlichen Symcon-Libraries vendort werden.
+
+Bei `IntegerOptionsPresentation()` müssen Optionslisten ausschließlich eindeutige
+Integer-Werte und String-Beschriftungen enthalten. Jeder Wert erhält ein eigenes
+Intervall mit identischem Minimum und Maximum sowie `ConstantActive=true` und
+`ConstantValue=Caption`. So erscheinen beispielsweise `-1`, `0`, `1` als
+**Nicht verfügbar**, **Nein**, **Ja**; nicht aufgeführte Werte werden nicht
+versehentlich einem benachbarten Zustand zugeordnet. Die gespeicherten Werte und
+Variablentypen ändern sich nicht. `IconActive`/`IconValue` und
+`ColorActive`/`ColorValue` werden auf die entsprechenden Intervalle übertragen.
+Die vorhandene `OptionsPresentation()`-API bleibt unverändert. Eine Integer-Variable
+mit nativer Wertanzeige unterstützt laut [offiziellem SDK](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/value-presentation/)
+keine `OPTIONS`; diese sind ausschließlich für Boolean und String vorgesehen.
 
 ## ParentConnectionHelper
 
