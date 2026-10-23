@@ -14,6 +14,29 @@ use InvalidArgumentException;
  */
 trait GeofenceHelper
 {
+    /**
+     * Combines independent tri-state results: any present wins; absence requires
+     * a non-empty selection of exclusively absent members. Otherwise unknown.
+     *
+     * @param list<int> $states -1 unknown, 0 absent, 1 present.
+     * @throws InvalidArgumentException Invalid member states or a non-list input.
+     */
+    protected function AggregateGeofencePresence(array $states): int
+    {
+        if (!array_is_list($states)) {
+            throw new InvalidArgumentException('Presence aggregation requires a list.');
+        }
+        foreach ($states as $state) {
+            if (!is_int($state) || !in_array($state, [-1, 0, 1], true)) {
+                throw new InvalidArgumentException('Invalid presence state.');
+            }
+        }
+        if (in_array(1, $states, true)) {
+            return 1;
+        }
+        return $states === [] || in_array(-1, $states, true) ? -1 : 0;
+    }
+
     /** @return list<array{id:string,name:string,latitude:float,longitude:float,radius:float}> */
     protected function NormalizeGeofenceZones(array $zones): array
     {
