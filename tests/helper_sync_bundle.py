@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -338,4 +339,17 @@ for target, raw in geo_files.items():
 if "ReverseGeocodingHelper" not in MODULE.expand_dependents(manifest, {"PersistentJsonCacheHelper"}):
     raise SystemExit("Persistent-cache updates must select subscribed reverse-geocoding consumers.")
 
-print("Helper dependency bundle manifests verified, including maps and reverse geocoding.")
+fence_files, fence_entries = MODULE.bundle_files(
+    manifest, "GeofenceHelper", "libs/helper/GeofenceHelper.php"
+)
+fence_source = (ROOT / "src/GeofenceHelper.php").read_bytes()
+if fence_files != {"libs/helper/GeofenceHelper.php": fence_source}:
+    raise SystemExit("Geofence evaluation must distribute exactly its canonical helper source.")
+if set(fence_entries) != {"GeofenceHelper"} or fence_entries["GeofenceHelper"].get("dependencies", []):
+    raise SystemExit("Geofence evaluation has no additional runtime dependencies.")
+if fence_entries["GeofenceHelper"]["sha256"] != hashlib.sha256(fence_source).hexdigest():
+    raise SystemExit("Geofence bundle metadata does not match the distributed source.")
+if "GeofenceHelper" not in MODULE.expand_dependents(manifest, {"GeofenceHelper"}):
+    raise SystemExit("Geofence changes must remain selectable for automatic consumer updates.")
+
+print("Helper dependency bundle manifests verified, including maps, reverse geocoding and geofences.")

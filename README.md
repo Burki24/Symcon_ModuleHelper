@@ -487,6 +487,44 @@ Die vorhandene `OptionsPresentation()`-API bleibt unverändert. Eine Integer-Var
 mit nativer Wertanzeige unterstützt laut [offiziellem SDK](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/value-presentation/)
 keine `OPTIONS`; diese sind ausschließlich für Boolean und String vorgesehen.
 
+## GeofenceHelper
+
+Reine, anbieterunabhängige Auswertung kreisförmiger Zonen ohne I/O, Timer oder
+Symcon-Abhängigkeit. `NormalizeGeofenceZones(array $zones)` prüft eine Liste von
+1 bis 64 Zonen mit eindeutiger `id`, `name`, `latitude`, `longitude` und positivem
+`radius` in Metern. `GeofenceDistanceMeters()` berechnet Luftlinienentfernungen
+auf einer Kugel mit mittlerem Erdradius 6.371.008,8 m; Datumsgrenze und Pole
+werden berücksichtigt.
+
+`EvaluateGeofence($zones, $reference, $location, $state, $now, $settings)` benötigt
+eine bestehende Referenzzonen-ID, einen expliziten Unix-Zeitpunkt und optional
+eine Position mit `latitude`, `longitude`, positivem `accuracy`, ganzzahligem
+`timestamp` sowie `isOld`/`isInaccurate`. Einstellungen: `maxAge=900` s,
+`maxAccuracy=100` m, `hysteresis=25` m, `confirmSeconds=30` s und `maxSpeed=300`
+km/h (0 deaktiviert den Geschwindigkeitsfilter). Der Zonenradius muss größer
+als der Grenzpuffer sein. Konfigurationsfehler werfen `InvalidArgumentException`.
+
+Das Ergebnis enthält `presence` (-1 unbekannt, 0 außerhalb der Referenzzone,
+1 innerhalb), `zone` (null unbekannt, leer außerhalb, sonst Zonen-ID), `since`,
+`duration`, `distance` zur Referenzzone (null bei unbrauchbarem Standort),
+`pending`, `reason` und den vom Aufrufer zu persistierenden `state`.
+Eine eindeutig passende Referenzzone hat Vorrang vor anderen Zonen; sonst gilt
+die Listenreihenfolge. Der Grenzbereich hält einen bestehenden Zustand; ohne
+Vorgeschichte bleibt er unbekannt. Unterschiedliche neue Beobachtungen und
+abgelaufene Bestätigungszeit sind für einen Wechsel nötig. Die erste klare
+Position wird sofort angenommen. Wiederholte Zeitstempel bestätigen keine
+Wechsel; widersprüchliche oder rückläufige Beobachtungen werden verworfen.
+
+Schlechte, alte, zukünftige oder unplausible Positionen erzeugen unbekannte
+Anwesenheit und keine aktuelle Entfernung. Der Geschwindigkeitsfilter zieht
+die Unsicherheit beider Positionen von der Bewegung ab. Datenlücken größer
+als `maxAge` unterbrechen einen Aufenthalt. `InvalidateGeofenceState($state)`
+verwirft bei Quellfehlern die Anwesenheit, behält aber die zuletzt beobachtete
+Position als Marke: ein alter Cachetreffer darf keine Wiederaufnahme bestätigen.
+Der Aufrufer trennt Zustände verschiedener Geräte/Konten/Konfigurationen und
+übersetzt die festen `reason`-Codes selbst. `duration` zählt beobachtete Sekunden
+innerhalb einer bestätigten Zone; außerhalb oder bei Unbekannt ist sie 0.
+
 ## ParentConnectionHelper
 
 `src/ParentConnectionHelper.php` kapselt den Zugriff auf die physisch verbundene Parent-Instanz eines Symcon-Moduls. Der Helper liest die `ConnectionID` der aktuellen Instanz und kann prüfen, ob die referenzierte Parent-Instanz tatsächlich noch existiert.
