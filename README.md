@@ -1642,3 +1642,54 @@ Bei umadressierten IPSView-Ereignissen mit `(0, 0)` wird die letzte tatsächlich
 Direkte Eltern-/Kind-Frames können ausschließlich UI-Eingaben austauschen: der Kind-Frame meldet sich an, Zeigerposition und relative Frame-Koordinaten berücksichtigen Skalierung, und der Eltern-Frame leitet Mausrad-Eingaben weiter. Empfänger akzeptieren nur die tatsächliche direkte Eltern-Window-Referenz; Eltern prüfen direkte iframe-Window-Referenzen. Ungültige Koordinaten, fremde Sender und übergroße Deltas werden verworfen. Nachrichten enthalten keine Zugangsdaten, Geräteinventare oder Modulaktionen. Opaque `data:`-Eltern benötigen `postMessage` mit `*`; die Zuordnung erfolgt deshalb über die exakte Window-Referenz und nicht über frei behauptete Herkunftsfelder.
 
 Reproduzierbarer Build: `npx --yes esbuild@0.28.2 src/visualization/interaction.js --minify --target=es2018 --outfile=src/visualization/interaction.min.js`. Die CI vergleicht den Build bytegenau und prüft lesbare und ausgelieferte Quelle mit `node tests/visualization-interaction.js` und `node tests/visualization-interaction.js --minified`. Native App, Webclient und simulierte Ereignisweitergabe bleiben getrennte Praxisnachweise.
+
+## StatusWidgetHelper
+
+`src/StatusWidgetHelper.php` und `src/visualization/status-widget/` stellen einen
+kompakten, ausschließlich lesenden Gesamtstatus mit einer responsiven Mitgliederliste
+bereit. Keine vollständige Dashboardseite. Erste Nutzung: SymconiCloud-Anwesenheit.
+Die konkrete Fachlogik, Texte, Verfügbarkeitsflags und stabilen anonymisierten
+Mitgliederkennungen liefert das Modul; der Helper enthält keine Geofence-Auswertung.
+
+| Einstieg | Vertrag |
+| --- | --- |
+| `RegisterStatusWidget()` | In `Create`: Eigenschaften, persistierter Widgetcache, IPSView-Token, flüchtiger Hook `SymconStatusWidget<InstanceID>` und nativer Visualisierungstyp |
+| `ConfigureStatusWidget($ident, $caption)` | In `ApplyChanges`: WebContent-Variable erhalten, Stilmedien abonnieren, Aktivierung und Kontobindung prüfen; Kontoänderung rotiert den Token |
+| `StatusWidgetForm($form)` | Zwei unabhängige Designer mit zentralem Tile-Theme und vollständigem IPSView-Stil sowie Layoutoptionen ergänzen |
+| `PublishStatusWidget($state)` | Fachmodell speichern und nativen Push erzeugen; keine Änderung an der IPSView-HTML-Variable |
+| `RenderStatusWidget($ipsView)` | Kompaktes HTML-Dokument für `GetVisualizationTile()` bzw. `GetIPSViewHTML()` |
+| `StatusWidgetAssetDirectory()` | Zentralen Ressourcenpfad aus dem Consumer-Override von `VisualizationAssetDirectory()` zurückgeben |
+| `StatusWidgetImage($mediaID)` | Geprüftes lokales Rasterbild als Data-URI oder leere Zeichenfolge für Initialen |
+
+Der Consumer verwendet zusätzlich die im Manifest angegebenen sechs Traits
+(`IPSViewHTMLPageHelper`, `VisualizationAssetHelper`,
+`VisualizationThemeConfigurationHelper`, `IPSViewStyleConfigurationHelper`,
+`ResponsiveVisualizationHelper`, `HttpResponseHelper`). Methoden zur Registrierung,
+Formularaktionen und Stilmedien gehören weiterhin zu deren bestehendem Vertrag.
+Nach `ConfigureStatusWidget` das Fachmodell publizieren und bei aktiviertem IPSView
+`RegenerateIPSViewHTMLPages()` aufrufen. `RequestAction` an
+`HandleIPSViewHTMLPageAction()` delegieren. Datenupdates publizieren ausschließlich
+das Modell; Stilmedienänderungen publizieren es erneut, damit aktiver Stil und
+Schriften ohne Dokumentwechsel nachgeführt werden.
+
+Das Modell besteht aus `title`, `summary` (`label`, `tone`, `detail`) und `members`.
+Mitglieder enthalten `id`, `name`, `status`, `tone`, `detail`, `reason`, `image`.
+Erlaubte Töne: `positive`, `neutral`, `unknown`. Alle sichtbaren Texte sind normale
+Strings, niemals HTML. IDs bleiben stabil bei Namens-, Reihenfolge- oder Bildänderung.
+Die Auswahl ist rein lokal; Karten lösen keine Modulaktionen aus.
+
+Bilder: nur vorhandene Symcon-Bildmedien mit PNG/JPEG/GIF/WebP-Inhalt, maximal
+128 KiB und 1024 × 1024 Pixel. Keine externen URLs, SVG oder frei wählbaren Dateien.
+Ungültige Bilder verwenden Initialen. Bildrechte und Auswahl verbleiben beim Anwender.
+
+IPSView nutzt den optionalen HTTP(S)-Ursprung `IPSViewServerURL`, ansonsten den
+zentralen Origin-Resolver. Nur `POST` mit `X-Status-Widget-Token` liest den Cache;
+`OPTIONS` ermöglicht die Einbettung. Keine Query-Tokens, keine Serveraktionen oder
+externen Anfragen. Aktivierung und Verbindung werden pro Abruf geprüft. Deaktivieren
+widerruft den Token und erhält gemäß HTML-Helper-Vertrag die vorhandene Variable.
+
+Zentrale Interaktionsressourcen sorgen für Mausrad/Frames. Datenupdates verwenden
+bestehende DOM-Zeilen und erhalten Fokus, Auswahl und Scrollposition. Fehler werden
+angezeigt; ein zeitlich begrenzter Poll wird ohne überlappende Abrufe wiederholt.
+Die Designer und alle HTML/CSS/JS- sowie Übersetzungsressourcen gehören zum
+Manifest-Bundle; `tests/helper_sync_bundle.py` prüft deren Vollständigkeit und Bytes.

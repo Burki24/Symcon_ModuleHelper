@@ -57,6 +57,11 @@ if ($exitCode !== 0) {
     exit($exitCode);
 }
 
+passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/status-widget.php'), $exitCode);
+if ($exitCode !== 0) {
+    exit($exitCode);
+}
+
 // Isolated variable-search simulation defines its own Symcon API stubs.
 passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/variable-search.php'), $exitCode);
 if ($exitCode !== 0) {

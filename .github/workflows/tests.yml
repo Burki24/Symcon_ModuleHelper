@@ -92,6 +92,9 @@ jobs:
       - name: Validate vector map themes and persistence
         run: node tests/openfreemap.js
 
+      - name: Validate compact status widget updates
+        run: node tests/status-widget.js
+
       - name: PHP lint
         shell: bash
         run: |

@@ -1,5 +1,21 @@
 # Symcon ModuleHelper & IPSView – Project Status
 
+## Compact status widgets (2026-10-23)
+
+StatusWidgetHelper provides compact summary/member widgets, independent native
+and IPSView designers, local raster images and authenticated read-only polling.
+First consumer: SymconiCloud Presence. The complete manifest bundle includes
+HTML/CSS/JS, translations and transitive dependencies; CI checks package bytes,
+image validation and state-preserving updates/recovery.
+
+MCP tested a separate temporary library with synthetic devices: light/dark native
+preview, responsive layout, images, wheel scrolling in both directions and live
+IPSView polling without losing selection or scroll. Native IPSView app and native
+tile live-push verification remain pending after normal distribution.
+Publish the consumer subscription first, release/distribute the helper, pull its
+complete bundle, then publish/install module changes. No local test helper copies
+remain in the consumer worktree.
+
 > Zentrale Arbeits- und Übergabedatei für die schrittweise Zentralisierung von IPSView-Fonts, Stilquellen und Style-Profilen.
 >
 > **Maßgeblicher Arbeitsstand:** `Symcon_ModuleHelper/dev`
