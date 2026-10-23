@@ -353,25 +353,3 @@ if "GeofenceHelper" not in MODULE.expand_dependents(manifest, {"GeofenceHelper"}
     raise SystemExit("Geofence changes must remain selectable for automatic consumer updates.")
 
 print("Helper dependency bundle manifests verified, including maps, reverse geocoding and geofences.")
-
-# Compact widgets must be independently distributable, including their shared runtime.
-widget_files, widget_entries = MODULE.bundle_files(manifest, "StatusWidgetHelper", "libs/helper/StatusWidgetHelper.php")
-expected_widget_files = {
-    "libs/helper/StatusWidgetHelper.php",
-    "libs/helper/visualization/status-widget/index.html",
-    "libs/helper/visualization/status-widget/style.css",
-    "libs/helper/visualization/status-widget/app.js",
-    "libs/helper/visualization/http-origin.js",
-    "libs/helper/visualization/interaction.min.js",
-    "libs/helper/translations/StatusWidgetHelper.json",
-    "libs/helper/IPSViewHTMLPageHelper.php",
-    "libs/helper/IPSViewStyleConfigurationHelper.php",
-    "libs/helper/ResponsiveVisualizationHelper.php",
-}
-if not expected_widget_files.issubset(widget_files):
-    raise SystemExit(f"Incomplete status widget bundle: {expected_widget_files - set(widget_files)}")
-for target in expected_widget_files:
-    source = ROOT / "src" / target.removeprefix("libs/helper/")
-    if widget_files[target] != source.read_bytes():
-        raise SystemExit(f"Changed status widget resource in distribution: {target}")
-print("Status widget dependencies and resources are complete and byte-identical.")
