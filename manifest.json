@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.25.0",
+  "repository_version": "3.26.0",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -398,10 +398,10 @@
     },
     "GeofenceHelper": {
       "file": "src/GeofenceHelper.php",
-      "version": "1.1.0",
-      "sha256": "f34b722ab56268d5316942c047f01600a9254b6dd5ce8942358c74c72d7d497e"
+      "version": "1.2.0",
+      "sha256": "a52906069249fb98ec1fcdd6cd7230aa265ae96358f906ee5bbb567624b3dba2"
     }
   },
-  "repository_build": 195467385,
-  "repository_date": 1792734518
+  "repository_build": 227366889,
+  "repository_date": 1792740921
 }
