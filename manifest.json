@@ -395,6 +395,11 @@
       "dependencies": [
         "PersistentJsonCacheHelper"
       ]
+    },
+    "GeofenceHelper": {
+      "file": "src/GeofenceHelper.php",
+      "version": "1.0.0",
+      "sha256": "9b725d525347d440c12536328ab120ebaa2012344451998328ea374724b6fd03"
     }
   },
   "repository_build": 58079958,
