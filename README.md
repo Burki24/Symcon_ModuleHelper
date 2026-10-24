@@ -606,7 +606,7 @@ protected function VisualizationAssetDirectory(): string
 }
 ```
 
-Ohne Override bleibt die bisherige Reflection-Auflösung erhalten. `VisualizationHTTPOriginScript()` liefert den gemeinsam verteilten Browser-Baustein `visualization/http-origin.js`. Dessen `SymconHTTPOrigin.resolve(window)` ermittelt einen HTTP(S)-Ursprung aus eigener Adresse, zugänglichem Elternfenster, `ancestorOrigins` oder `document.referrer`. Pfade, Query und Fragment werden nicht übernommen; nicht unterstützte Schemata und URLs mit Zugangsdaten werden abgelehnt. Ohne geeigneten Ursprung liefert er `null`; native Ansichten ohne diese Browserinformationen benötigen weiterhin eine explizite Serveradresse. Der aufrufende Loader behandelt eine ausdrücklich konfigurierte Adresse vorrangig.
+Ohne Override bleibt die bisherige Reflection-Auflösung erhalten. `VisualizationHTTPOriginScript()` liefert den gemeinsam verteilten Browser-Baustein `visualization/http-origin.js`. Dessen `SymconHTTPOrigin.resolve(window)` ermittelt einen HTTP(S)-Ursprung aus eigener Adresse, `document.baseURI`, zugänglichem Elternfenster, `ancestorOrigins` oder `document.referrer`, in dieser Reihenfolge. Native IPSView-HTMLBoxen können nur ein vom Client eingefügtes HTTP(S)-Basiselement besitzen; dieses genügt auch bei fehlenden Eltern-/Referrerinformationen. Echte HTTP-Seiten behalten immer ihren eigenen Ursprung. Pfade, Query und Fragment werden nicht übernommen; nicht unterstützte Schemata und URLs mit Zugangsdaten werden abgelehnt. Ohne geeigneten Ursprung liefert er `null`; nur native Ansichten ohne sämtliche geeigneten Herkunftsinformationen benötigen weiterhin eine explizite Serveradresse. Der aufrufende Loader behandelt eine ausdrücklich konfigurierte Adresse vorrangig.
 
 ### Verwendung
 

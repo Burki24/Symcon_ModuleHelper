@@ -485,3 +485,18 @@ OpenFreeMapHelper bietet einen eigenstÃ¤ndigen wiederverwendbaren Kartenvertrag 
 Zentrale Wheel-/Scroll-/Frame-UnterstÃ¼tzung ergÃ¤nzt. Der Seiten-Helper bindet die minifizierte Interaktion automatisch ein; OpenHomeAlarm, OpenCalendar, SymconECharts und SymconiCloud erhalten die Ressource mit den vorhandenen Helper-Bundles. Kalender-Zielauswahl und Touch-Gesten bleiben lokal; generische Pointer-/Delta-Mechanik ist zentral. WoIst registriert Kartenzoom und beteiligt seinen Ã¤uÃŸeren Loader an der Frame-Weitergabe. Die native IPSView-App 6.5.19 wurde direkt mit echten Mausradaktionen geprÃ¼ft: der bisherige Stand ignoriert Kartenzoom und Listenscroll. Die Korrektur ist lokal integriert; die native Abnahme des neuen Stands erfordert noch dessen Aktualisierung auf dem Zielsystem. Webclient-Tests und simulierte native Retargeting-/Frame-Regressionen sind getrennt ausgewiesen.
 
 Abschließender lokaler Nachweis: vollständige PHP-Suiten des Helper-Repositories und aller vier Consumer bestanden. Quell-/Minify-Regressionen, reproduzierbarer esbuild-Build, Manifest-, Bundle- und Verteilungstests sowie alle vier Consumer-Hashprüfungen bestanden. Im finalen synthetischen IPSView-Browseraufbau mit äußerem Loader: echtes Mausrad änderte Zoom von 15 auf 16 und Listenscroll von 0 auf 240 Pixel; ein an den äußeren Body mit (0, 0) gerichtetes Ereignis änderte über die zentrale Frame-Weitergabe Zoom auf 15 bzw. Listenscroll auf 360 Pixel. Listenbedienung änderte dabei keinen Kartenzoom. Dieser Nachweis betrifft die lokale Browser-Einbettung, nicht die noch ausstehende aktualisierte native App. ECharts lädt das gemeinsame Asset vor den Modulskripten über seinen bestehenden Gateway-Hook, um auch den geprüften maximalen BarCategory-Payload unter 1 MB zu halten.
+
+## Addendum 2026-10-23: native IPSView base addresses
+
+The shared HTTP-origin resolver now checks document.baseURI after the actual
+HTTP document origin. Native HTMLBoxes can provide only an injected HTTP base
+while parent access, ancestorOrigins and referrer are unavailable. A regression
+reproduced this gap before the change. Real HTTP origins retain priority; unsafe
+schemes and credential-bearing addresses remain rejected, with existing fallback
+behavior preserved.
+
+The resource already belongs to the manifest-driven VisualizationAssetHelper
+bundle. The page-helper bundle contract now explicitly checks its inclusion.
+Temporary consumer bundles are tested outside the working repositories and are
+not left under libs/helper. A simulated native document is separate evidence
+from a real IPSView web client or native application acceptance test.
