@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 $tests = [
+    'raster-image.php',
     'persistent-json-cache.php',
     'reverse-geocoding.php',
     'geoapify.php',
