@@ -1,5 +1,12 @@
 # Symcon ModuleHelper & IPSView ‚Äì Project Status
 
+## Presence widget ownership correction (2026-10-23)
+
+StatusWidgetHelper is withdrawn from the central package: only SymconiCloud uses
+it. Implementation, resources, translations and tests now belong to that library.
+Centralization requires actual use by at least two different libraries. Existing
+shared theme, style, HTTP and interaction helpers remain unchanged.
+
 > Zentrale Arbeits- und √úbergabedatei f√ºr die schrittweise Zentralisierung von IPSView-Fonts, Stilquellen und Style-Profilen.
 >
 > **Ma√ügeblicher Arbeitsstand:** `Symcon_ModuleHelper/dev`
@@ -478,3 +485,18 @@ OpenFreeMapHelper bietet einen eigenst√§ndigen wiederverwendbaren Kartenvertrag 
 Zentrale Wheel-/Scroll-/Frame-Unterst√ºtzung erg√§nzt. Der Seiten-Helper bindet die minifizierte Interaktion automatisch ein; OpenHomeAlarm, OpenCalendar, SymconECharts und SymconiCloud erhalten die Ressource mit den vorhandenen Helper-Bundles. Kalender-Zielauswahl und Touch-Gesten bleiben lokal; generische Pointer-/Delta-Mechanik ist zentral. WoIst registriert Kartenzoom und beteiligt seinen √§u√üeren Loader an der Frame-Weitergabe. Die native IPSView-App 6.5.19 wurde direkt mit echten Mausradaktionen gepr√ºft: der bisherige Stand ignoriert Kartenzoom und Listenscroll. Die Korrektur ist lokal integriert; die native Abnahme des neuen Stands erfordert noch dessen Aktualisierung auf dem Zielsystem. Webclient-Tests und simulierte native Retargeting-/Frame-Regressionen sind getrennt ausgewiesen.
 
 Abschlieﬂender lokaler Nachweis: vollst‰ndige PHP-Suiten des Helper-Repositories und aller vier Consumer bestanden. Quell-/Minify-Regressionen, reproduzierbarer esbuild-Build, Manifest-, Bundle- und Verteilungstests sowie alle vier Consumer-Hashpr¸fungen bestanden. Im finalen synthetischen IPSView-Browseraufbau mit ‰uﬂerem Loader: echtes Mausrad ‰nderte Zoom von 15 auf 16 und Listenscroll von 0 auf 240 Pixel; ein an den ‰uﬂeren Body mit (0, 0) gerichtetes Ereignis ‰nderte ¸ber die zentrale Frame-Weitergabe Zoom auf 15 bzw. Listenscroll auf 360 Pixel. Listenbedienung ‰nderte dabei keinen Kartenzoom. Dieser Nachweis betrifft die lokale Browser-Einbettung, nicht die noch ausstehende aktualisierte native App. ECharts l‰dt das gemeinsame Asset vor den Modulskripten ¸ber seinen bestehenden Gateway-Hook, um auch den gepr¸ften maximalen BarCategory-Payload unter 1 MB zu halten.
+
+## Addendum 2026-10-23: native IPSView base addresses
+
+The shared HTTP-origin resolver now checks document.baseURI after the actual
+HTTP document origin. Native HTMLBoxes can provide only an injected HTTP base
+while parent access, ancestorOrigins and referrer are unavailable. A regression
+reproduced this gap before the change. Real HTTP origins retain priority; unsafe
+schemes and credential-bearing addresses remain rejected, with existing fallback
+behavior preserved.
+
+The resource already belongs to the manifest-driven VisualizationAssetHelper
+bundle. The page-helper bundle contract now explicitly checks its inclusion.
+Temporary consumer bundles are tested outside the working repositories and are
+not left under libs/helper. A simulated native document is separate evidence
+from a real IPSView web client or native application acceptance test.
