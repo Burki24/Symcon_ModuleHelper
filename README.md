@@ -8,6 +8,36 @@ Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Ger�
 
 Die Helper werden für aktuelle `IPSModuleStrict`-Module entwickelt und mit **PHP 8.5 / Symcon 9.0** getestet.
 
+## RasterImageHelper
+
+`src/RasterImageHelper.php` stellt `PrepareRasterImage(string $content): array`
+für lokale Base64-Bilduploads bereit. Der Helper ist unabhängig von Symcon-Objekten
+und benötigt keine Dateien, externen Dienste oder zusätzlichen Programme.
+Die Zentralisierung vor einer zweiten nutzenden Library ist eine ausdrücklich
+vom Benutzer beschlossene Ausnahme; die allgemeine Zwei-Libraries-Regel bleibt
+bestehen. Erster Consumer ist SymconiCloud.
+
+- Eingabe: PNG, JPEG, GIF oder WebP; maximal 10 MiB, 8192 Pixel pro Seite und
+  16 Millionen Pixel. Grenzen werden vor dem GD-Decodieren geprüft.
+- Ausgabe: maximal 512 Pixel pro Seite und 128 KiB. Seitenverhältnis und
+  Transparenz bleiben erhalten, ohne Beschnitt oder Hochskalieren. Bereits
+  passende Bilder bleiben unverändert. Bei einer erforderlichen Umwandlung
+  animierter Bilder wird das erste Bild verwendet.
+- GD skaliert und komprimiert lokal, bevorzugt als WebP; JPEG/PNG sind Fallbacks.
+  JPEG-EXIF-Ausrichtung wird bei verfügbarer EXIF-Erweiterung berücksichtigt.
+  Keine Metadatenübernahme bei neu codierten Bildern.
+- Ergebnisfelder: `content` (Base64), `mime`, `width`, `height`, `changed` und
+  `error`. Ein leeres `error` bedeutet Erfolg, auch bei absichtlich leerem Bild.
+  Fehlercodes: `input_size`, `format`, `pixels`, `unavailable`, `conversion`.
+  Übersetzung und Benutzerhinweise gehören dem aufrufenden Modul.
+- Ohne GD bleiben bereits passende Bilder nutzbar; notwendige Umwandlungen
+  melden `unavailable`. Consumer speichern/cache-en aufbereitete Ergebnisse,
+  statt bei jedem Datenupdate neu zu komprimieren. Das Original wird nicht
+  verändert. Fehler enthalten keine Bilddaten.
+
+Der Helper ist ohne weitere Abhängigkeiten und Ressourcen im Manifest registriert.
+Verhaltensprüfungen mit echten Bilddaten benötigen PHP GD; EXIF ist optional.
+
 ## Automatische Versionierung
 
 Änderungen auf `main` werden automatisch versioniert. Der Workflow

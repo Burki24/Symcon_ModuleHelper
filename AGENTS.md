@@ -25,6 +25,11 @@ Lies zuerst `../SymconDevelopment/AGENTS.md` und die für die Aufgabe relevanten
 
 ## Verträge und Dokumentation
 
+- Ausdrückliche Benutzer-Ausnahme vom 24.10.2026: `RasterImageHelper` wird bereits
+  mit SymconiCloud als erstem Consumer zentral entwickelt, damit weitere Libraries
+  dieselbe Bildaufbereitung abonnieren können. Dies lockert die Zwei-Libraries-
+  Regel ausschließlich für diesen Helper, nicht allgemein.
+
 - Öffentliche und protected Helper-APIs bleiben abwärtskompatibel, sofern eine brechende Änderung nicht ausdrücklich beschlossen und versioniert wurde.
 - Sichtbare Konfiguration, Helper-APIs und Anwenderverhalten werden im selben Arbeitspaket in `README.md` und den direkten PHPDoc-Blöcken dokumentiert.
 - Neue oder geänderte sichtbare Texte folgen dem vorhandenen Übersetzungsquellen- und Katalogverfahren.

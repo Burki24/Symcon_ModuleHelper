@@ -352,4 +352,15 @@ if fence_entries["GeofenceHelper"]["sha256"] != hashlib.sha256(fence_source).hex
 if "GeofenceHelper" not in MODULE.expand_dependents(manifest, {"GeofenceHelper"}):
     raise SystemExit("Geofence changes must remain selectable for automatic consumer updates.")
 
-print("Helper dependency bundle manifests verified, including maps, reverse geocoding and geofences.")
+raster_files, raster_entries = MODULE.bundle_files(
+    manifest, "RasterImageHelper", "libs/helper/RasterImageHelper.php"
+)
+raster_source = (ROOT / "src/RasterImageHelper.php").read_bytes()
+if raster_files != {"libs/helper/RasterImageHelper.php": raster_source}:
+    raise SystemExit("Raster image preparation must distribute its canonical source.")
+if raster_entries["RasterImageHelper"]["sha256"] != hashlib.sha256(raster_source).hexdigest():
+    raise SystemExit("Raster image bundle hash does not match its source.")
+if raster_entries["RasterImageHelper"].get("dependencies", []):
+    raise SystemExit("Raster image preparation has no additional helper dependencies.")
+
+print("Helper dependency bundle manifests verified, including raster image preparation.")
