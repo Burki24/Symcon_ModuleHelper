@@ -13,7 +13,7 @@ require_once __DIR__ . '/DebugHelper.php';
  * Callers select safe domain context; request bodies, credentials and arbitrary exceptions
  * must never be passed as context. Pure getters need no separate flow.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 trait DebugFlowHelper
 {
