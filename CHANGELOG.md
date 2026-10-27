@@ -2,6 +2,12 @@
 
 ## Fixes
 
+- `DebugFlowHelper` ergänzt einen rückgabewert- und ausnahmetreuen Callback-Ablauf
+  mit ausgeglichenen Start-/Endereignissen. Fachliche Boolean-Erklärungen und
+  optionale sichere Schreibmetadaten wie Einheiten bleiben beim Consumer.
+  Native Debugfehler verändern keine Verarbeitung; einzelne Ereignisse erhalten
+  auch außerhalb eines aktiven Ablaufs eine Vorgangskennung.
+
 - Debug-Ausgaben maskieren nun auch deutsche Passwortfelder und vollständig zitierte oder unzitierte Geheimnisse mit Leerzeichen. Zusätzliche sensible Feldnamen schützen auch Freitext-Zuweisungen; bei Fehlern der Musterprüfung werden betroffene Texte zurückgehalten. Regressionstests sichern verschachtelte Daten, JSON, Base64, URLs, Anführungszeichen und unveränderte Statusfelder ab.
 
 # Changelog
