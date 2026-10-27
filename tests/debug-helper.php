@@ -92,6 +92,70 @@ foreach ([$jsonPayload, $base64Payload] as $payload) {
     debugAssertSame(12345, $payload['nested']['value'], 'Nested numeric values must remain visible.');
 }
 
+$germanPayload = [
+    'Passwort'       => 'synthetisches Passwort mit Leerzeichen',
+    'nested'         => (object) ['SMTP_PASSWORT' => 'weiteres synthetisches Geheimnis'],
+    'PasswortLaenge' => 38,
+    'status'         => 'bereit'
+];
+foreach (['array', 'json', 'base64'] as $encoding) {
+    $input = match ($encoding) {
+        'json'   => json_encode($germanPayload, JSON_THROW_ON_ERROR),
+        'base64' => base64_encode(json_encode($germanPayload, JSON_THROW_ON_ERROR)),
+        default  => $germanPayload
+    };
+    $formatted = $helper->format($input);
+    if ($encoding === 'base64') {
+        $formatted = base64_decode($formatted, true);
+    }
+    $safe = json_decode($formatted, true, 512, JSON_THROW_ON_ERROR);
+    debugAssertSame('***', $safe['Passwort'], 'German password fields must be masked in ' . $encoding . '.');
+    debugAssertSame('***', $safe['nested']['SMTP_PASSWORT'], 'German password suffixes must be masked in ' . $encoding . '.');
+    debugAssertSame(38, $safe['PasswortLaenge'], 'Password metadata must remain visible.');
+    debugAssertSame('bereit', $safe['status'], 'Non-sensitive status must remain visible.');
+}
+
+$textCases = [
+    ['password="zwei geheime Worte" status=ok', 'password="***" status=ok'],
+    ["Passwort='zwei geheime Worte'; status=ok", "Passwort='***'; status=ok"],
+    ['PASSWORT: zwei geheime Worte, status=ok', 'PASSWORT: ***, status=ok'],
+    ['password=zwei geheime Worte', 'password=***'],
+    ['password=a,b;c&d mit Leerzeichen; status=ok', 'password=***; status=ok'],
+    ['password="synthetic \\"quoted\\" secret" status=ok', 'password="***" status=ok'],
+    ["passwd='synthetic \\'quoted\\' secret' code=1234", "passwd='***' code=1234"],
+    ["password=\"erste Zeile\nzweite Zeile\" status=ok", 'password="***" status=ok'],
+    ['password="abgeschnittener geheimer Text', 'password="***"'],
+    ["pwd='abgeschnittener geheimer Text\\", "pwd='***'"],
+    ['Antwort: {"Passwort": "synthetische geheime Worte", "status": 200}', 'Antwort: {"Passwort": "***", "status": 200}'],
+    ['smtp-password="synthetic secret" count=3', 'smtp-password="***" count=3'],
+    ['client_secret="synthetic secret" status=ok', 'client_secret="***" status=ok'],
+    ['https://example.test/?Passwort=synthetic%20secret&value=1', 'https://example.test/?Passwort=***&value=1'],
+    ['PasswortLaenge=38 tokenCount=2 status=ok', 'PasswortLaenge=38 tokenCount=2 status=ok'],
+    ['Status: Passwort fehlt; code=1234', 'Status: Passwort fehlt; code=1234'],
+    ['password="" status=ok', 'password="***" status=ok']
+];
+foreach ($textCases as [$input, $expected]) {
+    debugAssertSame($expected, $helper->format($input), 'Password text must be fully masked while preserving safe adjacent fields.');
+}
+
+debugAssertSame('password="***"', $helper->format('password="' . str_repeat('private ', 20_000) . '"'), 'Large quoted secrets must be masked before output truncation.');
+debugAssertSame('password=*** ', $helper->format('password=' . str_repeat('private ', 20_000)), 'Large plain secrets must be masked before output truncation.');
+debugAssertSame('https://example.test/?%50asswort=***&value=1', $helper->format('https://example.test/?%50asswort=synthetic%20secret&value=1'), 'Encoded query field names must not bypass masking.');
+
+$backtrackLimit = ini_set('pcre.backtrack_limit', '1');
+try {
+    $failedSanitization = $helper->format('password="synthetic private text"');
+    debugAssertTrue(!str_contains($failedSanitization, 'synthetic'), 'A failed sanitizer must withhold input instead of returning raw secrets.');
+} finally {
+    ini_set('pcre.backtrack_limit', $backtrackLimit);
+}
+
+debugAssertSame(
+    'devicePin="***" status=ok',
+    $helper->format('devicePin="synthetic private value" status=ok', 16_384, ['devicePin']),
+    'Additional sensitive keys must also protect free text.'
+);
+
 $inline = $helper->format(
     "Authorization: Bearer abc.def.ghi\n"
     . "Cookie: session=secret\n"
@@ -114,6 +178,22 @@ debugAssertSame(RuntimeException::class, $exception['type'], 'Exception debug ou
 debugAssertSame(401, $exception['code'], 'Exception debug output must include the exception code.');
 debugAssertTrue(!str_contains($exception['message'], 'top-secret-token'), 'Exception messages must be sanitized.');
 debugAssertTrue(!array_key_exists('trace', $exception), 'Exception debug output must not expose stack arguments.');
+
+$privateError = new DebugHelperHarness();
+$privateError->sendException('ProviderError', new RuntimeException('Passwort="synthetische geheime Worte" status=403'));
+$safeError = json_decode($privateError->debug[0]['data'], true, 512, JSON_THROW_ON_ERROR);
+debugAssertSame('Passwort="***" status=403', $safeError['message'], 'Exception messages must use the same complete password masking.');
+
+debugAssertSame(
+    'Passwort="***" status=ok',
+    $helper->format(new class() implements Stringable {
+        public function __toString(): string
+        {
+            return 'Passwort="synthetische geheime Worte" status=ok';
+        }
+    }),
+    'Stringable debug values must not bypass password text masking.'
+);
 
 $truncated = $helper->format(str_repeat('ä', 100), 80);
 debugAssertTrue(strlen($truncated) <= 80, 'DebugHelper must respect the configured byte limit.');

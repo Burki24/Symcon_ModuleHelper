@@ -1,3 +1,9 @@
+# Unveröffentlicht
+
+## Fixes
+
+- Debug-Ausgaben maskieren nun auch deutsche Passwortfelder und vollständig zitierte oder unzitierte Geheimnisse mit Leerzeichen. Zusätzliche sensible Feldnamen schützen auch Freitext-Zuweisungen; bei Fehlern der Musterprüfung werden betroffene Texte zurückgehalten. Regressionstests sichern verschachtelte Daten, JSON, Base64, URLs, Anführungszeichen und unveränderte Statusfelder ab.
+
 # Changelog
 
 - `ChunkedJsonTransferHelper` 1.1.0 verhindert die Überschreitung des gesamten Symcon-Instanzbufferlimits durch verschlüsselte temporäre Transferdateien, eine instanzweite Bufferbudgetprüfung und synchronisierte Metadatenpflege. Regressionstests prüfen große parallele Transfers, Datenintegrität, Ablaufbereinigung, Neustart, Quoten und bestehende Buffertransfers.

@@ -40,6 +40,15 @@ async function lifecycle() {
     assert.equal(memory.read(), null);
     memory.write(viewState);
     assert.deepEqual(api.createViewState('map:1:2', memoryEnvironment).read(), viewState, 'A replacement iframe restores its tab-scoped map state.');
+    const filteredView = {...viewState, filter: 'synthetic-account', scroll: 145};
+    memory.write({...filteredView, credentials: 'must-not-be-stored'});
+    assert.deepEqual(memory.read(), filteredView, 'Source filter and list scroll survive replacement with the camera and selection.');
+    assert.equal([...stored.values()].join('').includes('must-not-be-stored'), false, 'Unknown properties never enter storage.');
+    memory.write({...filteredView, filter: 'x'.repeat(257)});
+    assert.deepEqual(memory.read(), filteredView, 'Oversized filters cannot replace a valid view.');
+    memory.write({...filteredView, scroll: -1});
+    assert.deepEqual(memory.read(), filteredView, 'Invalid scroll values cannot replace a valid view.');
+    memory.write(viewState);
     assert.equal(api.createViewState('map:2:2', memoryEnvironment).read(), null, 'Instances cannot share view state.');
     assert.equal(api.createViewState('map:1:3', memoryEnvironment).read(), null, 'Account connections cannot share view state.');
     assert.equal(api.createViewState('map:1:2', {...memoryEnvironment, location: {search: '?visuID=other'}}).read(), null);

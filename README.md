@@ -327,9 +327,26 @@ class ExampleModule extends IPSModuleStrict
 `src/DebugHelper.php` formatiert strukturierte Symcon-Debugausgaben und maskiert
 bekannte Zugangsdaten. JSON-Objekte und -Listen, die als String oder als
 Base64-kodierter JSON-String übergeben werden, werden vor der Ausgabe ebenfalls
-rekursiv bereinigt. Frei formulierte Texte und Messwerte bleiben erhalten;
-unbekannte Geheimnisse in beliebigem Skript- oder Medieninhalt können nicht
-zuverlässig erkannt werden.
+rekursiv bereinigt. `Passwort` und Feldnamen mit der Endung `passwort`, etwa
+`SMTP_PASSWORT`, werden wie `password` maskiert. Groß-/Kleinschreibung und
+übliche Trennzeichen ändern die Erkennung nicht. Zusätzliche sensible
+Feldnamen gelten sowohl in Strukturen als auch bei Textzuweisungen.
+
+Freitext-Zuweisungen wie `password="zwei geheime Worte"` oder
+`Passwort: zwei geheime Worte, status=ok` werden vollständig maskiert.
+Anführungszeichen, maskierte Anführungszeichen, mehrzeilige zitierte Werte
+und abgebrochene zitierte Werte werden berücksichtigt. Unzitierte Werte
+reichen vorsichtshalber bis zur nächsten erkennbaren Feldzuweisung oder
+zum Zeilenende; dabei kann auch erläuternder Text entfallen. URL-Parameter
+werden einschließlich URL-kodierter Feldnamen geprüft. Bei einem Fehler
+der Musterprüfung wird der betroffene Text durch einen neutralen Platzhalter
+ersetzt, statt unbereinigte Eingaben auszugeben.
+
+Messwerte und eindeutig getrennte Statusfelder bleiben erhalten. Unbeschriftete
+Geheimnisse, Personennamen, E-Mail-Adressen, interne IP-Adressen und beliebige
+Skript-/Medieninhalte werden nicht allgemein erkannt. Solche Inhalte muss das
+Modul vor der Übergabe auslassen oder über zusätzliche sensible Feldnamen
+schützen. Auch die Debug-Kategorie `$message` bleibt Verantwortung des Aufrufers.
 
 `SendSafeDebug()` begrenzt einzelne Ausgaben standardmäßig auf 16 KiB. Für
 bewusst vollständige Diagnoseausgaben kann der Aufrufer `PHP_INT_MAX` als
@@ -1653,7 +1670,7 @@ Verteilungsläufe werden serialisiert. Bei instabilem GitHub-PR-Status wartet de
 
 `maps/openfreemap.js` hält eine Leaflet-Vektorebene und eine GL-Karte über Daten-, Stil-, Farb- und Theme-Wechsel hinweg. Nur der Basisstil wird aktualisiert; Leaflet-Kamera, Marker und Auswahl bleiben beim Consumer. Höchstens sechs Basisstile werden im Seitenspeicher gehalten; ausstehende veraltete Stilabrufe werden abgebrochen. Stil-JSON-Kameravorgaben werden vor der Anwendung entfernt. Eigene Kartenfarben, Ebenensichtbarkeit und Namenübersetzungen werden auf einer Kopie angewendet, sodass deaktivierte Anpassungen die Originaldarstellung wiederherstellen.
 
-`SymconOpenFreeMap.createViewState(key, window)` liefert `read()` und `write(value)` für die Wiederherstellung neu aufgebauter Karten-iframes. Der Consumer liefert einen stabilen instanz- und kontobezogenen Schlüssel und ein Objekt `{center: [latitude, longitude], zoom, selected, popup}`. Der Helper trennt zusätzlich nach nativer Visualisierung und Benutzer; URL-Tokens und Passwörter werden nicht übernommen. Es werden ausschließlich validierte Kartenwerte in `sessionStorage` des aktuellen Browser-Tabs gespeichert, mit vier Stunden Ablaufzeit und maximal 4096 Zeichen beim Lesen. Ungültige, abgelaufene oder nicht verfügbare Speicherstände verhindern keine Kartenanzeige. Der Consumer stellt die Kamera vor dem ersten automatischen Einpassen wieder her, gleicht die Auswahl mit seinen aktuellen Daten ab und speichert abgeschlossene Ansichts-/Auswahländerungen. Geschlossene Tabs verlieren ihren Sitzungsspeicher; ein serverseitiger oder geräteübergreifender Zustand wird nicht angelegt.
+`SymconOpenFreeMap.createViewState(key, window)` liefert `read()` und `write(value)` für die Wiederherstellung neu aufgebauter Karten-iframes. Der Consumer liefert einen stabilen instanz- und kontobezogenen Schlüssel und ein Objekt `{center: [latitude, longitude], zoom, selected, popup}`. Optional werden `filter` (String mit höchstens 256 Zeichen) und `scroll` (endliche Zahl von 0 bis 10000000) gespeichert. Filtersemantik bleibt beim Consumer; iCloud-Kontologik ist nicht Bestandteil dieses Helpers. Alte Speicherstände ohne diese Felder bleiben kompatibel; unbekannte Felder werden nicht übernommen. Der Helper trennt zusätzlich nach nativer Visualisierung und Benutzer; URL-Tokens und Passwörter werden nicht übernommen. Es werden ausschließlich validierte Kartenwerte in `sessionStorage` des aktuellen Browser-Tabs gespeichert, mit vier Stunden Ablaufzeit und maximal 4096 Zeichen beim Lesen. Ungültige, abgelaufene oder nicht verfügbare Speicherstände verhindern keine Kartenanzeige. Der Consumer stellt die Kamera vor dem ersten automatischen Einpassen wieder her, gleicht die Auswahl mit seinen aktuellen Daten ab und speichert abgeschlossene Ansichts-/Auswahländerungen. Geschlossene Tabs verlieren ihren Sitzungsspeicher; ein serverseitiger oder geräteübergreifender Zustand wird nicht angelegt.
 
 Automatik verwendet den berechneten Designer-Hintergrund und beobachtet Theme-Änderungen. Explizit sind Hell und Dunkel möglich. Die fünf mitgelieferten Stil-Vorgaben und eigene HTTPS-Stil-URLs können je Theme gewählt werden. Farbgruppen: Land, Wasser, Grünflächen, Straßen, Gebäude und Texte; Ebenengruppen: Beschriftungen, POI, Gebäude und Grenzen. Eigene Stile müssen passende Vektorebenen enthalten. Attribution wird nicht ausgeblendet.
 
