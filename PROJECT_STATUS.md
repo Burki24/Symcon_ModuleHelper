@@ -1,5 +1,14 @@
 # Symcon ModuleHelper & IPSView – Project Status
 
+## Map filter and scroll persistence (2026-10-27)
+
+The shared OpenFreeMap createViewState API accepts optional bounded filter and
+scroll values. Legacy states remain compatible and unknown fields are excluded.
+Account semantics remain consumer-owned; no iCloud-specific helper was added.
+Regression, metadata and consumer bundle tests run in an isolated workspace;
+no provisional helper copies remain in the consumer working tree.
+
+
 ## Presence widget ownership correction (2026-10-23)
 
 StatusWidgetHelper is withdrawn from the central package: only SymconiCloud uses
