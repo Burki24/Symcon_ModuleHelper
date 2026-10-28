@@ -2,6 +2,11 @@
 
 ## Fixes
 
+- `ResponsiveVisualizationHelper` berücksichtigt den nativen Maximieren-Button
+  unabhängig von der Kachelüberschrift. Bei verborgenem Titel hält eine optional
+  markierte obere Bedienleiste rechts Platz frei; die übrige Fläche bleibt frei.
+  Sichtbarer Titel, ausgeblendeter Button und IPSView behalten ihre Abstände.
+
 - `DebugFlowHelper` ergänzt einen rückgabewert- und ausnahmetreuen Callback-Ablauf
   mit ausgeglichenen Start-/Endereignissen. Fachliche Boolean-Erklärungen und
   optionale sichere Schreibmetadaten wie Einheiten bleiben beim Consumer.
