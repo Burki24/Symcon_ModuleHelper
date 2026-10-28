@@ -49,8 +49,10 @@ assertTrueValue(str_contains($responsiveFrame, 'min-height: 0;'), 'The frame mus
 assertTrueValue(str_contains($responsiveFrame, 'padding-top: calc(var(--symc-responsive-padding, 12px) + var(--symc-tile-header-inset, 0px));'), 'The frame must reserve the canonical heading inset once.');
 assertFalseValue(str_contains($responsiveFrame, '--symc-tile-header-inset:'), 'The frame must inherit the dynamic heading inset from an ancestor without shadowing it.');
 assertTrueValue(str_contains($responsiveFrame, 'overflow: hidden;'), 'Scrolling belongs to module content rather than the outer page.');
-assertSameValue(['tileHeaderVisible' => false, 'tileHeaderInset' => 0], $responsiveVisualizationHarness->layout(false), 'IPSView must never reserve the native heading.');
-assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58], $responsiveVisualizationHarness->layout(), 'Unavailable object lookup must conservatively reserve the visible heading.');
+assertTrueValue(str_contains($responsiveFrame, '[data-symc-tile-toolbar]'), 'Only opted-in toolbars must reserve native overlay space.');
+assertTrueValue(str_contains($responsiveFrame, 'padding-right: var(--symc-tile-action-inset, 0px);'), 'The native maximize overlay is physically on the right, including RTL content.');
+assertSameValue(['tileHeaderVisible' => false, 'tileHeaderInset' => 0, 'tileMaximizeVisible' => false, 'tileActionInset' => 0], $responsiveVisualizationHarness->layout(false), 'IPSView must never reserve native controls.');
+assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58, 'tileMaximizeVisible' => true, 'tileActionInset' => 0], $responsiveVisualizationHarness->layout(), 'Unavailable object lookup must conservatively reserve the visible heading.');
 
 // Run object API fixtures in isolation so they cannot affect the shared test process.
 passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/responsive-visualization-heading.php'), $responsiveHeadingExitCode);

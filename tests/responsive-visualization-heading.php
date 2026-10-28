@@ -30,12 +30,25 @@ $headingHarness = new class() {
     }
 };
 foreach ([[], ['ObjectIsHiddenTitle' => false]] as $headingObject) {
-    assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58], $headingHarness->layout(), 'Visible or missing title metadata must reserve the shared inset.');
+    assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58, 'tileMaximizeVisible' => true, 'tileActionInset' => 0], $headingHarness->layout(), 'Visible or missing title metadata must reserve the shared inset.');
+}
+foreach ([true, false] as $hideTitle) {
+    foreach ([true, false] as $hideMaximize) {
+        $headingObject = ['ObjectIsHiddenTitle' => $hideTitle, 'ObjectIsHiddenMaximize' => $hideMaximize];
+        $before = $headingLookups;
+        assertSameValue([
+            'tileHeaderVisible'   => !$hideTitle,
+            'tileHeaderInset'     => $hideTitle ? 0 : 58,
+            'tileMaximizeVisible' => !$hideMaximize,
+            'tileActionInset'     => $hideTitle && !$hideMaximize ? 44 : 0
+        ], $headingHarness->layout(), 'Only a hidden title and visible maximize control require an inline toolbar reservation.');
+        assertSameValue($before + 1, $headingLookups, 'Both flags must come from the same object snapshot.');
+    }
 }
 $headingObject = ['ObjectIsHiddenTitle' => true];
-assertSameValue(['tileHeaderVisible' => false, 'tileHeaderInset' => 0], $headingHarness->layout(), 'Hidden native headings must not waste viewport height.');
+assertSameValue(44, $headingHarness->layout()['tileActionInset'], 'A missing maximize flag conservatively reserves the control beside a hidden title.');
 $headingObject = null;
-assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58], $headingHarness->layout(), 'Failed native lookups must retain the conservative heading inset.');
+assertSameValue(['tileHeaderVisible' => true, 'tileHeaderInset' => 58, 'tileMaximizeVisible' => true, 'tileActionInset' => 0], $headingHarness->layout(), 'Failed native lookups must retain the conservative heading inset.');
 $lookupsBeforeIPSView = $headingLookups;
-assertSameValue(['tileHeaderVisible' => false, 'tileHeaderInset' => 0], $headingHarness->layout(false), 'IPSView has no native heading.');
+assertSameValue(['tileHeaderVisible' => false, 'tileHeaderInset' => 0, 'tileMaximizeVisible' => false, 'tileActionInset' => 0], $headingHarness->layout(false), 'IPSView has neither a native heading nor a native maximize control.');
 assertSameValue($lookupsBeforeIPSView, $headingLookups, 'IPSView must not access the native object API.');

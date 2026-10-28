@@ -919,9 +919,19 @@ class ExampleModule extends IPSModuleStrict
 | Methode | Aufgabe |
 | --- | --- |
 | `ResponsiveVisualizationCSS()` | Richtet einen Root-Selektor als Container-Query-Kontext ein und liefert gemeinsame Abstands- und Touch-Target-Tokens. Mit dem optionalen dritten Parameter `true` wird ein bildschirmfüllender Flex-Rahmen ohne äußeres Scrollen erzeugt. |
-| `ResponsiveVisualizationLayoutOptions(bool $nativeTile = true)` | Liefert `tileHeaderVisible` und `tileHeaderInset` für die native Kachelüberschrift. Sichtbarer Titel oder fehlgeschlagene Objekterkennung reservieren 58 CSS-Pixel, ausgeblendete Titel und IPSView (`false`) 0 Pixel. |
+| `ResponsiveVisualizationLayoutOptions(bool $nativeTile = true)` | Liefert `tileHeaderVisible` und `tileHeaderInset` für die native Kachelüberschrift sowie `tileMaximizeVisible` und `tileActionInset` für den Maximieren-Button. Sichtbarer Titel oder fehlgeschlagene Objekterkennung reservieren 58 CSS-Pixel oben. Bei verborgenem Titel und sichtbarem Maximieren-Button werden stattdessen 44 Pixel rechts in der oberen Bedienleiste reserviert. Beide ausgeblendet oder IPSView (`false`): keine Reservierung. |
 
 Für bildschirmfüllende Karten und Diagramme ruft das Modul beispielsweise `ResponsiveVisualizationCSS('#example-app', 'example-view', true)` auf und übergibt die Layoutoptionen an seinen Client. Der Client setzt `--symc-tile-header-inset` am Root-Element auf den gelieferten Pixelwert. Der gemeinsame Rahmen berücksichtigt diesen Abstand einmal als oberen Innenabstand. Modul-CSS darf keinen zweiten Titelabstand und keine feste gemeinsame Höhenvorgabe ergänzen; fachliche Aufteilung, Listen und Breakpoints bleiben im Modul. Bestehende Aufrufe mit zwei Parametern behalten ihr bisheriges CSS unverändert.
+
+Die obere Bedienleiste wird mit `data-symc-tile-toolbar` markiert; der Client
+setzt zusätzlich `--symc-tile-action-inset` auf den gelieferten `tileActionInset`
+in CSS-Pixeln. Nur diese markierte Leiste erhält den rechten Innenabstand.
+Karte, Diagramm und Geräteliste behalten ihre volle Breite. Die beiden
+Sichtbarkeitsangaben stammen aus derselben `IPS_GetObject`-Abfrage
+(`ObjectIsHiddenTitle`/`ObjectIsHiddenMaximize`, ab Symcon 9.1). Fehlende Felder
+gelten konservativ als sichtbar; IPSView liest keine Objektflags und reserviert
+keine nativen Bedienelemente. Bestehende Consumer ohne Markierung bleiben
+unverändert; neue Metadatenfelder ergänzen den bisherigen Vertrag.
 
 ## VisualizationThemeConfigurationHelper
 
