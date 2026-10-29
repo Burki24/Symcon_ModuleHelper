@@ -330,11 +330,43 @@ final class IPSViewHTMLPageMissingVariableFallbackHarness
     }
 }
 
+final class IPSViewHTMLPageSyntheticPathHarness
+{
+    use IPSViewHTMLPageHelper;
+
+    public function __construct(private readonly string $visualizationDirectory)
+    {
+    }
+
+    /** @param list<string> $additionalKeys */
+    public function translationsFromLocale(array $additionalKeys = []): array
+    {
+        return $this->IPSViewTranslationsFromLocale($additionalKeys);
+    }
+
+    protected function VisualizationAssetDirectory(): string
+    {
+        return $this->visualizationDirectory;
+    }
+
+    protected function HelperTranslationLanguageOverride(): string
+    {
+        return 'de_DE';
+    }
+
+    protected function SendDebug(string $message, mixed $data, int $format): void
+    {
+    }
+}
+
 $visualizationDirectory = __DIR__ . '/visualization';
 $templatePath = $visualizationDirectory . '/index.html';
 $stylePath = $visualizationDirectory . '/style.css';
 $scriptPath = $visualizationDirectory . '/app.js';
 $localePath = __DIR__ . '/locale.json';
+$syntheticModuleDirectory = __DIR__ . '/synthetic-module';
+$syntheticVisualizationDirectory = $syntheticModuleDirectory . '/visualization';
+$syntheticLocalePath = $syntheticModuleDirectory . '/locale.json';
 
 $template = <<<'HTML'
 <!DOCTYPE html>
@@ -357,6 +389,13 @@ HTML;
 if (!is_dir($visualizationDirectory) && !mkdir($visualizationDirectory) && !is_dir($visualizationDirectory)) {
     throw new RuntimeException('Visualization test directory could not be created.');
 }
+if (
+    !is_dir($syntheticVisualizationDirectory)
+    && !mkdir($syntheticVisualizationDirectory, 0777, true)
+    && !is_dir($syntheticVisualizationDirectory)
+) {
+    throw new RuntimeException('Synthetic module test directory could not be created.');
+}
 
 file_put_contents($templatePath, $template);
 file_put_contents($stylePath, '.module { display: block; }');
@@ -372,6 +411,19 @@ file_put_contents(
                 ],
                 'en' => [
                     'Module title' => 'Module title'
+                ]
+            ]
+        ],
+        JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+    )
+);
+file_put_contents(
+    $syntheticLocalePath,
+    json_encode(
+        [
+            'translations' => [
+                'de' => [
+                    'Synthetic WebHook text' => 'Synthetischer WebHook-Text'
                 ]
             ]
         ],
@@ -748,6 +800,12 @@ try {
         $helper->translationsFromLocale(['Runtime only']),
         'Locale translations must use the active Symcon language independently of the request translator.'
     );
+    $syntheticPathHelper = new IPSViewHTMLPageSyntheticPathHarness($syntheticVisualizationDirectory);
+    assertSameValue(
+        ['Synthetic WebHook text' => 'Synthetischer WebHook-Text'],
+        $syntheticPathHelper->translationsFromLocale(),
+        'Locale lookup must follow the consumer asset-directory override used for synthetic WebHook paths.'
+    );
     $helper->setHelperLanguage('en');
     assertSameValue(
         [
@@ -827,13 +885,19 @@ try {
     );
     assertTrueValue(count($helper->debugMessages()) >= 1, 'Missing assets must be reported through SendDebug().');
 } finally {
-    foreach ([$templatePath, $stylePath, $scriptPath, $localePath] as $path) {
+    foreach ([$templatePath, $stylePath, $scriptPath, $localePath, $syntheticLocalePath] as $path) {
         if (is_file($path)) {
             unlink($path);
         }
     }
     if (is_dir($visualizationDirectory)) {
         rmdir($visualizationDirectory);
+    }
+    if (is_dir($syntheticVisualizationDirectory)) {
+        rmdir($syntheticVisualizationDirectory);
+    }
+    if (is_dir($syntheticModuleDirectory)) {
+        rmdir($syntheticModuleDirectory);
     }
 }
 

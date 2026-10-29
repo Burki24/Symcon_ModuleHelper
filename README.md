@@ -849,7 +849,7 @@ oder ein Modulupdate löscht keine Variablen.
 | `RegenerateIPSViewHTMLPages()` | Rendert über `GetIPSViewHTML()` neu und aktualisiert alle registrierten, vorhandenen IPSView-Variablen. |
 | `RenderVisualizationHTMLPage()` | Lädt Template, CSS und JavaScript, erzeugt den gemeinsamen Bootstrap und rendert das vollständige HTML-Dokument. |
 | `EncodeVisualizationHTMLJSON()` | Kodiert JSON mit zentralen Schutzflags für die sichere Einbettung in ein `script`-Element. |
-| `IPSViewTranslationsFromLocale()` | Liest alle Quelltexte aus der `locale.json` des konkreten Moduls und wählt ihre Übersetzung ausdrücklich anhand der aktiven Symcon-Sprache. Dadurch bleibt die Sprache auch bei direkt über einen WebHook geladenen Seiten unabhängig vom HTTP-Aufrufkontext stabil. |
+| `IPSViewTranslationsFromLocale()` | Liest alle Quelltexte aus der `locale.json` des konkreten Moduls und wählt ihre Übersetzung ausdrücklich anhand der aktiven Symcon-Sprache. Die Modulpfadauflösung folgt dabei demselben `VisualizationAssetDirectory()`-Override wie die Visualisierungsdateien, sodass Sprache und Übersetzungen auch bei synthetischen WebHook-Dateipfaden stabil bleiben. |
 | `IPSViewTranslationsFor()` | Übersetzt einen explizit übergebenen Satz von Quelltexten. |
 
 Der Helper bezieht `HelperTranslationHelper` und `VisualizationAssetHelper` als zentrale Abhängigkeiten. Die helper-eigenen Formulartexte werden aus `translations/IPSViewHTMLPageHelper.json` geladen; Consumer benötigen dafür keine zusätzlichen `locale.json`-Einträge. `VisualizationThemeHelper` und `IPSViewStyleHelper` bleiben eigenständige Bausteine; deren CSS wird dem Seiten-Helper lediglich übergeben.
