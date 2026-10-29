@@ -6,7 +6,6 @@ namespace Burki24\SymconModuleHelper;
 
 use InvalidArgumentException;
 use JsonException;
-use ReflectionClass;
 use RuntimeException;
 use Throwable;
 
@@ -1017,12 +1016,6 @@ trait IPSViewHTMLPageHelper
 
     private function ResolveIPSViewHTMLModuleDirectory(): string
     {
-        $reflection = new ReflectionClass($this);
-        $moduleFile = $reflection->getFileName();
-        if (!is_string($moduleFile) || $moduleFile === '') {
-            throw new RuntimeException('The module file path could not be determined.');
-        }
-
-        return dirname($moduleFile);
+        return dirname($this->VisualizationAssetDirectory());
     }
 }
