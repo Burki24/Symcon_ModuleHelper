@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.29.1",
+  "repository_version": "3.29.2",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -185,8 +185,8 @@
     },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
-      "version": "1.5.3",
-      "sha256": "e03d0bf8118c550026a84b271ce17a6c48f489cf5c33b50da0e9c41daa653a2a",
+      "version": "1.5.4",
+      "sha256": "aa36bbf643408b6a68220cf4f3c301fd2e14cba201b425715d8eac40d156ba3a",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"
@@ -407,6 +407,6 @@
       "sha256": "2c9f18d6ad9809015e6415f510106c02f1bb709b1d37e8acba4a6ad4ef151a81"
     }
   },
-  "repository_build": 22977015,
-  "repository_date": 1793174585
+  "repository_build": 92141436,
+  "repository_date": 1793287850
 }
