@@ -737,15 +737,27 @@ try {
         'The shared JSON encoder must apply the common safe encoding flags.'
     );
 
+    $helper->setHelperLanguage('de_DE');
     assertSameValue(
         [
-            'Close'        => 'translated:Close',
-            'Hello'        => 'translated:Hello',
-            'Module title' => 'translated:Module title',
-            'Runtime only' => 'translated:Runtime only'
+            'Close'        => 'Schließen',
+            'Hello'        => 'Hallo',
+            'Module title' => 'Module title',
+            'Runtime only' => 'Runtime only'
         ],
         $helper->translationsFromLocale(['Runtime only']),
-        'Locale translations and additional runtime keys must use the active translator.'
+        'Locale translations must use the active Symcon language independently of the request translator.'
+    );
+    $helper->setHelperLanguage('en');
+    assertSameValue(
+        [
+            'Close'        => 'Close',
+            'Hello'        => 'Hello',
+            'Module title' => 'Module title',
+            'Runtime only' => 'Runtime only'
+        ],
+        $helper->translationsFromLocale(['Runtime only']),
+        'Missing English locale entries must preserve their source text.'
     );
     assertSameValue(
         [
