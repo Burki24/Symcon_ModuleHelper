@@ -13,7 +13,7 @@ use Throwable;
  * Unknown semantics remain blocked with their complete original definition.
  * Native COLOR and CONTENT_COLOR are retained as independent parameters.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 final class VariablePresentationNormalizationHelper
 {
