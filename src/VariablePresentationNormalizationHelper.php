@@ -14,7 +14,7 @@ use Throwable;
  * Native COLOR and CONTENT_COLOR are retained as independent parameters.
  * Native display/preview settings are preserved without deriving value scaling.
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 final class VariablePresentationNormalizationHelper
 {
