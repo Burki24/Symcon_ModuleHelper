@@ -163,12 +163,34 @@ assertSameValue(
     'Boolean presentation must use the native value presentation.'
 );
 $booleanOptions = json_decode((string) ($boolean['OPTIONS'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+// Symcon 9.0 Windows build 5b5346950c61: the reported value-presentation form
+// directly reads these flags (community.symcon.de/t/beta-modul-symconicloud/144792/61).
+// This small independent form-consumer reproduction intentionally treats warnings as failures.
+$readValueOption = static function (array $option): array
+{
+    return [
+        'icon'       => $option['IconActive'] ? $option['IconValue'] : '',
+        'background' => $option['ColorActive'] ? $option['ColorValue'] : -1,
+        'text'       => $option['ContentColorActive'] ? $option['ContentColorValue'] : -1
+    ];
+};
+set_error_handler(static function (int $severity, string $message): never
+{
+    throw new ErrorException($message, 0, $severity);
+});
+try {
+    foreach ($booleanOptions as $option) {
+        assertSameValue(['icon' => '', 'background' => -1, 'text' => -1], $readValueOption($option), 'A default Boolean row must be safe for the Symcon 9.0 form.');
+    }
+} finally {
+    restore_error_handler();
+}
 assertSameValue(
     [
         ['Value' => false, 'Caption' => 'Nein'],
         ['Value' => true, 'Caption' => 'Ja/東京']
     ],
-    $booleanOptions,
+    array_map(static fn (array $option): array => array_intersect_key($option, ['Value' => true, 'Caption' => true]), $booleanOptions),
     'Boolean presentation must encode false and true captions in stable order.'
 );
 assertTrueValue(
@@ -306,9 +328,42 @@ $readOnlyDefinitions = [['Value' => false, 'Caption' => 'No'], ['Value' => true,
 $readOnlyOptions = $presentation->options($readOnlyDefinitions, 'list', -1, '[', ']');
 assertSameValue(VARIABLE_PRESENTATION_VALUE_PRESENTATION, $readOnlyOptions['PRESENTATION'] ?? null, 'Read-only options must use value presentation.');
 assertSameValue('list', $readOnlyOptions['ICON'] ?? null, 'Read-only options must keep the configured icon.');
-assertSameValue($readOnlyDefinitions, json_decode((string) $readOnlyOptions['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Boolean options must retain their native JSON contract.');
+$decodedReadOnly = json_decode((string) $readOnlyOptions['OPTIONS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue($readOnlyDefinitions, array_map(static fn (array $option): array => array_intersect_key($option, ['Value' => true, 'Caption' => true]), $decodedReadOnly), 'Boolean values/captions must retain their types and order.');
 $stringOptions = [['Value' => 'idle', 'Caption' => 'Idle'], ['Value' => 'active', 'Caption' => 'Active']];
-assertSameValue($stringOptions, json_decode($presentation->options($stringOptions)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'String options must remain unchanged.');
+$decodedStrings = json_decode($presentation->options($stringOptions)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue($stringOptions, array_map(static fn (array $option): array => array_intersect_key($option, ['Value' => true, 'Caption' => true]), $decodedStrings), 'String values/captions must remain unchanged.');
+
+$expectedDefaults = ['IconActive' => false, 'IconValue' => '', 'ColorActive' => false, 'ColorValue' => -1, 'ContentColorActive' => false, 'ContentColorValue' => -1];
+foreach ([$booleanOptions, $decodedReadOnly, $decodedStrings] as $rows) {
+    foreach ($rows as $row) {
+        foreach ($expectedDefaults as $field => $default) {
+            assertTrueValue(array_key_exists($field, $row), 'Every value-option row requires ' . $field);
+            assertSameValue($default, $row[$field], 'Missing overrides must use neutral typed defaults.');
+        }
+        assertSameValue(['icon' => '', 'background' => -1, 'text' => -1], $readValueOption($row), 'Default rows must not override icons or colors.');
+    }
+}
+$customRows = [
+    ['Value' => false, 'Caption' => 'No', 'IconActive' => true, 'IconValue' => 'star', 'ColorActive' => true, 'ColorValue' => 0, 'ContentColorActive' => true, 'ContentColorValue' => 0xFFFFFF, 'FutureField' => ['keep' => true]],
+    ['Value' => '0', 'Caption' => 'Zero/東京', 'IconActive' => false, 'IconValue' => 'retained', 'ColorActive' => false, 'ColorValue' => 0, 'ContentColorActive' => false, 'ContentColorValue' => -1]
+];
+$customInput = $customRows;
+$decodedCustom = json_decode($presentation->options($customRows)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue($customInput, $customRows, 'Option builders must not mutate caller-owned definitions.');
+assertSameValue($customRows, $decodedCustom, 'Explicit overrides, false, zero, Unicode and future fields must remain unchanged.');
+assertSameValue(['icon' => 'star', 'background' => 0, 'text' => 0xFFFFFF], $readValueOption($decodedCustom[0]), 'Explicit icon/background/text overrides must remain effective.');
+assertSameValue(['icon' => '', 'background' => -1, 'text' => -1], $readValueOption($decodedCustom[1]), 'Inactive override values must remain dormant.');
+$partial = [['Value' => '', 'Caption' => 'Empty', 'IconValue' => 'retained', 'ColorActive' => true, 'ColorValue' => 0]];
+$partialDecoded = json_decode($presentation->options($partial)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR);
+assertSameValue('', $partialDecoded[0]['Value'], 'Empty string option values must not become Boolean false.');
+assertSameValue('retained', $partialDecoded[0]['IconValue'], 'A supplied inactive icon must not be replaced.');
+assertSameValue(['icon' => '', 'background' => 0, 'text' => -1], $readValueOption($partialDecoded[0]), 'Partially specified overrides must retain black and inherit other defaults.');
+$sharedRow = ['Value' => false, 'Caption' => 'Shared row'];
+$sharedBefore = $sharedRow;
+$referencedRows = [&$sharedRow];
+$presentation->options($referencedRows);
+assertSameValue($sharedBefore, $sharedRow, 'Completing options must not mutate caller rows held by reference.');
 
 assertSameValue($enumerationOptions, json_decode($presentation->options($enumerationOptions)['OPTIONS'], true, 512, JSON_THROW_ON_ERROR), 'Existing options serialization must remain unchanged for staged distribution.');
 

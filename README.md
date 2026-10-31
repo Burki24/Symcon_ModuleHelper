@@ -534,6 +534,43 @@ Die vorhandene `OptionsPresentation()`-API bleibt unverändert. Eine Integer-Var
 mit nativer Wertanzeige unterstützt laut [offiziellem SDK](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/value-presentation/)
 keine `OPTIONS`; diese sind ausschließlich für Boolean und String vorgesehen.
 
+### Vollständige Wertanzeige-Optionen unter Symcon 9.0
+
+`BooleanPresentation()` und `OptionsPresentation()` ergänzen in Boolean-/String-
+Zeilen ausschließlich fehlende Override-Felder. `Value`, `Caption`, Reihenfolge,
+Datentypen und sämtliche ausdrücklich gesetzten oder zusätzlichen Felder bleiben
+erhalten. Auch `false`, eine schwarze Farbe als `0` und deaktivierte, gespeicherte
+Overrides werden nicht durch Defaults ersetzt. Eingabearrays werden nicht verändert.
+
+| Feld | Typ | Ergänzung, wenn das Feld fehlt |
+| --- | --- | --- |
+| `IconActive` | bool | `false` |
+| `IconValue` | string | `''` |
+| `ColorActive` | bool | `false` |
+| `ColorValue` | int | `-1` |
+| `ContentColorActive` | bool | `false` |
+| `ContentColorValue` | int | `-1` |
+
+Die ersten vier Felder sind in der [offiziellen Wertanzeige-Dokumentation](https://www.symcon.de/de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/darstellungen/wertanzeige/)
+beschrieben. Die Textfarbfelder und die direkten Flag-Zugriffe sind zusätzlich
+im vom Benutzer veröffentlichten Formular von **Symcon 9.0 Windows, Build
+5b5346950c61 vom 21.10.2026** belegt: [Version](https://community.symcon.de/t/beta-modul-symconicloud/144792/56),
+[Formularfehler](https://community.symcon.de/t/beta-modul-symconicloud/144792/61).
+Die Regression prüft diesen Feldzugriff ohne fehlende Array-Schlüssel. Das ist
+ein Offline-Nachweis aus dem gemeldeten Formular, kein eigener Laufzeittest auf
+diesem Build und kein belegter Vergleich mit Symcon 9.1.
+
+Es werden keine Darstellungs-, Icon- oder Farb-Overrides aktiviert. Aufzählungen,
+numerische Intervalle und bisherige numerische Optionszeilen ändern sich nicht.
+Der Helper erzeugt nur Definitionsarrays und schreibt keine Variablen oder
+benutzerdefinierten Darstellungen. Bestehende Instanzen benötigen nach regulärer
+Helper-Verteilung eine erneute Registrierung der nativen Darstellung durch ihr
+Modul; Werte, Idents und Objekt-IDs müssen dabei erhalten bleiben. Eine eigene
+Darstellung hat weiterhin Vorrang und wird nicht automatisch überschrieben.
+Ein bereits gespeichertes, unvollständiges benutzerdefiniertes `OPTIONS`-Array
+wird von diesem reinen Builder nicht nachträglich repariert. Die tatsächliche
+Formular- und WebFront-Abnahme auf dem betroffenen 9.0-Build bleibt erforderlich.
+
 ## GeofenceHelper
 
 `AggregateGeofencePresence(list<int> $states): int` bildet die gemeinsame
