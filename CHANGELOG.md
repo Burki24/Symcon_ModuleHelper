@@ -10,6 +10,12 @@
 
 ## Fixes
 
+- `VariablePresentationNormalizationHelper` erhält die von Symcon 9.1 gemeinsam
+  gelieferten Felder `DISPLAY_TYPE`, `PREVIEW_STYLE` und `SHOW_PREVIEW` mit ihren
+  nativen Typen. Der vollständige beobachtete Parametersatz, SDK-Rundlauf,
+  Feldbilanz und explizite Null-/False-Werte sind durch Regressionstests
+  abgesichert; bestehende Formatierung und Prozentregeln bleiben erhalten.
+
 - `VariablePresentationNormalizationHelper` erhält das von Symcon 9.1 gelieferte
   ganzzahlige `CONTENT_COLOR` unabhängig von `COLOR`. Gültige Farbangaben
   blockieren den JSLive-Export nicht mehr; Originaldaten, native Parameter,

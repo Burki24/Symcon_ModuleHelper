@@ -12,6 +12,7 @@ use Throwable;
  * Lists remain arrays until ToSDK(); no variable, profile or value is written.
  * Unknown semantics remain blocked with their complete original definition.
  * Native COLOR and CONTENT_COLOR are retained as independent parameters.
+ * Native display/preview settings are preserved without deriving value scaling.
  *
  * @version 1.0.1
  */
@@ -120,6 +121,7 @@ final class VariablePresentationNormalizationHelper
             $keys = ['prefix'        => 'PREFIX', 'suffix' => 'SUFFIX', 'digits' => 'DIGITS', 'minimum' => 'MIN',
                 'maximum'            => 'MAX', 'stepSize' => 'STEP_SIZE', 'icon' => 'ICON', 'color' => 'COLOR',
                 'contentColor'       => 'CONTENT_COLOR',
+                'displayType'        => 'DISPLAY_TYPE', 'previewStyle' => 'PREVIEW_STYLE', 'showPreview' => 'SHOW_PREVIEW',
                 'percentage'         => 'PERCENTAGE', 'usageType' => 'USAGE_TYPE', 'decimalSeparator' => 'DECIMAL_SEPARATOR',
                 'thousandsSeparator' => 'THOUSANDS_SEPARATOR', 'options' => 'OPTIONS', 'intervals' => 'INTERVALS'];
             $effective = ['kind' => match ($id) {
@@ -261,8 +263,8 @@ final class VariablePresentationNormalizationHelper
     {
         $strings = ['PREFIX', 'SUFFIX', 'ICON', 'THOUSANDS_SEPARATOR', 'DECIMAL_SEPARATOR'];
         $numbers = ['MIN', 'MAX', 'STEP_SIZE'];
-        $integers = ['DIGITS', 'COLOR', 'CONTENT_COLOR', 'USAGE_TYPE', 'GRADIENT_TYPE', 'LAYOUT', 'DISPLAY'];
-        $booleans = ['PERCENTAGE', 'INTERVALS_ACTIVE', 'MULTILINE'];
+        $integers = ['DIGITS', 'COLOR', 'CONTENT_COLOR', 'USAGE_TYPE', 'GRADIENT_TYPE', 'LAYOUT', 'DISPLAY', 'DISPLAY_TYPE', 'PREVIEW_STYLE'];
+        $booleans = ['PERCENTAGE', 'INTERVALS_ACTIVE', 'MULTILINE', 'SHOW_PREVIEW'];
         foreach ($parameters as $key => $value) {
             $valid = match (true) {
                 in_array($key, $strings, true)                                    => is_string($value),

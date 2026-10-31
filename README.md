@@ -42,6 +42,16 @@ werden nicht ergänzt und ungültige Typen bleiben blockiert. Dieser
 Kompatibilitätsfall beruht auf der gemeldeten Live-Exportprüfung vom 31.10.2026;
 die unten verlinkte SDK-Tabelle führt `CONTENT_COLOR` derzeit noch nicht auf.
 
+Die auf der Symcon-9.1-Testebene gemeinsam gelieferten Parameter `DISPLAY_TYPE`
+und `PREVIEW_STYLE` (Ganzzahlen) sowie `SHOW_PREVIEW` (Boolean) werden ebenfalls
+typgeprüft erhalten. Sie stehen unverändert in `native.parameters`, `ToSDK()`
+und der Feldbilanz sowie als `effective.displayType`, `effective.previewStyle`
+und `effective.showPreview` bereit. Auch `0` und `false` bleiben erhalten;
+fehlende Parameter werden nicht ergänzt. `DISPLAY_TYPE`, `DISPLAY` und
+`PERCENTAGE` bleiben eigenständige Felder ohne abgeleitete Prozentumrechnung.
+Ein Regressionstest deckt den vollständigen beobachteten nativen Parametersatz
+ab; private Objektkennungen und Variablenwerte sind kein Teil der Testdaten.
+
 Nicht belegte Sonderprofile, dynamische printf-Texte, unbekannte Parameter und
 inkompatible Kombinationen werden samt Originaldaten als `blocked` zurückgegeben.
 Sie werden nicht als leere Einheit oder generische Zahlenanzeige kaschiert.
