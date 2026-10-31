@@ -72,6 +72,43 @@ $intervals = VariablePresentationNormalizationHelper::Normalize(2, $parameters);
 assertPresentationNormalization($intervals['native']['parameters']['INTERVALS'][0]['ConversionFactor'] === 1000, 'Conversion factor lost.');
 $sdk = VariablePresentationNormalizationHelper::ToSDK($intervals);
 assertPresentationNormalization(is_string($sdk['INTERVALS']) && !isset($sdk['PROFILE']), 'Native SDK serialization must encode lists without profile dependency.');
+
+// Symcon 9.1 exports CONTENT_COLOR independently of the default COLOR.
+foreach ([VariablePresentationNormalizationHelper::VALUE, VariablePresentationNormalizationHelper::SLIDER,
+    VariablePresentationNormalizationHelper::ENUMERATION] as $presentationID) {
+    foreach ([-1, 0, 0xFFFFFF, 0x12ABEF, 0x8044CC11, 0xFFFFFFFF] as $contentColor) {
+        $coloredPresentation = ['PRESENTATION' => $presentationID, 'COLOR' => 0xFF00FF, 'CONTENT_COLOR' => $contentColor];
+        $colored = VariablePresentationNormalizationHelper::Normalize(1, $coloredPresentation);
+        assertPresentationNormalization($colored['conversion']['status'] === 'exact', 'Native CONTENT_COLOR must not block a supported presentation.');
+        assertPresentationNormalization($colored['original']['presentation'] === $coloredPresentation, 'Original native colors changed.');
+        assertPresentationNormalization($colored['effective']['color'] === 0xFF00FF
+            && $colored['effective']['contentColor'] === $contentColor, 'Default and content colors must stay independent, including zero and automatic color.');
+        assertPresentationNormalization(
+            VariablePresentationNormalizationHelper::ToSDK($colored) === $coloredPresentation,
+            'SDK serialization must preserve both native color parameters without conversion.'
+        );
+        assertPresentationNormalization(
+            in_array(['source'                               => '/original/presentation/CONTENT_COLOR',
+                'target'                                     => '/native/parameters/CONTENT_COLOR', 'status' => 'exact'], $colored['conversion']['fieldCoverage'], true),
+            'The content color must have an exact source and target in the field coverage.'
+        );
+    }
+}
+$legacyColored = VariablePresentationNormalizationHelper::Normalize(
+    2,
+    ['PROFILE' => 'Example.Number', 'CONTENT_COLOR' => 0],
+    ['Example.Number' => $before]
+);
+assertPresentationNormalization($legacyColored['conversion']['status'] === 'exact'
+    && $legacyColored['effective']['contentColor'] === 0
+    && $legacyColored['native']['parameters']['CONTENT_COLOR'] === 0, 'Legacy conversion must retain explicit native content color overrides.');
+assertPresentationNormalization(!array_key_exists('CONTENT_COLOR', $result['native']['parameters']), 'A missing content color must not be invented.');
+foreach (['0', 1.0, false, null, []] as $invalidColor) {
+    $invalidPresentation = ['PRESENTATION' => VariablePresentationNormalizationHelper::VALUE, 'CONTENT_COLOR' => $invalidColor];
+    $blockedColor = VariablePresentationNormalizationHelper::Normalize(2, $invalidPresentation);
+    assertPresentationNormalization($blockedColor['conversion']['status'] === 'blocked'
+        && $blockedColor['original']['presentation'] === $invalidPresentation, 'Invalid content color types must block while retaining the original definition.');
+}
 foreach ([['DIGITS' => '2'], ['MIN' => INF], ['OPTIONS' => '{broken'], ['UNKNOWN_PARAMETER' => 1]] as $invalid) {
     $blocked = VariablePresentationNormalizationHelper::Normalize(2, ['PRESENTATION' => VariablePresentationNormalizationHelper::VALUE] + $invalid);
     assertPresentationNormalization($blocked['conversion']['status'] === 'blocked', 'Invalid or unknown value parameter accepted.');

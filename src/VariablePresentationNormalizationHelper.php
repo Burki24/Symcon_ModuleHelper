@@ -11,6 +11,7 @@ use Throwable;
  * Loss-aware, read-only native/legacy presentation snapshots for migrations.
  * Lists remain arrays until ToSDK(); no variable, profile or value is written.
  * Unknown semantics remain blocked with their complete original definition.
+ * Native COLOR and CONTENT_COLOR are retained as independent parameters.
  *
  * @version 1.0.0
  */
@@ -118,6 +119,7 @@ final class VariablePresentationNormalizationHelper
             self::Validate($id, $parameters);
             $keys = ['prefix'        => 'PREFIX', 'suffix' => 'SUFFIX', 'digits' => 'DIGITS', 'minimum' => 'MIN',
                 'maximum'            => 'MAX', 'stepSize' => 'STEP_SIZE', 'icon' => 'ICON', 'color' => 'COLOR',
+                'contentColor'       => 'CONTENT_COLOR',
                 'percentage'         => 'PERCENTAGE', 'usageType' => 'USAGE_TYPE', 'decimalSeparator' => 'DECIMAL_SEPARATOR',
                 'thousandsSeparator' => 'THOUSANDS_SEPARATOR', 'options' => 'OPTIONS', 'intervals' => 'INTERVALS'];
             $effective = ['kind' => match ($id) {
@@ -259,7 +261,7 @@ final class VariablePresentationNormalizationHelper
     {
         $strings = ['PREFIX', 'SUFFIX', 'ICON', 'THOUSANDS_SEPARATOR', 'DECIMAL_SEPARATOR'];
         $numbers = ['MIN', 'MAX', 'STEP_SIZE'];
-        $integers = ['DIGITS', 'COLOR', 'USAGE_TYPE', 'GRADIENT_TYPE', 'LAYOUT', 'DISPLAY'];
+        $integers = ['DIGITS', 'COLOR', 'CONTENT_COLOR', 'USAGE_TYPE', 'GRADIENT_TYPE', 'LAYOUT', 'DISPLAY'];
         $booleans = ['PERCENTAGE', 'INTERVALS_ACTIVE', 'MULTILINE'];
         foreach ($parameters as $key => $value) {
             $valid = match (true) {

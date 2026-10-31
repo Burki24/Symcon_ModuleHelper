@@ -10,6 +10,12 @@
 
 ## Fixes
 
+- `VariablePresentationNormalizationHelper` erhält das von Symcon 9.1 gelieferte
+  ganzzahlige `CONTENT_COLOR` unabhängig von `COLOR`. Gültige Farbangaben
+  blockieren den JSLive-Export nicht mehr; Originaldaten, native Parameter,
+  SDK-Ausgabe und Feldbilanz bleiben vollständig erhalten. Ungültige Typen
+  und weiterhin unbekannte Parameter werden unverändert abgewiesen.
+
 - `ResponsiveVisualizationHelper` berücksichtigt den nativen Maximieren-Button
   unabhängig von der Kachelüberschrift. Bei verborgenem Titel hält eine optional
   markierte obere Bedienleiste rechts Platz frei; die übrige Fläche bleibt frei.

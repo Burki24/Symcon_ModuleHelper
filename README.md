@@ -34,6 +34,14 @@ bleiben erhalten; Schrittweiten der Wertanzeige bleiben Metadaten. Native
 Prozentformatierung ist von einem bewusst gesetzten `PERCENTAGE=false`
 für reine Chart-Suffixe getrennt. Keine Messwertnormalisierung oder neue Action.
 
+Das im Symcon-9.1-Export beobachtete ganzzahlige `CONTENT_COLOR` bleibt neben
+`COLOR` eigenständig erhalten: unverändert unter `native.parameters` und bei
+`ToSDK()`, zusätzlich als `effective.contentColor` mit eigener Feldbilanz.
+Auch `0`, `-1` und 32-Bit-Farbwerte bleiben unverändert; fehlende Parameter
+werden nicht ergänzt und ungültige Typen bleiben blockiert. Dieser
+Kompatibilitätsfall beruht auf der gemeldeten Live-Exportprüfung vom 31.10.2026;
+die unten verlinkte SDK-Tabelle führt `CONTENT_COLOR` derzeit noch nicht auf.
+
 Nicht belegte Sonderprofile, dynamische printf-Texte, unbekannte Parameter und
 inkompatible Kombinationen werden samt Originaldaten als `blocked` zurückgegeben.
 Sie werden nicht als leere Einheit oder generische Zahlenanzeige kaschiert.
