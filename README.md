@@ -8,6 +8,41 @@ Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Ger�
 
 Die Helper werden für aktuelle `IPSModuleStrict`-Module entwickelt und mit **PHP 8.5 / Symcon 9.0** getestet.
 
+## VariablePresentationNormalizationHelper
+
+`src/VariablePresentationNormalizationHelper.php` stellt eine gemeinsame lesende
+Darstellungsnormalisierung für die Libraries JSLive und SymconECharts bereit:
+
+- `Capture(int $variableID): array` erfasst aktuelle native Darstellung,
+  System-/Custom-Profildefinitionen, Template-Werte und Objekt-Icon. Es wird
+  keine Variable oder Darstellung verändert.
+- `Normalize(int $variableType, array $presentation, array $profiles = []): array`
+  erzeugt `original`, `effective`, `native` und `conversion`. Profile stehen
+  nach Namen indiziert in `profiles`. Explizite native Parameter überschreiben
+  die aufgelöste Profilbasis, auch bei nullähnlichen Werten wie false, 0 oder
+  leeren Zeichenfolgen. Ungültige Typen werden nicht stillschweigend konvertiert.
+- `ToSDK(array $snapshot): array` kodiert SDK-Listen wie `OPTIONS` und
+  `INTERVALS` erst an der SDK-Grenze als JSON-Strings. Ein blockierter Snapshot
+  darf nicht als gültige native Darstellung ausgegeben werden.
+
+Wertanzeige, Slider und Enumeration behalten ihre vollständigen unterstützten
+Parameter. Gewöhnliche Legacy-Zahlenprofile sowie Boolean-/String-Zustände und
+konstante numerische Assoziationen werden in profilunabhängige native Werte
+übersetzt. Numerische Assoziationen verwenden die dokumentierten Schwellen
+bis zum nächsten Eintrag. Präfix-/Suffix-Leerzeichen, Typen, Farben und Icons
+bleiben erhalten; Schrittweiten der Wertanzeige bleiben Metadaten. Native
+Prozentformatierung ist von einem bewusst gesetzten `PERCENTAGE=false`
+für reine Chart-Suffixe getrennt. Keine Messwertnormalisierung oder neue Action.
+
+Nicht belegte Sonderprofile, dynamische printf-Texte, unbekannte Parameter und
+inkompatible Kombinationen werden samt Originaldaten als `blocked` zurückgegeben.
+Sie werden nicht als leere Einheit oder generische Zahlenanzeige kaschiert.
+`conversion.fieldCoverage` nennt Herkunft und native Zielpfade. Die Regeln
+beziehen sich auf den Exportvertrag 1.0; reale SDK-/Visualisierungsabnahme bleibt
+von lokalen Konvertertests getrennt. Quellen:
+[native Wertanzeige](https://www.symcon.de/en/service/documentation/developer-area/sdk-tools/sdk-php/presentations/value-presentation/),
+[Legacy-Assoziationen](https://www.symcon.de/en/service/documentation/basics/variables/variable-profiles/).
+
 ## RasterImageHelper
 
 `src/RasterImageHelper.php` stellt `PrepareRasterImage(string $content): array`

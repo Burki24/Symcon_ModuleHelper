@@ -1,5 +1,13 @@
 # Unveröffentlicht
 
+## Neu
+
+- `VariablePresentationNormalizationHelper` ergänzt lesende, verlustbewusste Schnappschüsse
+  nativer Darstellungen und Legacy-Profile für JSLive und SymconECharts. Native
+  Definitionen erhalten Formatierung, Zustände, Icons und Farben; unbekannte
+  Regeln bleiben mit vollständigem Original blockiert. Bestehende Variablen,
+  Darstellungen, Actions und Werte werden nicht verändert.
+
 ## Fixes
 
 - `ResponsiveVisualizationHelper` berücksichtigt den nativen Maximieren-Button
