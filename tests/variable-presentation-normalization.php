@@ -109,6 +109,63 @@ foreach (['0', 1.0, false, null, []] as $invalidColor) {
     assertPresentationNormalization($blockedColor['conversion']['status'] === 'blocked'
         && $blockedColor['original']['presentation'] === $invalidPresentation, 'Invalid content color types must block while retaining the original definition.');
 }
+// Synthetic full native shape observed on the Symcon 9.1 test plane; no object IDs or values.
+$symcon91Presentation = [
+    'COLOR'               => -1, 'CONTENT_COLOR' => -1, 'DECIMAL_SEPARATOR' => 'Client', 'DIGITS' => 2,
+    'DISPLAY_TYPE'        => 0, 'ICON' => '', 'INTERVALS' => '[]', 'INTERVALS_ACTIVE' => false,
+    'MAX'                 => 100, 'MIN' => 0, 'PERCENTAGE' => false, 'PREFIX' => '',
+    'PRESENTATION'        => VariablePresentationNormalizationHelper::VALUE,
+    'PREVIEW_STYLE'       => 1, 'SHOW_PREVIEW' => true, 'SUFFIX' => '',
+    'THOUSANDS_SEPARATOR' => '', 'USAGE_TYPE' => 0
+];
+$symcon91 = VariablePresentationNormalizationHelper::Normalize(2, $symcon91Presentation);
+assertPresentationNormalization(
+    $symcon91['conversion']['status'] === 'exact',
+    'The complete Symcon 9.1 native presentation must normalize: ' . json_encode($symcon91['conversion']['issues'])
+);
+assertPresentationNormalization($symcon91['original']['presentation'] === $symcon91Presentation, 'Complete native presentation changed.');
+$roundTrip91 = VariablePresentationNormalizationHelper::ToSDK($symcon91);
+$expectedRoundTrip91 = $symcon91Presentation;
+ksort($roundTrip91);
+ksort($expectedRoundTrip91);
+assertPresentationNormalization($roundTrip91 === $expectedRoundTrip91, 'The complete SDK round trip lost native fields or types.');
+$symcon91Fields = ['displayType' => 'DISPLAY_TYPE', 'previewStyle' => 'PREVIEW_STYLE', 'showPreview' => 'SHOW_PREVIEW'];
+foreach ($symcon91Fields as $effectiveKey => $parameter) {
+    assertPresentationNormalization($symcon91['effective'][$effectiveKey] === $symcon91Presentation[$parameter], 'Native display/preview metadata missing: ' . $parameter);
+    assertPresentationNormalization(in_array(['source' => '/original/presentation/' . $parameter,
+        'target'                                       => '/native/parameters/' . $parameter, 'status' => 'exact'], $symcon91['conversion']['fieldCoverage'], true), 'Native display/preview field coverage missing: ' . $parameter);
+    assertPresentationNormalization(!array_key_exists($parameter, $result['native']['parameters']), 'Missing native display/preview fields must not be invented.');
+}
+$displayOverrides = ['DISPLAY_TYPE' => 1, 'PREVIEW_STYLE' => 0, 'SHOW_PREVIEW' => false];
+foreach ([VariablePresentationNormalizationHelper::VALUE, VariablePresentationNormalizationHelper::SLIDER,
+    VariablePresentationNormalizationHelper::ENUMERATION] as $presentationID) {
+    $display91 = VariablePresentationNormalizationHelper::Normalize(1, array_replace(
+        $symcon91Presentation,
+        ['PRESENTATION' => $presentationID, 'DISPLAY' => 2],
+        $displayOverrides
+    ));
+    assertPresentationNormalization($display91['conversion']['status'] === 'exact'
+        && $display91['effective']['displayType'] === 1 && $display91['effective']['previewStyle'] === 0
+        && $display91['effective']['showPreview'] === false && $display91['effective']['percentage'] === false
+        && $display91['native']['parameters']['DISPLAY'] === 2, 'Display and preview settings must retain zero/false and stay independent of percentage scaling and DISPLAY.');
+}
+$legacyDisplay91 = VariablePresentationNormalizationHelper::Normalize(
+    2,
+    ['PROFILE' => 'Example.Number'] + $displayOverrides,
+    ['Example.Number' => $before]
+);
+assertPresentationNormalization($legacyDisplay91['conversion']['status'] === 'exact'
+    && $legacyDisplay91['effective']['displayType'] === 1 && $legacyDisplay91['effective']['previewStyle'] === 0
+    && $legacyDisplay91['effective']['showPreview'] === false, 'Legacy conversion lost explicit native display/preview overrides.');
+foreach (['DISPLAY_TYPE' => ['0', 0.0, false, null, []], 'PREVIEW_STYLE' => ['1', 1.0, true, null, []],
+    'SHOW_PREVIEW'       => [1, 0.0, 'false', null, []]] as $parameter => $invalidValues) {
+    foreach ($invalidValues as $invalidValue) {
+        $invalid91Presentation = array_replace($symcon91Presentation, [$parameter => $invalidValue]);
+        $invalid91 = VariablePresentationNormalizationHelper::Normalize(2, $invalid91Presentation);
+        assertPresentationNormalization($invalid91['conversion']['status'] === 'blocked'
+            && $invalid91['original']['presentation'] === $invalid91Presentation, 'Invalid native field types must block with their original data: ' . $parameter);
+    }
+}
 foreach ([['DIGITS' => '2'], ['MIN' => INF], ['OPTIONS' => '{broken'], ['UNKNOWN_PARAMETER' => 1]] as $invalid) {
     $blocked = VariablePresentationNormalizationHelper::Normalize(2, ['PRESENTATION' => VariablePresentationNormalizationHelper::VALUE] + $invalid);
     assertPresentationNormalization($blocked['conversion']['status'] === 'blocked', 'Invalid or unknown value parameter accepted.');
