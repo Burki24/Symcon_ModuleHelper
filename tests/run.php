@@ -17,6 +17,7 @@ $tests = [
     'debug-helper.php',
     'debug-flow.php',
     'variable-presentation.php',
+    'variable-presentation-normalization.php',
     'geofence.php',
     'geofence-zones.php',
     'parent-connection.php',
