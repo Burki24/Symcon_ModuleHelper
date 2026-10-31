@@ -14,7 +14,7 @@ use JsonException;
  * deliberately returns presentation arrays only and has no dependency on a
  * concrete module class, device model, transport or expose structure.
  *
- * @version 2.1.0
+ * @version 2.1.1
  */
 trait VariablePresentationHelper
 {
