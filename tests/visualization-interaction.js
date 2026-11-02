@@ -5,10 +5,27 @@ const listeners = {};
 const doc = {addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {}};
 const env = {document: doc, addEventListener() {}, removeEventListener() {}, getComputedStyle: () => ({overflowY: 'auto', overflowX: 'auto'})};
 const router = createRouter(env);
+
+// A native Symcon preview host expects its own Message envelope and must not
+// receive our private frame protocol unless the loader explicitly opts in.
+const foreignMessages = [], foreignListeners = {};
+const foreignHost = {postMessage(data) { foreignMessages.push(data); }};
+const foreignEnvironment = {document: {elementFromPoint: () => list}, parent: foreignHost,
+    innerWidth: 100, innerHeight: 100, getComputedStyle: env.getComputedStyle,
+    addEventListener: (name, fn) => { foreignListeners[name] = fn; }, removeEventListener() {}};
+const foreignRouter = createRouter(foreignEnvironment);
+foreignRouter.rememberPointer({clientX: 20, clientY: 30});
+assert.deepEqual(foreignMessages, [], 'Unmarked children must never send readiness or pointer messages to a foreign host.');
 const list = {tagName: 'ASIDE', clientWidth: 100, clientHeight: 100, scrollHeight: 600, scrollWidth: 300, scrollTop: 0, scrollLeft: 0};
 doc.elementFromPoint = () => list;
 const wheel = extra => Object.assign({type: 'wheel', target: {tagName: 'BODY'}, clientX: 0, clientY: 0, deltaX: 0, deltaY: 2, deltaMode: 1,
     preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; }}, extra);
+foreignListeners.message({source: foreignHost, data: ['burki24.wheel.v1', 'wheel', 0.2, 0.3, 0, 40]});
+assert.equal(list.scrollTop, 0, 'Unmarked children must reject frame input even from their actual parent.');
+assert.equal(foreignRouter.handle(wheel()), true, 'Local wheel routing must still work in a foreign host.');
+assert.equal(list.scrollTop, 32);
+list.scrollTop = 0;
+foreignRouter.dispose();
 router.rememberPointer({pointerType: 'mouse', clientX: 50, clientY: 60});
 let event = wheel();
 assert.equal(router.handle(event), true);
@@ -34,10 +51,10 @@ const parentListeners = {}, childListeners = {};
 const parent = {innerWidth: 500, innerHeight: 300, getComputedStyle: env.getComputedStyle,
     addEventListener: (n, f) => { parentListeners[n] = f; }, removeEventListener() {}};
 parent.parent = parent;
-const child = {innerWidth: 100, innerHeight: 50, getComputedStyle: env.getComputedStyle, parent,
+const child = {name: 'burki24.wheel.v1', innerWidth: 100, innerHeight: 50, getComputedStyle: env.getComputedStyle, parent,
     addEventListener: (n, f) => { childListeners[n] = f; }, removeEventListener() {}};
 const childList = {...list, scrollTop: 0, scrollLeft: 0};
-const frame = {tagName: 'IFRAME', contentWindow: child, getBoundingClientRect: () => ({left: 10, top: 20, width: 200, height: 100})};
+const frame = {name: 'burki24.wheel.v1', tagName: 'IFRAME', contentWindow: child, getBoundingClientRect: () => ({left: 10, top: 20, width: 200, height: 100})};
 parent.document = {querySelectorAll: () => [frame], elementFromPoint: () => frame};
 child.document = {elementFromPoint: () => childList};
 parent.postMessage = data => parentListeners.message({source: child, data});
@@ -58,6 +75,13 @@ childListeners.message({source: {}, data: ['burki24.wheel.v1', 'wheel', 0.2, 0.5
 assert.equal(childList.scrollTop, 40, 'An unrelated sender cannot issue UI input.');
 childListeners.message({source: parent, data: ['burki24.wheel.v1', 'wheel', NaN, 0.5, 0, 50]});
 assert.equal(childList.scrollTop, 40, 'Malformed forwarded input must be rejected.');
+outer.clearPointer();
+frame.name = '';
+parentListeners.message({source: child, data: ['burki24.wheel.v1', 'ready']});
+parentListeners.message({source: child, data: ['burki24.wheel.v1', 'pointer', 0.5, 0.5]});
+assert.equal(outer.point(wheel()).clientX, 0, 'Unmarked frames must not register or update their parent pointer.');
+outer.handle(wheel({target: frame, clientX: 50, clientY: 60}));
+assert.equal(childList.scrollTop, 40, 'Removing the explicit frame marker must stop forwarding.');
 inner.dispose(); outer.dispose();
 
 // Existing graphic engines must receive retargeted input exactly once.

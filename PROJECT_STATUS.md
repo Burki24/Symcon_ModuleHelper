@@ -493,7 +493,7 @@ OpenFreeMapHelper bietet einen eigenst√§ndigen wiederverwendbaren Kartenvertrag 
 
 Zentrale Wheel-/Scroll-/Frame-Unterst√ºtzung erg√§nzt. Der Seiten-Helper bindet die minifizierte Interaktion automatisch ein; OpenHomeAlarm, OpenCalendar, SymconECharts und SymconiCloud erhalten die Ressource mit den vorhandenen Helper-Bundles. Kalender-Zielauswahl und Touch-Gesten bleiben lokal; generische Pointer-/Delta-Mechanik ist zentral. WoIst registriert Kartenzoom und beteiligt seinen √§u√üeren Loader an der Frame-Weitergabe. Die native IPSView-App 6.5.19 wurde direkt mit echten Mausradaktionen gepr√ºft: der bisherige Stand ignoriert Kartenzoom und Listenscroll. Die Korrektur ist lokal integriert; die native Abnahme des neuen Stands erfordert noch dessen Aktualisierung auf dem Zielsystem. Webclient-Tests und simulierte native Retargeting-/Frame-Regressionen sind getrennt ausgewiesen.
 
-Abschlieﬂender lokaler Nachweis: vollst‰ndige PHP-Suiten des Helper-Repositories und aller vier Consumer bestanden. Quell-/Minify-Regressionen, reproduzierbarer esbuild-Build, Manifest-, Bundle- und Verteilungstests sowie alle vier Consumer-Hashpr¸fungen bestanden. Im finalen synthetischen IPSView-Browseraufbau mit ‰uﬂerem Loader: echtes Mausrad ‰nderte Zoom von 15 auf 16 und Listenscroll von 0 auf 240 Pixel; ein an den ‰uﬂeren Body mit (0, 0) gerichtetes Ereignis ‰nderte ¸ber die zentrale Frame-Weitergabe Zoom auf 15 bzw. Listenscroll auf 360 Pixel. Listenbedienung ‰nderte dabei keinen Kartenzoom. Dieser Nachweis betrifft die lokale Browser-Einbettung, nicht die noch ausstehende aktualisierte native App. ECharts l‰dt das gemeinsame Asset vor den Modulskripten ¸ber seinen bestehenden Gateway-Hook, um auch den gepr¸ften maximalen BarCategory-Payload unter 1 MB zu halten.
+Abschlie√üender lokaler Nachweis: vollst√§ndige PHP-Suiten des Helper-Repositories und aller vier Consumer bestanden. Quell-/Minify-Regressionen, reproduzierbarer esbuild-Build, Manifest-, Bundle- und Verteilungstests sowie alle vier Consumer-Hashpr√ºfungen bestanden. Im finalen synthetischen IPSView-Browseraufbau mit √§u√üerem Loader: echtes Mausrad √§nderte Zoom von 15 auf 16 und Listenscroll von 0 auf 240 Pixel; ein an den √§u√üeren Body mit (0, 0) gerichtetes Ereignis √§nderte √ºber die zentrale Frame-Weitergabe Zoom auf 15 bzw. Listenscroll auf 360 Pixel. Listenbedienung √§nderte dabei keinen Kartenzoom. Dieser Nachweis betrifft die lokale Browser-Einbettung, nicht die noch ausstehende aktualisierte native App. ECharts l√§dt das gemeinsame Asset vor den Modulskripten √ºber seinen bestehenden Gateway-Hook, um auch den gepr√ºften maximalen BarCategory-Payload unter 1 MB zu halten.
 
 ## Addendum 2026-10-23: native IPSView base addresses
 
@@ -509,3 +509,19 @@ bundle. The page-helper bundle contract now explicitly checks its inclusion.
 Temporary consumer bundles are tested outside the working repositories and are
 not left under libs/helper. A simulated native document is separate evidence
 from a real IPSView web client or native application acceptance test.
+
+## Addendum 2026-11-02: explicit wheel-frame partners
+
+The shared router now limits parent messages and forwarded input to own frames
+marked `name="burki24.wheel.v1"`. Unmarked Symcon tile/preview hosts receive no
+ready or pointer arrays. Local scrolling, chart regions, source-window checks,
+coordinate scaling and Ctrl/Meta behavior remain unchanged. SymconiCloud's
+existing outer HTTP loader adds the marker; it is compatible with the old helper.
+Deploy that loader change before distributing the new helper.
+
+Source and minified Node regressions cover foreign hosts and marker removal.
+The optional isolated browser check covers real wheel directions, independent
+list/zoom behavior and simulated native retargeting in marked srcdoc/data frames.
+Live Symcon/native-app acceptance of the new distribution remains a later check;
+no live instance or source was changed. Helper metadata is generated only through
+the existing workflow; consumer test bundles are temporary and restored.
