@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.30.2",
+  "repository_version": "3.30.3",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -288,8 +288,8 @@
     },
     "VisualizationAssetHelper": {
       "file": "src/VisualizationAssetHelper.php",
-      "version": "1.1.0",
-      "sha256": "a9f5e0c8ea21c021646189fedda6757724b7897b539ead378c2a2f012895e1ee",
+      "version": "1.1.1",
+      "sha256": "5df251b5ceb7a9867f2330de6b0476b0c11f1762aeda7c03f08d3ad66f4433d6",
       "assets": [
         {
           "file": "src/visualization/http-origin.js",
@@ -299,12 +299,12 @@
         {
           "file": "src/visualization/interaction.js",
           "target": "visualization/interaction.js",
-          "sha256": "830baf8049e7274d3796386d93186c45bcb65102e4bf4a8a704171187fb22c96"
+          "sha256": "ed03a790da87ccaf747dac426107bf9b9b57a54c5bcab2281b199d662cbaa3ed"
         },
         {
           "file": "src/visualization/interaction.min.js",
           "target": "visualization/interaction.min.js",
-          "sha256": "851bb2e77a7111da86fbcd0dc0acb554fd68c6cffa826b1af132eb6847d65959"
+          "sha256": "0bd1aa60899bd9859a26943a9506b5b52126f45f9cd19532a573e6cb0cb28289"
         }
       ]
     },
@@ -412,6 +412,6 @@
       "sha256": "5ce425a8a54872ea2c0ecd4d065a540300ef6a6d6b5e97627e25b075b8d3c0fd"
     }
   },
-  "repository_build": 118009214,
-  "repository_date": 1793445069
+  "repository_build": 197181907,
+  "repository_date": 1793600566
 }
