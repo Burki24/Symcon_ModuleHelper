@@ -51,7 +51,7 @@ trait VisualizationAssetHelper
         return $script;
     }
 
-    /** Returns shared wheel routing, scrolling and direct iframe UI forwarding. */
+    /** Returns local wheel routing and UI forwarding for explicitly named own child frames. */
     protected function VisualizationInteractionScript(): string
     {
         $script = file_get_contents(__DIR__ . '/visualization/interaction.min.js');
