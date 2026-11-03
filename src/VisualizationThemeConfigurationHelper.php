@@ -195,6 +195,6 @@ trait VisualizationThemeConfigurationHelper
 
     private function VisualizationThemeText(string $key, string $fallback): string
     {
-        return $this->TranslateHelperText('VisualizationThemeConfigurationHelper', $key, $fallback);
+        return $this->TranslateHelperTextFromDirectory(__DIR__ . '/translations', 'VisualizationThemeConfigurationHelper', $key, $fallback);
     }
 }

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Burki24\SymconModuleHelper;
 
+// Different Symcon libraries vendor separate copies of this shared declaration.
+if (trait_exists(VisualizationThemeHelper::class, false)) {
+    return;
+}
+
 /**
  * Provides shared CSS design tokens for Symcon HTML-SDK visualizations.
  *

@@ -1011,7 +1011,7 @@ trait IPSViewHTMLPageHelper
     {
         $fallback = self::IPSVIEW_HTML_TRANSLATION_SOURCES[$key] ?? $key;
 
-        return $this->TranslateHelperText('IPSViewHTMLPageHelper', $key, $fallback);
+        return $this->TranslateHelperTextFromDirectory(__DIR__ . '/translations', 'IPSViewHTMLPageHelper', $key, $fallback);
     }
 
     private function ResolveIPSViewHTMLModuleDirectory(): string

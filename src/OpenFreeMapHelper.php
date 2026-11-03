@@ -197,7 +197,7 @@ trait OpenFreeMapHelper
 
     private function OpenFreeMapText(string $key): string
     {
-        return $this->TranslateHelperText('OpenFreeMapHelper', $key, self::OPEN_FREE_MAP_TRANSLATION_SOURCES[$key]);
+        return $this->TranslateHelperTextFromDirectory(__DIR__ . '/translations', 'OpenFreeMapHelper', $key, self::OPEN_FREE_MAP_TRANSLATION_SOURCES[$key]);
     }
 
     /** @return array<string,string> Stable persisted values and translated display names. */

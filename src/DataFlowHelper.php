@@ -8,6 +8,11 @@ use InvalidArgumentException;
 use JsonException;
 use UnexpectedValueException;
 
+// Different Symcon libraries vendor separate copies of this shared declaration.
+if (trait_exists(DataFlowHelper::class, false)) {
+    return;
+}
+
 /**
  * Provides reusable JSON encoding and decoding for Symcon data-flow messages.
  *

@@ -10,6 +10,13 @@
 
 ## Fixes
 
+- Die gemeinsamen Helper von JSLive und SymconECharts lassen sich im selben
+  PHP-Aufruf aus getrennten Bibliotheksverzeichnissen laden, ohne Traits oder
+  Klassen erneut zu deklarieren. Beide Libraries benötigen das aktualisierte
+  Bundle. Katalogbesitzende Helper behalten ihre eigenen Übersetzungsverzeichnisse;
+  bestehende APIs, Quellen und Darstellungen bleiben erhalten. Regressionstests
+  prüfen beide Ladereihenfolgen, wiederholtes Laden und getrennte Katalog-Caches.
+
 - `VariablePresentationNormalizationHelper` erhält die von Symcon 9.1 gemeinsam
   gelieferten Felder `DISPLAY_TYPE`, `PREVIEW_STYLE` und `SHOW_PREVIEW` mit ihren
   nativen Typen. Der vollständige beobachtete Parametersatz, SDK-Rundlauf,

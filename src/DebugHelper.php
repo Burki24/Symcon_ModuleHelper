@@ -10,6 +10,11 @@ use JsonException;
 use Stringable;
 use Throwable;
 
+// Different Symcon libraries vendor separate copies of this shared declaration.
+if (trait_exists(DebugHelper::class, false)) {
+    return;
+}
+
 /**
  * Provides privacy-conscious debug output for Symcon modules.
  *
