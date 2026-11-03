@@ -9,6 +9,11 @@ use ReflectionClass;
 use RuntimeException;
 use UnexpectedValueException;
 
+// Different Symcon libraries vendor separate copies of this shared declaration.
+if (trait_exists(ConfigurationFormHelper::class, false)) {
+    return;
+}
+
 /**
  * Loads and serializes Symcon configuration forms for dynamic module forms.
  *

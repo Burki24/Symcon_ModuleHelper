@@ -8,6 +8,24 @@ Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Ger�
 
 Die Helper werden für aktuelle `IPSModuleStrict`-Module entwickelt und mit **PHP 8.5 / Symcon 9.0** getestet.
 
+## Gemeinsames Laden von JSLive und SymconECharts
+
+Die acht gemeinsam verwendeten direkten und transitiven Helper schützen ihre
+Trait-/Klassendeklarationen vor erneutem Laden aus einem anderen Dateipfad.
+Das betrifft `ConfigurationFormHelper`, `DataFlowHelper`, `DebugHelper`,
+`HelperTranslationHelper`, `ResponsiveVisualizationHelper`,
+`VariablePresentationNormalizationHelper`, `VisualizationAssetHelper` und
+`VisualizationThemeHelper`. Die zuerst geladene kompatible Definition bleibt
+aktiv; die Prüfung löst keinen Autoloader aus. Bestehende Methoden und Daten-
+verträge ändern sich nicht.
+
+Alle beteiligten Libraries müssen das regulär verteilte, zusammen geprüfte
+Bundle erhalten. Der Schutz lädt keine neue Version über eine bereits aktive
+Definition und macht beliebige ältere Helper-Versionen nicht kompatibel.
+Insbesondere kann eine später geladene alte Kopie ohne Deklarationsschutz
+weiterhin einen PHP-Abbruch verursachen. Lokale Tests prüfen beide Reihenfolgen
+mit getrennten Bibliotheksverzeichnissen; dies ersetzt keine Live-Abnahme.
+
 ## VariablePresentationNormalizationHelper
 
 `src/VariablePresentationNormalizationHelper.php` stellt eine gemeinsame lesende
@@ -1074,6 +1092,13 @@ Das statische Formular enthält am gewünschten Einfügepunkt lediglich folgende
 ## HelperTranslationHelper
 
 `src/HelperTranslationHelper.php` stellt helper-eigene Übersetzungen bereit. Sichtbare Beschriftungen und Hinweise eines zentralen Helpers werden damit bereits im Helper übersetzt; Consumer-Module benötigen dafür keine Einträge in ihrer eigenen `locale.json`.
+
+`TranslateHelperText()` behält seine bisherige Signatur. Katalogbesitzende Helper
+verwenden zusätzlich `TranslateHelperTextFromDirectory(string $directory,
+string $catalog, string $key, string $fallback, ?string $language = null): string`
+mit ihrem eigenen `__DIR__ . '/translations'`. Dadurch hängen Ressourcen nicht
+vom zuerst geladenen Bibliothekspfad ab. Der Cache unterscheidet vollständige
+Katalogpfade; gleichnamige Kataloge verschiedener Bundles bleiben getrennt.
 
 Die Übersetzungen liegen als versionierte JSON-Kataloge unter `src/translations/`.
 Der deutsche Katalog des `IPSViewStyleHelper` wird beim Vendor-Sync zusammen mit

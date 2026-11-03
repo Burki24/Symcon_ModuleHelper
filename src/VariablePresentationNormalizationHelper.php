@@ -7,6 +7,11 @@ namespace Burki24\SymconModuleHelper;
 use InvalidArgumentException;
 use Throwable;
 
+// Different Symcon libraries vendor separate copies of this shared declaration.
+if (class_exists(VariablePresentationNormalizationHelper::class, false)) {
+    return;
+}
+
 /**
  * Loss-aware, read-only native/legacy presentation snapshots for migrations.
  * Lists remain arrays until ToSDK(); no variable, profile or value is written.

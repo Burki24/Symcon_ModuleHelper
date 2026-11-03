@@ -65,4 +65,10 @@ if ($exitCode !== 0) {
     exit($exitCode);
 }
 
+// Cross-library declarations are intentionally exercised in fresh PHP processes.
+passthru(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/multiple-library-load.php'), $exitCode);
+if ($exitCode !== 0) {
+    exit($exitCode);
+}
+
 fwrite(STDOUT, "All helper tests passed.\n");

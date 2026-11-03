@@ -1089,7 +1089,7 @@ trait IPSViewStyleHelper
     {
         $fallback = self::IPSVIEW_STYLE_TRANSLATION_SOURCES[$key] ?? $key;
 
-        return $this->TranslateHelperText('IPSViewStyleHelper', $key, $fallback);
+        return $this->TranslateHelperTextFromDirectory(__DIR__ . '/translations', 'IPSViewStyleHelper', $key, $fallback);
     }
 
     /** @return list<array{caption:string,value:int}> */

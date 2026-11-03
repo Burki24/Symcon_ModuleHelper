@@ -651,7 +651,8 @@ trait IPSViewStyleConfigurationHelper
      */
     private function IPSViewStyleConfigurationText(string $key, string $fallback): string
     {
-        return $this->TranslateHelperText(
+        return $this->TranslateHelperTextFromDirectory(
+            __DIR__ . '/translations',
             'IPSViewStyleConfigurationHelper',
             $key,
             $fallback
