@@ -21,7 +21,7 @@ if (trait_exists(ConfigurationFormHelper::class, false)) {
  * resolves the directory of the concrete module class via reflection so a
  * vendored helper can reliably access that module's form.json file.
  *
- * @version 1.0.1
+ * @version 1.0.2
  */
 trait ConfigurationFormHelper
 {

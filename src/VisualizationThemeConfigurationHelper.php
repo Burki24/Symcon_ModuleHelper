@@ -16,7 +16,7 @@ require_once __DIR__ . '/VisualizationThemeHelper.php';
  * the properties and insert the form items only when their tile should expose
  * the shared customization UI.
  *
- * @version 1.0.1
+ * @version 1.0.2
  */
 trait VisualizationThemeConfigurationHelper
 {

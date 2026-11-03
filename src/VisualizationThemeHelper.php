@@ -16,7 +16,7 @@ if (trait_exists(VisualizationThemeHelper::class, false)) {
  * light/dark fallbacks when a host does not provide them. Module-specific
  * components deliberately remain outside this helper.
  *
- * @version 1.1.0
+ * @version 1.1.1
  */
 trait VisualizationThemeHelper
 {

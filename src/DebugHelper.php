@@ -24,7 +24,7 @@ if (trait_exists(DebugHelper::class, false)) {
  * quoted/plain text assignments and JSON encoded as text), and
  * limiting oversized messages unless the caller explicitly raises the limit.
  *
- * @version 1.0.3
+ * @version 1.0.4
  */
 trait DebugHelper
 {

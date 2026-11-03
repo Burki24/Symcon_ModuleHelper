@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.30.3",
+  "repository_version": "3.30.4",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -10,13 +10,13 @@
     },
     "ConfigurationFormHelper": {
       "file": "src/ConfigurationFormHelper.php",
-      "version": "1.0.1",
-      "sha256": "bd45f15a1c2f6e2800eff51eefeb3094f5745a3469434d6a57b98d54f30d363f"
+      "version": "1.0.2",
+      "sha256": "852803dccc90b62a28c09a755814743dacc8d7be225e6820b39d275726c857a3"
     },
     "DataFlowHelper": {
       "file": "src/DataFlowHelper.php",
-      "version": "1.0.0",
-      "sha256": "4c25828b283367692d0db1631d2b7d71ba6012883798bc5ffddb8f2d551d6dfb"
+      "version": "1.0.1",
+      "sha256": "24178058bdcf879c52e9230d6f6d174ccc217b25c885fb6f2e5f8ed4b604b9bb"
     },
     "DateHelper": {
       "file": "src/DateHelper.php",
@@ -25,13 +25,13 @@
     },
     "DebugHelper": {
       "file": "src/DebugHelper.php",
-      "version": "1.0.3",
-      "sha256": "b58cd75c9c2c01fc0a6e2610b3f41d817e9799400f08179d380eaa81791864e3"
+      "version": "1.0.4",
+      "sha256": "4259c0424d762d98fe37445658b86c559a860dfb0baafc5fcefede21c6c1107f"
     },
     "HelperTranslationHelper": {
       "file": "src/HelperTranslationHelper.php",
-      "version": "1.0.0",
-      "sha256": "d3deee581eca9f8eb11e9adce060170227a2dc836ee898bd134f93d27604f639"
+      "version": "1.0.1",
+      "sha256": "513bad1084c3b4d58a05757ce4d080698d17dc26f2541a93de7929205f5a0e2e"
     },
     "HttpResponseHelper": {
       "file": "src/HttpResponseHelper.php",
@@ -185,8 +185,8 @@
     },
     "IPSViewHTMLPageHelper": {
       "file": "src/IPSViewHTMLPageHelper.php",
-      "version": "1.5.5",
-      "sha256": "83b049678e9901514101e74c9e2d9a247adac0b05d1ed5e0c3f368e6be5e9d05",
+      "version": "1.5.6",
+      "sha256": "c5ac1aeaefa3b909ab3bfa07316322e9b3676dfb08a4e3a9adab63e495ba9c6b",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"
@@ -201,8 +201,8 @@
     },
     "IPSViewStyleConfigurationHelper": {
       "file": "src/IPSViewStyleConfigurationHelper.php",
-      "version": "1.1.0",
-      "sha256": "e6f558a0dee301d251d2f5845ebdedb765dc07ca5352427d1e08792d940629b7",
+      "version": "1.1.1",
+      "sha256": "1b367ca24374d5cd0eb0fe1db9289b5f1ed1c4ea47e44197388792a9dbfe9a62",
       "dependencies": [
         "IPSViewControlThemeHelper",
         "IPSViewStyleHelper"
@@ -217,8 +217,8 @@
     },
     "IPSViewStyleHelper": {
       "file": "src/IPSViewStyleHelper.php",
-      "version": "1.6.9",
-      "sha256": "44140d34f866a59808948d29849de23a5bc2b1441df1fdc92df6f39d97e90e21",
+      "version": "1.6.10",
+      "sha256": "16773fc594ae3b6df9b7d352611ec79a02c4c7089466769c94b77b1f90cdc7d9",
       "dependencies": [
         "HelperTranslationHelper",
         "IPSViewFontCatalogHelper",
@@ -258,8 +258,8 @@
     },
     "ResponsiveVisualizationHelper": {
       "file": "src/ResponsiveVisualizationHelper.php",
-      "version": "1.0.2",
-      "sha256": "158d643156820c7c1e6979d4b28099b6b0e2f71eafbd8c6a7feb717200b6c700"
+      "version": "1.0.3",
+      "sha256": "91f168d2deedc97f7adccaca14ef0b4816af3762ac52e6aff0dc1e7810b0c78b"
     },
     "SVGPreviewHelper": {
       "file": "src/SVGPreviewHelper.php",
@@ -288,8 +288,8 @@
     },
     "VisualizationAssetHelper": {
       "file": "src/VisualizationAssetHelper.php",
-      "version": "1.1.1",
-      "sha256": "5df251b5ceb7a9867f2330de6b0476b0c11f1762aeda7c03f08d3ad66f4433d6",
+      "version": "1.1.2",
+      "sha256": "edcf36477eba727b32fc55e3eabbefd93d9a54a1ba669a341e939660f69bb122",
       "assets": [
         {
           "file": "src/visualization/http-origin.js",
@@ -310,13 +310,13 @@
     },
     "VisualizationThemeHelper": {
       "file": "src/VisualizationThemeHelper.php",
-      "version": "1.1.0",
-      "sha256": "29fe61a7eccafeb8b2beb77fe3f7a4896f43b3eaace9ebe428a4fc8250fd9088"
+      "version": "1.1.1",
+      "sha256": "1003208363294baac0965dc8b2a1a3b9a6573474bbe297562bd58e025ea0626e"
     },
     "VisualizationThemeConfigurationHelper": {
       "file": "src/VisualizationThemeConfigurationHelper.php",
-      "version": "1.0.1",
-      "sha256": "117b0f8f8a4d9c829115eabf15cf957d5c9e26cedf2954c996cbb1a36e115f01",
+      "version": "1.0.2",
+      "sha256": "a0319239cf638dc42586fc77b16986f33f8b08387dec4bfc8d734dd2c5a1b316",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationThemeHelper"
@@ -339,8 +339,8 @@
     },
     "OpenFreeMapHelper": {
       "file": "src/OpenFreeMapHelper.php",
-      "version": "1.0.2",
-      "sha256": "09b08d987f800a58a54b763d50144f6cf8a9f120f8f41e9432fe4bf93e972a82",
+      "version": "1.0.3",
+      "sha256": "86bb678869e27cb188dac9b6ce0d000b0b46a978a22776052bddaf889db69209",
       "dependencies": [
         "HelperTranslationHelper",
         "VisualizationAssetHelper"
@@ -408,10 +408,10 @@
     },
     "VariablePresentationNormalizationHelper": {
       "file": "src/VariablePresentationNormalizationHelper.php",
-      "version": "1.0.2",
-      "sha256": "5ce425a8a54872ea2c0ecd4d065a540300ef6a6d6b5e97627e25b075b8d3c0fd"
+      "version": "1.0.3",
+      "sha256": "1f14140aba750654de6987d732a2e48600a46fb20708d32a5ddad3860c59998b"
     }
   },
-  "repository_build": 197181907,
-  "repository_date": 1793600566
+  "repository_build": 182684963,
+  "repository_date": 1793737936
 }

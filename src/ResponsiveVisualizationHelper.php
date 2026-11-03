@@ -20,7 +20,7 @@ if (trait_exists(ResponsiveVisualizationHelper::class, false)) {
  * tokens and an optional viewport frame with native tile heading metadata, so
  * layouts adapt to the available tile dimensions in every Symcon client.
  *
- * @version 1.0.2
+ * @version 1.0.3
  */
 trait ResponsiveVisualizationHelper
 {
