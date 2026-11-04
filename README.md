@@ -19,12 +19,21 @@ Das betrifft `ConfigurationFormHelper`, `DataFlowHelper`, `DebugHelper`,
 aktiv; die Prüfung löst keinen Autoloader aus. Bestehende Methoden und Daten-
 verträge ändern sich nicht.
 
+Die Deklarationen selbst liegen in einer bedingten Definition. Ein früher
+`return` vor einer unbedingten Trait-/Klassendeklaration genügt bei bereits
+gecachten Dateien nicht. Der Regressionstest lädt beide Bibliothekskopien
+zunächst getrennt in einen aktiven OPcache und prüft anschließend beide
+Ladereihenfolgen wiederholt über denselben lokalen PHP-Testserver. Er prüft
+ausdrücklich, dass alle 16 Helper-Dateien schon vor dem gemeinsamen Laden
+gecacht sind; zusätzliche CLI-Prüfungen laufen ohne OPcache.
+
 Alle beteiligten Libraries müssen das regulär verteilte, zusammen geprüfte
 Bundle erhalten. Der Schutz lädt keine neue Version über eine bereits aktive
 Definition und macht beliebige ältere Helper-Versionen nicht kompatibel.
 Insbesondere kann eine später geladene alte Kopie ohne Deklarationsschutz
 weiterhin einen PHP-Abbruch verursachen. Lokale Tests prüfen beide Reihenfolgen
-mit getrennten Bibliotheksverzeichnissen; dies ersetzt keine Live-Abnahme.
+mit getrennten Bibliotheksverzeichnissen und aktivem OPcache; dies ersetzt
+keine Live-Abnahme des aktualisierten Bundles in Symcon.
 
 ## VariablePresentationNormalizationHelper
 

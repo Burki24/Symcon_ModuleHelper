@@ -10,6 +10,13 @@
 
 ## Fixes
 
+- Der Deklarationsschutz der acht gemeinsamen JSLive-/SymconECharts-Helper
+  umfasst jetzt die Trait-/Klassendefinition selbst. Dadurch verhindert er auch
+  bei bereits im OPcache geladenen Bibliothekskopien erneute Deklarationen.
+  Regressionstests prüfen getrenntes Vorladen und wiederholtes gemeinsames Laden
+  in beiden Reihenfolgen über einen aktiven PHP-Testserver. Öffentliche APIs,
+  Ressourcenauflösung und bestehende Consumer-Konfigurationen bleiben erhalten.
+
 - Die gemeinsamen Helper von JSLive und SymconECharts lassen sich im selben
   PHP-Aufruf aus getrennten Bibliotheksverzeichnissen laden, ohne Traits oder
   Klassen erneut zu deklarieren. Beide Libraries benötigen das aktualisierte
