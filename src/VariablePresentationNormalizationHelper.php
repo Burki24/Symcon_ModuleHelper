@@ -16,7 +16,7 @@ if (!class_exists(VariablePresentationNormalizationHelper::class, false)) {
      * Native COLOR and CONTENT_COLOR are retained as independent parameters.
      * Native display/preview settings are preserved without deriving value scaling.
      *
-     * @version 1.0.3
+     * @version 1.0.4
      */
     final class VariablePresentationNormalizationHelper
     {

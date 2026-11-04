@@ -18,7 +18,7 @@ if (!trait_exists(DataFlowHelper::class, false)) {
      * parent or child and translating transport failures remain responsibilities
      * of the calling module.
      *
-     * @version 1.0.1
+     * @version 1.0.2
      */
     trait DataFlowHelper
     {

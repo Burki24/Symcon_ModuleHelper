@@ -15,7 +15,7 @@ if (!trait_exists(HelperTranslationHelper::class, false)) {
      * itself. Consumer modules therefore do not need matching locale.json
      * entries for helper captions or hints.
      *
-     * @version 1.0.1
+     * @version 1.0.2
      */
     trait HelperTranslationHelper
     {
