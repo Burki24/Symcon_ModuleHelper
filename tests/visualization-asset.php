@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Burki24\SymconModuleHelper\VisualizationAssetHelper;
 
 require_once __DIR__ . '/../src/VisualizationAssetHelper.php';
+require_once __DIR__ . '/../src/DebugFlowHelper.php';
 
 class VisualizationAssetHelperHarness
 {
@@ -31,6 +32,16 @@ class VisualizationAssetHelperHarness
             'data'    => $data,
             'format'  => $format
         ];
+    }
+}
+
+class VisualizationInteractionDebugHarness extends VisualizationAssetHelperHarness
+{
+    use \Burki24\SymconModuleHelper\DebugFlowHelper;
+
+    public function interaction(): string
+    {
+        return $this->VisualizationInteractionScript();
     }
 }
 
@@ -79,6 +90,24 @@ try {
         && str_contains($debugMessages[0]['data'], 'missing-asset.txt'),
         'The debug output must contain the missing asset path.'
     );
+
+    $interaction = new VisualizationInteractionDebugHarness();
+    $payload = $interaction->interaction();
+    $messages = $interaction->debugMessages();
+    assertSameValue(file_get_contents(__DIR__ . '/../src/visualization/interaction.min.js'), $payload, 'Diagnostics must never change the delivered canonical asset.');
+    assertSameValue(1, count($messages), 'Loading the asset with DebugFlowHelper emits one bounded native event.');
+    $details = json_decode($messages[0]['data'], true, 8, JSON_THROW_ON_ERROR);
+    assertTrueValue(str_contains($details['Meldung'], 'Scrollgrenzen'), 'The German diagnostic explains wheel handoff at scroll boundaries.');
+    assertSameValue(substr(hash('sha256', $payload), 0, 16), $details['Bezug']['Assetkennung'], 'The diagnostic identifies the actual delivered resource.');
+    assertSameValue(['Assetkennung'], array_keys($details['Bezug']), 'No pointer, document, access token or form content belongs in this event.');
+
+    $failedDebug = new class() extends VisualizationInteractionDebugHarness {
+        protected function SendDebug(string $message, mixed $data, int $format): void
+        {
+            throw new RuntimeException('Synthetic unavailable debug output');
+        }
+    };
+    assertSameValue($payload, $failedDebug->interaction(), 'Unavailable debug must not prevent visualization input from loading.');
 } finally {
     if (is_file($assetPath)) {
         unlink($assetPath);

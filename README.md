@@ -1816,7 +1816,24 @@ Die Renderer-Dateien werden kanonisch mit dem Helper verteilt: MapLibre GL JS 5.
 
 Bei großen HTML-Ausgaben kann der Consumer mit `VisualizationInteractionScriptURL(): string` einen festen gleichursprünglichen `/hook/...`-Asset-Pfad bereitstellen. Enthält sein Template `{{INTERACTION_SCRIPT}}` im Kopf vor jedem Modulskript, liefert der Seiten-Helper dort ein parserblockierendes Script-Element statt des Inline-Payloads. Der GET-Endpunkt muss genau `VisualizationInteractionScript()` als JavaScript ausliefern. Ohne diesen optionalen Vertrag bleibt die automatische Inline-Einbindung erhalten. Fremde URLs und Pfadtraversierung werden abgewiesen. ECharts verwendet diesen Weg, damit seine großen Ausgaben unter Symcons 1-MB-Grenze bleiben.
 
-`window.SymconVisualizationInteraction` stellt `point(event)`, `delta(event, target)`, `scroll(event, target)`, `registerWheelRegion(element, handler)` und `dispose()` bereit. `createRouter(environment)` ist der isolierbare Node-/Browser-Testeinstieg. Eine Region erhält normalisierte Pixel-Deltas und korrigierte Viewport-Koordinaten; sie signalisiert eine übernommene Aktion mit `true` oder `preventDefault()`. Fachlicher Karten-/Diagrammzoom bleibt beim Consumer. Ctrl-/Meta-Mausrad wird nicht übernommen. Normale überlaufende Scrollcontainer werden automatisch bedient und an ihren Grenzen vom äußeren Scrollen getrennt. Kalender können ihre modalspezifische Zielauswahl behalten und nur `scroll()` aufrufen.
+`window.SymconVisualizationInteraction` stellt `point(event)`, `delta(event, target)`, `scroll(event, target)`, `registerWheelRegion(element, handler)` und `dispose()` bereit. `createRouter(environment)` ist der isolierbare Node-/Browser-Testeinstieg. Eine Region erhält normalisierte Pixel-Deltas und korrigierte Viewport-Koordinaten; sie signalisiert eine übernommene Aktion mit `true` oder `preventDefault()`. Fachlicher Karten-/Diagrammzoom bleibt beim Consumer. Ctrl-/Meta-Mausrad wird nicht übernommen. Kalender können ihre modalspezifische Zielauswahl behalten und nur `scroll()` aufrufen.
+
+Ein Scrollbereich übernimmt das Ereignis nur, wenn sich seine Position tatsächlich
+ändert. An oberer, unterer oder horizontaler Grenze wird im selben Dokument der
+nächste bewegliche Bereich gesucht, einschließlich des Dokument-Viewports bei
+sichtbarem Overflow. Versteckte Achsen und vom Body übernommene Viewport-Sperren
+bleiben geschützt. Der erste tatsächlich bewegte Bereich übernimmt das gesamte
+Ereignis; ein verbleibendes Delta wird nicht ein zweites Mal an Eltern verteilt.
+Das gilt auch für negative RTL-Positionen und für UI-Eingaben aus eigenen Frames.
+Innerhalb eines offenen HTML-Dialogs kann eine Liste an ihren Dialog weitergeben,
+aber nicht dessen Hintergrund bewegen. Eine vollständig ausgeschöpfte Kette bleibt
+ohne übernommene Scrollaktion.
+
+Verwendet der Consumer den `DebugFlowHelper`, nennt `VisualizationInteractionScript()`
+im nativen Debug die geladene Mausradunterstützung, ihre Scrollgrenzen-Regel und eine
+kurze Inhaltskennung. Die Meldung enthält keine Zeigerpositionen, Formularinhalte
+oder Zugänge. Einzelne Wheel-Ereignisse erzeugen keine Netzwerk- oder Debugaufrufe.
+Consumer ohne diesen optionalen Debughelper erhalten unverändert dieselbe Ressource.
 
 Bei umadressierten IPSView-Ereignissen mit `(0, 0)` wird die letzte tatsächliche Mausposition verwendet; Blur, Pointer-Verlassen und Touch/Pointer-Wechsel verwerfen sie. Pixel-, Zeilen- und Seiten-Deltas sowie Shift-Scroll werden normalisiert. Bestehende grafische Komponenten erhalten bei umadressierten Ereignissen eine korrigierte Wheel-Weitergabe, ohne Rekursion.
 

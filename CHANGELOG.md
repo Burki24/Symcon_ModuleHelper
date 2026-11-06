@@ -10,6 +10,14 @@
 
 ## Fixes
 
+- Die gemeinsame Mausradsteuerung gibt Eingaben an Scrollgrenzen an den nächsten
+  beweglichen Bereich weiter, auch an den Dokument-Viewport in verschachtelten
+  Kacheln. Ein bereits bewegter Bereich wird nicht doppelt gescrollt; offene
+  Dialoge schützen weiterhin ihren Hintergrund. Regressionen prüfen obere,
+  untere und horizontale Grenzen sowie echte Browser-Mausradaktionen.
+  Beim Laden nennt der vorhandene native Debugkanal die verwendete Ressource
+  und ihre Inhaltskennung, ohne Mausbewegungen oder Formulareingaben zu übertragen.
+
 - Der Deklarationsschutz der acht gemeinsamen JSLive-/SymconECharts-Helper
   umfasst jetzt die Trait-/Klassendefinition selbst. Dadurch verhindert er auch
   bei bereits im OPcache geladenen Bibliothekskopien erneute Deklarationen.
