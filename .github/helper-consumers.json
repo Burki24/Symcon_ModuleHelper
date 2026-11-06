@@ -50,6 +50,10 @@
       "branch": "dev"
     },
     {
+      "repository": "Burki24/Z2MAutomations",
+      "branch": "dev"
+    },
+    {
       "repository": "Burki24/IPS_Informations",
       "branch": "dev",
       "auto_merge": false
