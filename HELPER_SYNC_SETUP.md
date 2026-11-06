@@ -26,6 +26,8 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `IPSViewAssistant`
 - `JSLive`
 - `SymconiCloud` (Zielbranch `dev`; vorhandene `.helper-sync.json`)
+- `Z2MAutomations` (Zielbranch `dev`; IPSViewHTMLPageHelper einschließlich seiner
+  Abhängigkeiten und Ressourcen über `.helper-sync.json` abonniert)
 
 ## 2. Symcon_ModuleHelper konfigurieren
 
