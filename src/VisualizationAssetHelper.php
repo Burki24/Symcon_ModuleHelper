@@ -17,7 +17,7 @@ if (!trait_exists(VisualizationAssetHelper::class, false)) {
      * vendored helper can reliably access files from that module's visualization
      * directory.
      *
-     * @version 1.1.3
+     * @version 1.1.4
      */
     trait VisualizationAssetHelper
     {
