@@ -103,4 +103,86 @@ assert.equal(graphicRouter.handle(wheel({deltaMode: 0})), true);
 assert.equal(graphicCalls, 1);
 assert.equal(graphicRouter.handle(wheel({target: graphicEnvironment, clientX: undefined, clientY: undefined})), false);
 graphicRouter.dispose();
+
+// Browser-like setters are essential: a real element clamps wheel input at its
+// scroll limits instead of accepting negative/out-of-range positions.
+function scrollBox(tag, parent, options = {}) {
+    const value = {tagName: tag, parentElement: parent, clientWidth: 200, clientHeight: 200,
+        scrollWidth: 600, scrollHeight: 600, overflowX: 'auto', overflowY: 'auto', ...options};
+    let top = options.top ?? 0, left = options.left ?? 0;
+    Object.defineProperties(value, {
+        scrollTop: {get: () => top, set: next => { top = Math.max(0, Math.min(value.scrollHeight - value.clientHeight, next)); }},
+        scrollLeft: {get: () => left, set: next => { left = Math.max(options.minLeft ?? 0, Math.min(options.maxLeft ?? value.scrollWidth - value.clientWidth, next)); }}
+    });
+    return value;
+}
+const root = scrollBox('HTML', null, {top: 424, clientHeight: 400, scrollHeight: 1200, overflowX: 'visible', overflowY: 'visible'});
+const boundaryBody = {tagName: 'BODY', parentElement: root, overflowX: 'visible', overflowY: 'visible'};
+const nested = scrollBox('DIV', boundaryBody, {scrollHeight: 401});
+const hit = {tagName: 'SECTION', parentElement: nested};
+const boundaryDocument = {scrollingElement: root, body: boundaryBody, elementFromPoint: () => hit};
+const boundaryEnvironment = {document: boundaryDocument, addEventListener() {}, removeEventListener() {},
+    getComputedStyle: node => ({overflowX: node.overflowX ?? 'visible', overflowY: node.overflowY ?? 'visible'})};
+const boundary = createRouter(boundaryEnvironment);
+const boundaryWheel = extra => wheel({target: hit, clientX: 20, clientY: 20, deltaMode: 0, ...extra});
+event = boundaryWheel({deltaY: -300});
+assert.equal(boundary.handle(event), true);
+assert.equal(nested.scrollTop, 0, 'An inner list at its upper boundary must remain clamped.');
+assert.equal(root.scrollTop, 124, 'A wheel at the inner upper boundary must reach the scrolled document.');
+assert(event.prevented && event.stopped);
+
+root.scrollTop = 100; nested.scrollTop = 201;
+assert.equal(boundary.handle(boundaryWheel({deltaY: 80})), true);
+assert.equal(root.scrollTop, 180, 'The lower boundary must also allow the document to move.');
+assert.equal(nested.scrollTop, 201);
+
+root.scrollTop = 100; nested.scrollTop = 190;
+assert.equal(boundary.handle(boundaryWheel({deltaY: 80})), true);
+assert.equal(nested.scrollTop, 201);
+assert.equal(root.scrollTop, 100, 'The remainder of a partly consumed wheel must not produce a second scroll.');
+
+root.scrollTop = 100; nested.scrollTop = 40;
+assert.equal(boundary.handle(boundaryWheel({deltaY: 50})), true);
+assert.equal(nested.scrollTop, 90);
+assert.equal(root.scrollTop, 100, 'A movable inner list owns the event; no second document movement.');
+
+root.scrollLeft = 80; nested.scrollLeft = 400;
+assert.equal(boundary.handle(boundaryWheel({deltaY: 20, shiftKey: true})), true);
+assert.equal(root.scrollLeft, 100, 'Shift-wheel must pass a horizontal boundary to a movable ancestor.');
+assert.equal(nested.scrollLeft, 400);
+
+root.scrollTop = 100; nested.scrollTop = 0; nested.scrollLeft = 30;
+assert.equal(boundary.handle(boundaryWheel({deltaX: 20, deltaY: -40})), true);
+assert.equal(nested.scrollLeft, 50);
+assert.equal(root.scrollTop, 100, 'A diagonal event remains owned by its first actually moving target.');
+
+root.scrollTop = 0; nested.scrollTop = 0; nested.scrollLeft = 0;
+event = boundaryWheel({deltaY: -30});
+assert.equal(boundary.handle(event), false);
+assert(!event.prevented && !event.stopped, 'An entirely exhausted scroll chain must not swallow the wheel.');
+root.overflowY = 'hidden'; root.scrollTop = 100;
+assert.equal(boundary.handle(boundaryWheel({deltaY: -30})), false);
+assert.equal(root.scrollTop, 100, 'A hidden viewport is not a new manual scroll target.');
+root.overflowY = 'visible'; boundaryBody.overflowY = 'hidden';
+assert.equal(boundary.handle(boundaryWheel({deltaY: -30})), false);
+assert.equal(root.scrollTop, 100, 'Body overflow propagated to the viewport must remain respected.');
+boundaryBody.overflowY = 'visible';
+
+const modal = scrollBox('DIALOG', boundaryBody, {open: true});
+nested.parentElement = modal; modal.scrollTop = 0; root.scrollTop = 100;
+event = boundaryWheel({deltaY: -30});
+assert.equal(boundary.handle(event), true);
+assert(event.prevented && event.stopped, 'A modal boundary must prevent default background scrolling.');
+assert.equal(root.scrollTop, 100, 'An open modal boundary must not scroll the background document.');
+modal.scrollTop = 60;
+assert.equal(boundary.handle(boundaryWheel({deltaY: -30})), true);
+assert.equal(modal.scrollTop, 30, 'An inner list may hand off to its own open dialog.');
+nested.parentElement = boundaryBody;
+
+const rtl = scrollBox('DIV', boundaryBody, {minLeft: -400, maxLeft: 0});
+const rtlEvent = boundaryWheel({target: rtl, deltaY: 0, deltaX: -50});
+assert.equal(boundary.handle(rtlEvent), true);
+assert.equal(rtl.scrollLeft, -50, 'Observed movement also works for negative RTL scroll positions.');
+assert.equal(root.scrollLeft, 100);
+boundary.dispose();
 console.log('Shared visualization interaction contracts passed.');

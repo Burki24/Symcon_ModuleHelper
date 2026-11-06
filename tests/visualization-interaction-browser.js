@@ -62,5 +62,51 @@ const child = script + '<style>body{margin:0}#list{height:100px;overflow:auto}#m
                 console.log(mode + ': real wheel in both directions, isolated list/zoom and frame routing passed.');
             } finally { await page.close(); }
         }
+
+        // Same clamped geometry as the native tile failure, using actual wheel
+        // input in both local and explicitly forwarded child-frame modes.
+        for (const forwarded of [false, true]) {
+            const page = await browser.newPage({viewport: {width: 800, height: 500}}), errors = [];
+            page.on('pageerror', e => errors.push(e.message));
+            try {
+                const boundaryChild = script + '<style>html,body{margin:0}#space{height:500px}#inner{height:100px;overflow:auto}#inner div{height:500px}#tail{height:1000px}</style>'
+                    + '<div id="space"></div><div id="inner"><div>Inner area</div></div><div id="tail"></div>';
+                await page.setContent((forwarded ? script : '') + '<iframe style="width:400px;height:250px;border:0" '
+                    + (forwarded ? 'name="burki24.wheel.v1" ' : '') + '></iframe>');
+                await page.locator('iframe').evaluate((frame, html) => { frame.srcdoc = html; }, boundaryChild);
+                const inner = page.frames().find(frame => frame.parentFrame());
+                await inner.locator('#inner').waitFor();
+                for (const direction of [-1, 1]) {
+                    await inner.evaluate(direction => { scrollTo(0, 424); document.getElementById('inner').scrollTop = direction < 0 ? 0 : 400; }, direction);
+                    const box = await inner.locator('#inner').boundingBox();
+                    await page.mouse.move(box.x + 40, box.y + 30);
+                    await page.mouse.wheel(0, direction * 120);
+                    await inner.waitForFunction(direction => direction < 0 ? scrollY < 424 : scrollY > 424, direction);
+                    assert.equal(await inner.locator('#inner').evaluate(el => el.scrollTop), direction < 0 ? 0 : 400);
+                }
+                if (forwarded) {
+                    await inner.evaluate(() => { scrollTo(0, 424); document.getElementById('inner').scrollTop = 0; });
+                    const box = await inner.locator('#inner').boundingBox();
+                    await page.mouse.move(box.x + 40, box.y + 30);
+                    // Additional protocol coverage, distinct from the real wheel above.
+                    await page.waitForFunction(() => SymconVisualizationInteraction.point({clientX: 0, clientY: 0}).clientX > 0);
+                    await page.evaluate(() => document.body.dispatchEvent(new WheelEvent('wheel', {deltaY: -120, bubbles: true, cancelable: true})));
+                    await inner.waitForFunction(() => scrollY < 424);
+                }
+                assert.deepEqual(errors, []);
+                console.log((forwarded ? 'Forwarded' : 'Local') + ' nested scroll boundaries: actual wheel reaches the document in both directions.');
+            } finally { await page.close(); }
+        }
+        const modalPage = await browser.newPage({viewport: {width: 800, height: 500}});
+        try {
+            await modalPage.setContent(script + '<style>body{margin:0;height:2000px}dialog{height:100px;overflow:auto}dialog div{height:500px}</style><dialog><div>Modal</div></dialog>');
+            await modalPage.evaluate(() => { scrollTo(0, 424); document.querySelector('dialog').showModal(); });
+            const box = await modalPage.locator('dialog').boundingBox();
+            await modalPage.mouse.move(box.x + 20, box.y + 30);
+            await modalPage.mouse.wheel(0, -120);
+            await modalPage.waitForTimeout(150);
+            assert.equal(await modalPage.evaluate(() => scrollY), 424, 'A modal boundary must also prevent default browser scroll chaining.');
+            console.log('Open modal boundary: actual wheel leaves the background document unchanged.');
+        } finally { await modalPage.close(); }
     } finally { await browser.close(); }
 }()).catch(error => {console.error(error); process.exitCode = 1;});
