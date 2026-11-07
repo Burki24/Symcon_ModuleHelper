@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.30.7",
+  "repository_version": "3.30.8",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -412,6 +412,6 @@
       "sha256": "3f3e3043ed79b469cd7da0f81e464d097e5d526e96b0c04f8740198f653b09a2"
     }
   },
-  "repository_build": 104491879,
-  "repository_date": 1793982097
+  "repository_build": 168482616,
+  "repository_date": 1794036275
 }
