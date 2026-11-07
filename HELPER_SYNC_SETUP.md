@@ -26,8 +26,18 @@ Danach einen Private Key erzeugen und die App für diese Repositories installier
 - `IPSViewAssistant`
 - `JSLive`
 - `SymconiCloud` (Zielbranch `dev`; vorhandene `.helper-sync.json`)
-- `Z2MAutomations` (Zielbranch `dev`; die weiterhin benötigten Helper sind über
+- `Symcon_Z2MAutomations` (Zielbranch `dev`; die weiterhin benötigten Helper sind über
   `.helper-sync.json` abonniert; keine IPSView-Administration)
+
+Die Umbenennung von `Z2MAutomations` in `Symcon_Z2MAutomations` ist lokal
+vorbereitet. Den geänderten Consumer-Eintrag erst nach der tatsächlichen
+GitHub-Umbenennung nach `main` freigeben und verteilen. Davor laufende
+Verteilungsläufe abschließen lassen; danach App-Zugriff und das neue
+Repositoryziel prüfen. Eine HTTP-Weiterleitung ersetzt nicht den richtigen
+Namen: Der Workflow erzeugt das App-Token für die konfigurierten Namen, und
+der Sync vergleicht beim Auto-Merge `head.repo.full_name` exakt mit dem
+Consumer-Eintrag. Zielbranch `dev`, Subscription und Helperpaket bleiben
+unverändert. Kein zweiter Consumer-Eintrag unter dem alten Namen.
 
 ## 2. Symcon_ModuleHelper konfigurieren
 
