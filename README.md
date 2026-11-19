@@ -1,5 +1,7 @@
 # Symcon_ModuleHelper
 
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#spenden)
+
 Wiederverwendbare Helper für die Entwicklung eigener Symcon-PHP-Module.
 
 Die Helper sind bewusst fachlich klar abgegrenzt, unabhängig von konkreten Geräten oder Diensten und können direkt in eine Modul-Library übernommen werden. Das Repository selbst ist **keine Symcon-Library** und erzeugt keine zusätzliche Laufzeitabhängigkeit.
@@ -1842,3 +1844,9 @@ Direkte Eltern-/Kind-Frames können ausschließlich UI-Eingaben austauschen. Der
 Zeigerposition und relative Frame-Koordinaten berücksichtigen Skalierung, und der Eltern-Frame leitet Mausrad-Eingaben weiter. Empfänger akzeptieren nur die tatsächliche direkte Eltern-Window-Referenz; Eltern prüfen direkte iframe-Window-Referenzen und deren Marker auch bei der Weiterleitung. Ungültige Koordinaten, fremde Sender und übergroße Deltas werden verworfen. Nachrichten enthalten keine Zugangsdaten, Geräteinventare oder Modulaktionen. Opaque `data:`-Eltern benötigen `postMessage` mit `*`; die Zuordnung erfolgt deshalb über die exakte Window-Referenz und nicht über frei behauptete Herkunftsfelder. Bestehende eigene Loader müssen den Marker zusammen mit dem neuen Helper erhalten; bei alten Helpern ist das zusätzliche `name`-Attribut bereits verträglich.
 
 Reproduzierbarer Build: `npx --yes esbuild@0.28.2 src/visualization/interaction.js --minify --target=es2018 --outfile=src/visualization/interaction.min.js`. Die CI vergleicht den Build bytegenau und prüft lesbare und ausgelieferte Quelle mit `node tests/visualization-interaction.js` und `node tests/visualization-interaction.js --minified`. Optional prüft `node tests/visualization-interaction-browser.js` mit vorhandenem Playwright und `VISUALIZATION_BROWSER_EXECUTABLE` als lokalem Chromium-Pfad echte Mausradaktionen in fremden Hosts sowie markierten `srcdoc`-/opaken `data:`-Frames; `--minified` verwendet das ausgelieferte Asset. Native App, Webclient und simulierte Ereignisweitergabe bleiben getrennte Praxisnachweise.
+
+## Spenden
+
+Mit einer freiwilligen Spende kannst du die Weiterentwicklung dieses Projekts unterstützen.
+
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://www.paypal.me/BurkhardKneiseler)
