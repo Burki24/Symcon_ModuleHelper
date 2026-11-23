@@ -10,6 +10,9 @@
 
 ## Fixes
 
+- Geofencing, Adressauflösung und deren JSON-Cache lassen sich aus mehreren
+  gleichzeitig geladenen Modulbibliotheken nutzen.
+
 - Die gemeinsame Mausradsteuerung gibt Eingaben an Scrollgrenzen an den nächsten
   beweglichen Bereich weiter, auch an den Dokument-Viewport in verschachtelten
   Kacheln. Ein bereits bewegter Bereich wird nicht doppelt gescrollt; offene
