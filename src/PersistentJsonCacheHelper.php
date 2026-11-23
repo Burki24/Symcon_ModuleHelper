@@ -16,7 +16,7 @@ if (!trait_exists(PersistentJsonCacheHelper::class, false)) {
      * data and similar structured state that should not be exposed as a status
      * variable.
      *
-     * @version 1.0.0
+     * @version 1.0.1
      */
     trait PersistentJsonCacheHelper
     {

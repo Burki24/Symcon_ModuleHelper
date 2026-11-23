@@ -11,7 +11,7 @@ if (!trait_exists(GeofenceHelper::class, false)) {
      * Pure geofence evaluation with accuracy envelopes, hysteresis and sample confirmation.
      * State is supplied and persisted by the caller; no I/O or platform dependency.
      *
-     * @version 1.2.0
+     * @version 1.2.1
      */
     trait GeofenceHelper
     {

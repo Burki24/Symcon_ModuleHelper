@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "repository": "Burki24/Symcon_ModuleHelper",
-  "repository_version": "3.30.9",
+  "repository_version": "3.30.10",
   "helpers": {
     "ChunkedJsonTransferHelper": {
       "file": "src/ChunkedJsonTransferHelper.php",
@@ -253,8 +253,8 @@
     },
     "PersistentJsonCacheHelper": {
       "file": "src/PersistentJsonCacheHelper.php",
-      "version": "1.0.0",
-      "sha256": "adbc7680abe814dc6c15a9cda1312cc30023073595052006662716bc0d65f2a4"
+      "version": "1.0.1",
+      "sha256": "e048ce434b80f396e1821fdfba65982ad6c02123c50a2e335c6d436d0aa3ae38"
     },
     "ResponsiveVisualizationHelper": {
       "file": "src/ResponsiveVisualizationHelper.php",
@@ -390,16 +390,16 @@
     },
     "ReverseGeocodingHelper": {
       "file": "src/ReverseGeocodingHelper.php",
-      "version": "1.1.0",
-      "sha256": "a1511ade232cb44bd923d1edddac171e9006fe60a37bd250e8c63aed96bc5e67",
+      "version": "1.1.1",
+      "sha256": "074ff0b278647716e87e844c6a58942070feba4b051632dcaa15cf721298abfa",
       "dependencies": [
         "PersistentJsonCacheHelper"
       ]
     },
     "GeofenceHelper": {
       "file": "src/GeofenceHelper.php",
-      "version": "1.2.0",
-      "sha256": "a52906069249fb98ec1fcdd6cd7230aa265ae96358f906ee5bbb567624b3dba2"
+      "version": "1.2.1",
+      "sha256": "8e856a675a7b53106979a2f6346ee38de959aa57208ffb5b23ac721fd96f6ca8"
     },
     "RasterImageHelper": {
       "file": "src/RasterImageHelper.php",
@@ -412,6 +412,6 @@
       "sha256": "3f3e3043ed79b469cd7da0f81e464d097e5d526e96b0c04f8740198f653b09a2"
     }
   },
-  "repository_build": 267720221,
-  "repository_date": 1795083482
+  "repository_build": 1330562,
+  "repository_date": 1795472664
 }

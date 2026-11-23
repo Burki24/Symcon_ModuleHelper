@@ -13,7 +13,7 @@ if (!trait_exists(ReverseGeocodingHelper::class, false)) {
      * performs I/O. ResolveNominatimAddress must run in a serialized background worker.
      * No Apple credentials or device identifiers are accepted or transmitted.
      *
-     * @version 1.1.0
+     * @version 1.1.1
      */
     trait ReverseGeocodingHelper
     {
