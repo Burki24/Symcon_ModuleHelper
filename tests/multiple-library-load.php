@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/bootstrap.php';
 
-/** The common direct and transitive dependencies of JSLive and SymconECharts. */
+/** Shared dependencies that can be loaded from multiple Library bundles. */
 function multipleLibraryHelpers(): array
 {
     return [
         'ConfigurationFormHelper', 'DataFlowHelper', 'DebugHelper', 'HelperTranslationHelper',
+        'GeofenceHelper', 'PersistentJsonCacheHelper', 'ReverseGeocodingHelper',
         'ResponsiveVisualizationHelper', 'VariablePresentationNormalizationHelper',
         'VisualizationAssetHelper', 'VisualizationThemeHelper'
     ];
