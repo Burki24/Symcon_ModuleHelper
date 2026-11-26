@@ -125,6 +125,12 @@ const boundaryEnvironment = {document: boundaryDocument, addEventListener() {}, 
     getComputedStyle: node => ({overflowX: node.overflowX ?? 'visible', overflowY: node.overflowY ?? 'visible'})};
 const boundary = createRouter(boundaryEnvironment);
 const boundaryWheel = extra => wheel({target: hit, clientX: 20, clientY: 20, deltaMode: 0, ...extra});
+event = boundaryWheel({deltaY: -30});
+assert.equal(boundary.scroll(event, nested), true, 'An explicitly selected scroll target must keep the wheel inside its dialog at a boundary.');
+assert.equal(nested.scrollTop, 0);
+assert.equal(root.scrollTop, 424, 'Direct scrolling must not hand the event to a background ancestor.');
+assert(event.prevented && event.stopped);
+
 event = boundaryWheel({deltaY: -300});
 assert.equal(boundary.handle(event), true);
 assert.equal(nested.scrollTop, 0, 'An inner list at its upper boundary must remain clamped.');
