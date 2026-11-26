@@ -299,12 +299,12 @@
         {
           "file": "src/visualization/interaction.js",
           "target": "visualization/interaction.js",
-          "sha256": "48f9b1cef490201ab8cde9bdc2367c3c897d34e7f4427da114035c1ca62950c2"
+          "sha256": "1592282d39ec2925004582434e2db3e08d70f29a46f6c18049ab0f102757c3d3"
         },
         {
           "file": "src/visualization/interaction.min.js",
           "target": "visualization/interaction.min.js",
-          "sha256": "282d9c70995471a58aa06670b310a578a2358b19ea22478448c857c2892dcdf2"
+          "sha256": "fc6a80968c5fea47834aaf230bafeaf4036bdcd4c0b3166abde2b07e72570242"
         }
       ]
     },

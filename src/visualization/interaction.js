@@ -59,16 +59,16 @@
             if (event.stopImmediatePropagation) event.stopImmediatePropagation();
             else if (event.stopPropagation) event.stopPropagation();
         }
-        function scroll(event, target, axes = {x: true, y: true}) {
+        function scroll(event, target, axes = {x: true, y: true}, consumeAtBoundary = true) {
             if (!target || event.ctrlKey || event.metaKey) return false;
             const movement = delta(event, target);
             if (!movement.deltaX && !movement.deltaY) return false;
             const left = target.scrollLeft, top = target.scrollTop;
             if (axes.x) target.scrollLeft += movement.deltaX;
             if (axes.y) target.scrollTop += movement.deltaY;
-            // Browsers clamp positions, including negative RTL scrollLeft.
-            // Only the element that really moved may consume this wheel.
-            if (target.scrollLeft === left && target.scrollTop === top) return false;
+            // Direct callers own their selected target even at a clamped edge.
+            // Automatic routing hands off only when neither axis moved.
+            if (!consumeAtBoundary && target.scrollLeft === left && target.scrollTop === top) return false;
             consume(event);
             return true;
         }
@@ -117,7 +117,7 @@
                     }
                 }
                 const axes = scrollable(target);
-                if (axes && scroll(event, target, axes)) return true;
+                if (axes && scroll(event, target, axes, false)) return true;
                 const handler = regions.get(target);
                 if (handler) {
                     const position = point(event), movement = delta(event, target);
